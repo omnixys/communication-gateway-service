@@ -1,0 +1,38 @@
+services:
+  gateway-postgres:
+    image: postgres:18-alpine
+    container_name: omnixys-gateway-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gateway
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: gateway
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gateway -d gateway"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - gateway-postgres-data:/var/lib/postgresql
+
+  communication-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omnixys-gateway
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://gateway:gateway@gateway-postgres:5432/gateway
+      HOST: "0.0.0.0"
+      PORT: "8002"
+      LOG_LEVEL: INFO
+    ports:
+      - "8002:8002"
+    depends_on:
+      gateway-postgres:
+        condition: service_healthy
+
+volumes:
+  gateway-postgres-data:

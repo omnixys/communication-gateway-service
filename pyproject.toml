@@ -1,0 +1,48 @@
+[project]
+name = "omnixys-communication-gateway"
+version = "0.1.0"
+description = "Omnixys Communication Gateway – External Provider Integration Layer"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115.0",
+    "strawberry-graphql[fastapi,asgi]>=0.260.0",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "httpx>=0.28.0",
+    "structlog>=25.0.0",
+    "hypercorn>=0.17.0",
+]
+
+[project.scripts]
+gateway = "communication_gateway.main:run"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+    "httpx>=0.28.0",
+    "websockets>=15.0.0",
+    "aiosqlite>=0.20.0",
+    "ruff>=0.9.0",
+    "respx>=0.22.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["src/communication_gateway/tests"]
