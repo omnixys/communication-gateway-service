@@ -5,9 +5,13 @@ from communication_gateway.domain.models.resolution_context import ResolutionCon
 
 
 class DefaultProviderResolver(ProviderResolver):
-
-    def __init__(self, providers: list[CommunicationProvider]) -> None:
+    def __init__(
+        self,
+        providers: list[CommunicationProvider],
+        fallback_providers: list[CommunicationProvider] | None = None,
+    ) -> None:
         self._providers = providers
+        self._fallback_providers = fallback_providers or []
 
     async def resolve(
         self,

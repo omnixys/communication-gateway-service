@@ -10,7 +10,6 @@ from communication_gateway.infrastructure.providers.evolution.evolution_mapper i
 
 
 class TestDtoMapping:
-
     def test_map_to_provider_response_success(self) -> None:
         api_response = EvolutionApiResponse(
             status="success",

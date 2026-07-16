@@ -6,7 +6,6 @@ from communication_gateway.domain.models.resolution_context import ResolutionCon
 
 
 class ProviderResolver(ABC):
-
     @abstractmethod
     async def resolve(
         self,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from collections.abc import AsyncGenerator
 
@@ -5,9 +7,8 @@ from communication_gateway.application.ports.event_publisher import OutboundEven
 
 
 class InMemoryEventPublisher(OutboundEventPublisher):
-
     def __init__(self) -> None:
-        self._queues: dict[type, dict[str, asyncio.Queue]] = {}
+        self._queues: dict[type, dict[str, asyncio.Queue[object]]] = {}
 
     async def publish(self, event: object) -> None:
         event_type = type(event)
@@ -18,7 +19,7 @@ class InMemoryEventPublisher(OutboundEventPublisher):
 
     async def subscribe(self, event_type: type) -> AsyncGenerator[object]:
         queue_id = str(id(asyncio.current_task()))
-        queue: asyncio.Queue = asyncio.Queue()
+        queue: asyncio.Queue[object] = asyncio.Queue()
         self._queues.setdefault(event_type, {})[queue_id] = queue
         try:
             while True:

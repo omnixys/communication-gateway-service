@@ -10,6 +10,7 @@ from communication_gateway.domain.enums import (
     DeliveryStatus,
 )
 from communication_gateway.domain.models.communication_channel import CommunicationChannel
+from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.infrastructure.providers.evolution.evolution_config import (
     EvolutionApiConfig,
@@ -35,7 +36,6 @@ def provider(config: EvolutionApiConfig) -> EvolutionProvider:
 
 
 class TestEvolutionProvider:
-
     @property
     def provider_type(self) -> CommunicationProviderType:
         return CommunicationProviderType.EVOLUTION
@@ -45,12 +45,12 @@ class TestEvolutionProvider:
 
     @respx.mock
     async def test_send_text_success(self, provider: EvolutionProvider) -> None:
-        respx.post("http://evolution:8080/message/text?instance=test-instance").mock(
+        respx.post("http://evolution:8080/message/sendText/test-instance").mock(
             return_value=Response(
                 200,
                 json={
                     "key": {"id": "evolution-msg-1", "remoteJid": "1234567890@s.whatsapp.net"},
-                    "status": "sent",
+                    "status": "PENDING",
                 },
             )
         )
@@ -68,7 +68,7 @@ class TestEvolutionProvider:
 
     @respx.mock
     async def test_send_text_failure(self, provider: EvolutionProvider) -> None:
-        respx.post("http://evolution:8080/message/text?instance=test-instance").mock(
+        respx.post("http://evolution:8080/message/sendText/test-instance").mock(
             return_value=Response(400, json={"error": "Bad request"})
         )
 
@@ -85,8 +85,8 @@ class TestEvolutionProvider:
 
     @respx.mock
     async def test_health_connected(self, provider: EvolutionProvider) -> None:
-        respx.get("http://evolution:8080/instance/connectionState?instance=test-instance").mock(
-            return_value=Response(200, json={"state": {"state": "open"}})
+        respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
+            return_value=Response(200, json={"instance": {"state": "open"}})
         )
 
         ok = await provider.health()
@@ -94,8 +94,8 @@ class TestEvolutionProvider:
 
     @respx.mock
     async def test_health_disconnected(self, provider: EvolutionProvider) -> None:
-        respx.get("http://evolution:8080/instance/connectionState?instance=test-instance").mock(
-            return_value=Response(200, json={"state": {"state": "close"}})
+        respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
+            return_value=Response(200, json={"instance": {"state": "close"}})
         )
 
         ok = await provider.health()
@@ -103,7 +103,7 @@ class TestEvolutionProvider:
 
     @respx.mock
     async def test_health_unreachable(self, provider: EvolutionProvider) -> None:
-        respx.get("http://evolution:8080/instance/connectionState?instance=test-instance").mock(
+        respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
             return_value=Response(503)
         )
 
@@ -134,7 +134,7 @@ class TestEvolutionProvider:
             ],
         }
         result = await provider.handle_webhook({}, json.dumps(payload).encode())
-        assert result is not None
+        assert isinstance(result, InboundMessage)
         assert result.from_ == "1234567890"
         assert result.body == "Hello from WhatsApp"
 

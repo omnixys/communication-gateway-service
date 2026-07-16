@@ -10,7 +10,6 @@ from communication_gateway.api.graphql.types.provider import (
 
 @strawberry.type
 class ProviderQuery:
-
     @strawberry.field
     async def providers(self, info: Info) -> list[ProviderStatus]:
         registry = get_registry(info)
@@ -23,11 +22,7 @@ class ProviderQuery:
             except Exception:
                 ok = False
             caps = await p.capabilities()
-            cap_names = [
-                k.removeprefix("supports_")
-                for k, v in caps.__dict__.items()
-                if v
-            ]
+            cap_names = [k.removeprefix("supports_") for k, v in caps.__dict__.items() if v]
             results.append(
                 ProviderStatus(
                     provider_type=p.provider_type.value,
@@ -43,9 +38,7 @@ class ProviderQuery:
         registry = get_registry(info)
         from communication_gateway.domain.enums import CommunicationProviderType
 
-        p = registry.get_by_provider_type(
-            CommunicationProviderType(provider_type.upper())
-        )
+        p = registry.get_by_provider_type(CommunicationProviderType(provider_type.upper()))
         if p is None:
             return None
         try:
@@ -55,11 +48,7 @@ class ProviderQuery:
         except Exception:
             ok = False
         caps = await p.capabilities()
-        cap_names = [
-            k.removeprefix("supports_")
-            for k, v in caps.__dict__.items()
-            if v
-        ]
+        cap_names = [k.removeprefix("supports_") for k, v in caps.__dict__.items() if v]
         return ProviderStatus(
             provider_type=p.provider_type.value,
             connected=ok,

@@ -2,7 +2,6 @@ from communication_gateway.tests.conftest import MockProvider
 
 
 class TestHealth:
-
     async def test_mock_provider_healthy(self, mock_provider: MockProvider) -> None:
         ok = await mock_provider.health()
         assert ok is True

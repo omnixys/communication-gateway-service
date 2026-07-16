@@ -39,3 +39,10 @@ class WebhookVerificationError(GatewayError):
 class ConfigurationError(GatewayError):
     def __init__(self, message: str) -> None:
         super().__init__(f"Configuration error: {message}")
+
+
+class InvalidStatusTransitionError(GatewayError):
+    def __init__(self, current: str, attempted: str) -> None:
+        self.current = current
+        self.attempted = attempted
+        super().__init__(f"Invalid status transition: {current} -> {attempted}")

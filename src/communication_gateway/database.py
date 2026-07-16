@@ -1,19 +1,18 @@
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from collections.abc import AsyncGenerator
+
+from omnixys_database import DatabaseSessionManager
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from communication_gateway.config import settings
 
-engine = create_async_engine(settings.database_url, echo=False, pool_size=10, max_overflow=20)
+manager = DatabaseSessionManager(
+    url=settings.database.url,
+    echo=settings.database.echo,
+    pool_size=settings.database.pool_size,
+    max_overflow=settings.database.max_overflow,
+)
 
-async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-
-async def get_db() -> AsyncSession:
-    async with async_session_factory() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with manager.session_scope() as session:
+        yield session

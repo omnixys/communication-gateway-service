@@ -2,7 +2,7 @@
 name = "omnixys-communication-gateway"
 version = "0.1.0"
 description = "Omnixys Communication Gateway – External Provider Integration Layer"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.115.0",
     "strawberry-graphql[fastapi,asgi]>=0.260.0",
@@ -10,14 +10,25 @@ dependencies = [
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
     "httpx>=0.28.0",
-    "structlog>=25.0.0",
     "hypercorn>=0.17.0",
+    "aiosmtplib>=3.0.0",
+    "omnixys-config",
+    "omnixys-database",
+    "omnixys-kafka",
+    "omnixys-observability",
+    "omnixys-security",
 ]
 
 [project.scripts]
 gateway = "communication_gateway.main:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/communication_gateway"]
 
 [dependency-groups]
 dev = [
@@ -26,23 +37,61 @@ dev = [
     "httpx>=0.28.0",
     "websockets>=15.0.0",
     "aiosqlite>=0.20.0",
-    "ruff>=0.9.0",
+    "ruff>=0.15.17",
+    "mypy>=1.18.2",
     "respx>=0.22.0",
+    "pytest-mock>=3.14.0",
 ]
 
 [tool.uv]
 package = true
 
+[tool.uv.sources]
+omnixys-config = { url = "https://github.com/omnixys/config-python/releases/download/v1.0.0/omnixys_config-1.0.0-py3-none-any.whl" }
+omnixys-database = { url = "https://github.com/omnixys/database-python/releases/download/v1.0.0/omnixys_database-1.0.0-py3-none-any.whl" }
+omnixys-kafka = { url = "https://github.com/omnixys/kafka-python/releases/download/v1.0.0/omnixys_kafka-1.0.0-py3-none-any.whl" }
+omnixys-observability = { url = "https://github.com/omnixys/observability-python/releases/download/v1.0.0/omnixys_observability-1.0.0-py3-none-any.whl" }
+omnixys-security = { url = "https://github.com/omnixys/security-python/releases/download/v1.0.6/omnixys_security-1.0.0-py3-none-any.whl" }
+
 [tool.ruff]
-target-version = "py313"
-line-length = 100
+line-length = 120
+target-version = "py314"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "ANN101", "ANN401", "S101",
+    "T20", "FBT", "D", "INP001",
+]
+"src/**" = [
+    "D", "ANN401", "ARG002", "S104", "S105", "S107",
+]
 
 [tool.ruff.format]
 quote-style = "double"
 
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[[tool.mypy.overrides]]
+module = [
+    "aiokafka.*",
+    "aiosmtplib.*",
+    "opentelemetry.*",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["src/communication_gateway/tests"]
+pythonpath = ["src"]

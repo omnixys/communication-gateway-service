@@ -7,7 +7,6 @@ from communication_gateway.domain.models.resolution_context import ResolutionCon
 
 
 class GatewayDispatcher:
-
     def __init__(self, registry: ChannelProviderRegistry) -> None:
         self._registry = registry
 

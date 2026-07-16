@@ -8,15 +8,15 @@ from communication_gateway.domain.models.channel_capabilities import ChannelCapa
 from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
 from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.domain.models.outbound_message import OutboundMessage
+from communication_gateway.domain.models.provider_identity import ProviderIdentity
+from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
 from communication_gateway.infrastructure.providers.evolution.evolution_config import (
     EvolutionApiConfig,
 )
 from communication_gateway.infrastructure.providers.evolution.evolution_dto import (
     EvolutionApiResponse,
-    EvolutionMediaMessageRequest,
     EvolutionMessageData,
-    EvolutionTextMessageRequest,
     EvolutionWebhookPayload,
 )
 from communication_gateway.infrastructure.providers.evolution.evolution_mapper import (
@@ -27,7 +27,6 @@ from communication_gateway.infrastructure.providers.evolution.evolution_mapper i
 
 
 class EvolutionProvider(CommunicationProvider):
-
     def __init__(self, config: EvolutionApiConfig) -> None:
         self._config = config
         self._client = httpx.AsyncClient(
@@ -43,44 +42,48 @@ class EvolutionProvider(CommunicationProvider):
     def provider_type(self) -> CommunicationProviderType:
         return CommunicationProviderType.EVOLUTION
 
+    @property
+    def metadata(self) -> ProviderMetadata:
+        return ProviderMetadata(
+            identity=ProviderIdentity(
+                name="Evolution API",
+                provider_type=CommunicationProviderType.EVOLUTION,
+                version="0.1.0",
+                instance=self._config.instance_name,
+                api_version="2.3.7",
+            ),
+            supports_health=True,
+            supports_webhooks=True,
+            supports_templates=False,
+            supports_delivery_receipts=True,
+            supports_read_receipts=True,
+            supports_typing=True,
+        )
+
     async def send(self, message: OutboundMessage) -> ProviderResponse:
         if message.attachment is not None:
             return await self._send_media(message)
         return await self._send_text(message)
 
     async def _send_text(self, message: OutboundMessage) -> ProviderResponse:
-        payload = EvolutionTextMessageRequest(
-            number=message.to,
-            text=message.body,
-        )
         response = await self._client.post(
-            f"/message/text?instance={self._config.instance_name}",
+            f"/message/sendText/{self._config.instance_name}",
             json={
-                "number": payload.number,
-                "options": {"delay": payload.delay},
-                "textMessage": {"text": payload.text},
+                "number": message.to,
+                "text": message.body,
             },
         )
         return self._parse_response(response)
 
     async def _send_media(self, message: OutboundMessage) -> ProviderResponse:
         att = message.attachment
-        payload = EvolutionMediaMessageRequest(
-            number=message.to,
-            mediatype=att.type.value.lower() if att else "document",
-            media=att.url if att else "",
-            caption=message.body,
-        )
         response = await self._client.post(
-            f"/message/media?instance={self._config.instance_name}",
+            f"/message/sendMedia/{self._config.instance_name}",
             json={
-                "number": payload.number,
-                "options": {"delay": payload.delay},
-                "mediaMessage": {
-                    "mediatype": payload.mediatype,
-                    "media": payload.media,
-                    "caption": payload.caption,
-                },
+                "number": message.to,
+                "mediatype": att.type.value.lower() if att else "document",
+                "media": att.url if att else "",
+                "caption": message.body,
             },
         )
         return self._parse_response(response)
@@ -88,11 +91,12 @@ class EvolutionProvider(CommunicationProvider):
     async def health(self) -> bool:
         try:
             response = await self._client.get(
-                f"/instance/connectionState?instance={self._config.instance_name}"
+                f"/instance/connectionState/{self._config.instance_name}"
             )
             if response.status_code == 200:
                 data = response.json()
-                state = data.get("state", {}).get("state", "") if isinstance(data, dict) else ""
+                instance = data.get("instance", {})
+                state = instance.get("state", "") if isinstance(instance, dict) else ""
                 return state == "open"
             return False
         except Exception:
@@ -115,18 +119,13 @@ class EvolutionProvider(CommunicationProvider):
         )
 
     async def verify_webhook(self, headers: dict[str, str], body: bytes) -> bool:
-        api_key = (
-            headers.get("apiKey")
-            or headers.get("apikey")
-            or headers.get("x-api-key")
-            or ""
-        )
+        api_key = headers.get("apiKey") or headers.get("apikey") or headers.get("x-api-key") or ""
         expected = self._config.api_key
         if expected and api_key == expected:
             return True
         if self._config.webhook_secret:
             return self._verify_signature(headers, body, self._config.webhook_secret)
-        return bool(expected)
+        return False
 
     async def handle_webhook(
         self, headers: dict[str, str], body: bytes
@@ -177,25 +176,24 @@ class EvolutionProvider(CommunicationProvider):
                 data=data if isinstance(data, dict) else None,
                 error=data.get("error", str(response.text)) if not response.is_success else None,
             )
-            return map_to_provider_response(api_response)
+            pr = map_to_provider_response(api_response)
+            pr.provider_identity = self.metadata.identity
+            return pr
         except Exception:
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
                 error=f"HTTP {response.status_code}: {response.text[:200]}",
+                provider_identity=self.metadata.identity,
             )
 
-    def _verify_signature(
-        self, headers: dict[str, str], body: bytes, secret: str
-    ) -> bool:
+    def _verify_signature(self, headers: dict[str, str], body: bytes, secret: str) -> bool:
         import hmac
 
         signature = headers.get("x-signature", headers.get("X-Signature", ""))
         if not signature:
             return False
-        expected = hmac.new(
-            secret.encode(), body, "sha256"
-        ).hexdigest()
+        expected = hmac.new(secret.encode(), body, "sha256").hexdigest()
         return hmac.compare_digest(expected, signature)
 
     async def close(self) -> None:

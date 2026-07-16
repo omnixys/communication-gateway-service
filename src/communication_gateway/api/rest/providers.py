@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from typing import Any
 
+from fastapi import APIRouter, Depends
+
+from communication_gateway.api.auth import require_internal_api_key
 from communication_gateway.application.ports.channel_provider_registry import (
     ChannelProviderRegistry,
 )
@@ -31,23 +34,41 @@ def get_dispatcher() -> object:
     return _dispatcher
 
 
-router = APIRouter(prefix="/api/v1", tags=["providers"])
+router = APIRouter(
+    prefix="/api/v1",
+    tags=["providers"],
+    dependencies=[Depends(require_internal_api_key)],
+)
 
 
 @router.get("/providers")
-async def list_providers() -> list[dict]:
+async def list_providers() -> list[dict[str, Any]]:
     registry = get_registry()
-    return [
-        {
+    result = []
+    for p in registry.list_providers():
+        enabled = registry.is_provider_enabled(p.provider_type)
+        meta = None
+        try:
+            meta = p.metadata
+        except Exception:
+            pass
+        entry: dict[str, Any] = {
             "provider_type": p.provider_type.value,
-            "channel": None,
+            "enabled": enabled,
         }
-        for p in registry.list_providers()
-    ]
+        if meta is not None:
+            entry["name"] = meta.identity.name
+            entry["version"] = meta.identity.version
+            entry["instance"] = meta.identity.instance
+            entry["api_version"] = meta.identity.api_version
+            entry["supports_health"] = meta.supports_health
+            entry["supports_webhooks"] = meta.supports_webhooks
+        result.append(entry)
+    return result
 
 
 @router.get("/providers/{provider_type}/health")
-async def provider_health(provider_type: str) -> dict:
+async def provider_health(provider_type: str) -> dict[str, Any]:
     registry = get_registry()
     provider = registry.get_by_provider_type(CommunicationProviderType(provider_type.upper()))
     if provider is None:

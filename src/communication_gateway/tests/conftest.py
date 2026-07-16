@@ -14,9 +14,14 @@ from communication_gateway.domain.models.communication_channel import Communicat
 from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
 from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.domain.models.outbound_message import OutboundMessage
+from communication_gateway.domain.models.provider_identity import ProviderIdentity
+from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
 from communication_gateway.infrastructure.events.in_memory_event_publisher import (
     InMemoryEventPublisher,
+)
+from communication_gateway.infrastructure.persistence.in_memory_message_mapping_store import (
+    InMemoryMessageMappingStore,
 )
 from communication_gateway.infrastructure.persistence.in_memory_registry import (
     InMemoryChannelProviderRegistry,
@@ -27,7 +32,6 @@ from communication_gateway.infrastructure.resolvers.default_provider_resolver im
 
 
 class MockProvider(CommunicationProvider):
-
     def __init__(
         self,
         provider_type: CommunicationProviderType = CommunicationProviderType.EVOLUTION,
@@ -38,6 +42,13 @@ class MockProvider(CommunicationProvider):
             success=True,
             provider_message_id="mock-msg-1",
             status=DeliveryStatus.SENT,
+            provider_identity=ProviderIdentity(
+                name="Mock Provider",
+                provider_type=self._type,
+                version="0.0.0",
+                instance="test",
+                api_version="0.0.0",
+            ),
         )
         self.health_result: bool = True
         self.webhook_should_verify: bool = True
@@ -46,6 +57,20 @@ class MockProvider(CommunicationProvider):
     @property
     def provider_type(self) -> CommunicationProviderType:
         return self._type
+
+    @property
+    def metadata(self) -> ProviderMetadata:
+        return ProviderMetadata(
+            identity=ProviderIdentity(
+                name="Mock Provider",
+                provider_type=self._type,
+                version="0.0.0",
+                instance="test",
+                api_version="0.0.0",
+            ),
+            supports_health=True,
+            supports_webhooks=True,
+        )
 
     async def send(self, message: OutboundMessage) -> ProviderResponse:
         self.last_message = message
@@ -66,13 +91,15 @@ class MockProvider(CommunicationProvider):
         return self.webhook_result
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture  # type: ignore[type-var]
 def mock_provider() -> MockProvider:
     return MockProvider()
 
 
-@pytest_asyncio.fixture
-def registry(mock_provider: MockProvider) -> InMemoryChannelProviderRegistry:
+@pytest_asyncio.fixture  # type: ignore[type-var]
+def registry(
+    mock_provider: MockProvider,
+) -> InMemoryChannelProviderRegistry:
     reg = InMemoryChannelProviderRegistry()
     entry = ChannelEntry(
         resolver=DefaultProviderResolver(providers=[mock_provider]),
@@ -85,19 +112,27 @@ def registry(mock_provider: MockProvider) -> InMemoryChannelProviderRegistry:
     return reg
 
 
-@pytest_asyncio.fixture
-def dispatcher(registry: InMemoryChannelProviderRegistry) -> GatewayDispatcher:
+@pytest_asyncio.fixture  # type: ignore[type-var]
+def dispatcher(
+    registry: InMemoryChannelProviderRegistry,
+) -> GatewayDispatcher:
     return GatewayDispatcher(registry)
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture  # type: ignore[type-var]
 def event_publisher() -> InMemoryEventPublisher:
     return InMemoryEventPublisher()
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture  # type: ignore[type-var]
+def mapping_store() -> InMemoryMessageMappingStore:
+    return InMemoryMessageMappingStore()
+
+
+@pytest_asyncio.fixture  # type: ignore[type-var]
 def webhook_service(
     registry: InMemoryChannelProviderRegistry,
     event_publisher: InMemoryEventPublisher,
+    mapping_store: InMemoryMessageMappingStore,
 ) -> WebhookService:
-    return WebhookService(registry, event_publisher)
+    return WebhookService(registry, event_publisher, mapping_store)

@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -20,7 +23,7 @@ class EvolutionMediaMessageRequest:
 @dataclass
 class EvolutionApiResponse:
     status: str
-    data: dict | None = None
+    data: dict[str, Any] | None = None
     error: str | None = None
 
 
@@ -28,14 +31,14 @@ class EvolutionApiResponse:
 class EvolutionWebhookPayload:
     event: str
     instance: str
-    data: dict = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class EvolutionMessageData:
-    key: dict
+    key: dict[str, Any]
     push_name: str
-    message: dict | None = None
+    message: dict[str, Any] | None = None
     message_type: str | None = None
 
 

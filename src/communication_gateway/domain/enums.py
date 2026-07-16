@@ -10,8 +10,10 @@ class CommunicationChannelType(StrEnum):
 
 class CommunicationProviderType(StrEnum):
     EVOLUTION = "EVOLUTION"
+    RESEND = "RESEND"
     MAILU = "MAILU"
     SMTP = "SMTP"
+    STALWART = "STALWART"
     TWILIO = "TWILIO"
     FIREBASE = "FIREBASE"
     WHATSAPP_CLOUD = "WHATSAPP_CLOUD"

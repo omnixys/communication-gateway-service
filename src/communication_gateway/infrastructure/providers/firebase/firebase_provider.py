@@ -8,7 +8,6 @@ from communication_gateway.domain.models.provider_response import ProviderRespon
 
 
 class FirebaseProvider(CommunicationProvider):
-
     @property
     def provider_type(self) -> CommunicationProviderType:
         return CommunicationProviderType.FIREBASE

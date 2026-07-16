@@ -1,4 +1,5 @@
 import strawberry
+from strawberry import federation
 
 from communication_gateway.api.graphql.queries.provider_query import ProviderQuery
 
@@ -8,4 +9,4 @@ class Query(ProviderQuery):
     pass
 
 
-schema = strawberry.Schema(query=Query)
+schema = federation.Schema(query=Query, federation_version="2.11")

@@ -15,3 +15,5 @@ class ChannelCapabilities:
     supports_deletion: bool = False
     supports_delivery_status: bool = False
     supports_presence: bool = False
+    supports_templates: bool = False
+    supports_bulk_messaging: bool = False

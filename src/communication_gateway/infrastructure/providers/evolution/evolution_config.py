@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 
 from communication_gateway.config import settings
+from communication_gateway.infrastructure.providers.base_config import ProviderConfig
 
 
 @dataclass
-class EvolutionApiConfig:
-    base_url: str
-    api_key: str
-    instance_name: str
-    webhook_secret: str
+class EvolutionApiConfig(ProviderConfig):
+    base_url: str = ""
+    api_key: str = ""
+    instance_name: str = ""
+    webhook_secret: str = ""
 
     @classmethod
     def from_settings(cls) -> "EvolutionApiConfig":
@@ -17,4 +18,7 @@ class EvolutionApiConfig:
             api_key=settings.evolution.api_key,
             instance_name=settings.evolution.instance_name,
             webhook_secret=settings.evolution.webhook_secret,
+            enabled=True,
+            priority=10,
+            timeout=30,
         )
