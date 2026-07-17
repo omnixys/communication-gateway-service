@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from communication_gateway.domain.enums import (
     AttachmentType,
@@ -11,10 +12,12 @@ from communication_gateway.domain.models.communication_channel import Communicat
 from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
 from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.domain.models.provider_response import ProviderResponse
-from communication_gateway.infrastructure.providers.evolution.evolution_dto import (
-    EvolutionApiResponse,
-    EvolutionMessageData,
-)
+
+if TYPE_CHECKING:
+    from communication_gateway.infrastructure.providers.evolution.evolution_dto import (
+        EvolutionApiResponse,
+        EvolutionMessageData,
+    )
 
 
 def map_to_provider_response(

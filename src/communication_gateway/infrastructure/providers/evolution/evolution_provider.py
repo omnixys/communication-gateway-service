@@ -1,19 +1,14 @@
 import json
+from typing import TYPE_CHECKING
 
 import httpx
 
 from communication_gateway.application.ports.communication_provider import CommunicationProvider
 from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
 from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
-from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.provider_identity import ProviderIdentity
 from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
-from communication_gateway.infrastructure.providers.evolution.evolution_config import (
-    EvolutionApiConfig,
-)
 from communication_gateway.infrastructure.providers.evolution.evolution_dto import (
     EvolutionApiResponse,
     EvolutionMessageData,
@@ -24,6 +19,14 @@ from communication_gateway.infrastructure.providers.evolution.evolution_mapper i
     map_to_inbound_message,
     map_to_provider_response,
 )
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
+    from communication_gateway.infrastructure.providers.evolution.evolution_config import (
+        EvolutionApiConfig,
+    )
 
 
 class EvolutionProvider(CommunicationProvider):
@@ -91,9 +94,9 @@ class EvolutionProvider(CommunicationProvider):
     async def health(self) -> bool:
         try:
             response = await self._client.get(
-                f"/instance/connectionState/{self._config.instance_name}"
+                f"/instance/connectionState/{self._config.instance_name}",
             )
-            if response.status_code == 200:
+            if response.is_success:
                 data = response.json()
                 instance = data.get("instance", {})
                 state = instance.get("state", "") if isinstance(instance, dict) else ""
@@ -128,7 +131,7 @@ class EvolutionProvider(CommunicationProvider):
         return False
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes
+        self, headers: dict[str, str], body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         raw = json.loads(body)
         payload = EvolutionWebhookPayload(
@@ -139,7 +142,7 @@ class EvolutionProvider(CommunicationProvider):
         return self._process_event(payload)
 
     def _process_event(
-        self, payload: EvolutionWebhookPayload
+        self, payload: EvolutionWebhookPayload,
     ) -> InboundMessage | DeliveryReceipt | None:
         if payload.event == "messages.upsert":
             messages = payload.data if isinstance(payload.data, list) else [payload.data]
@@ -160,10 +163,7 @@ class EvolutionProvider(CommunicationProvider):
             )
             return map_to_delivery_receipt(message_data)
 
-        elif payload.event == "connection.update":
-            return None
-
-        elif payload.event == "qr":
+        elif payload.event in {"connection.update", "qr"}:
             return None
 
         return None

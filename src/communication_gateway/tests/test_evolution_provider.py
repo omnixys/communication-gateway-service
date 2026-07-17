@@ -52,7 +52,7 @@ class TestEvolutionProvider:
                     "key": {"id": "evolution-msg-1", "remoteJid": "1234567890@s.whatsapp.net"},
                     "status": "PENDING",
                 },
-            )
+            ),
         )
 
         message = OutboundMessage(
@@ -69,7 +69,7 @@ class TestEvolutionProvider:
     @respx.mock
     async def test_send_text_failure(self, provider: EvolutionProvider) -> None:
         respx.post("http://evolution:8080/message/sendText/test-instance").mock(
-            return_value=Response(400, json={"error": "Bad request"})
+            return_value=Response(400, json={"error": "Bad request"}),
         )
 
         message = OutboundMessage(
@@ -86,7 +86,7 @@ class TestEvolutionProvider:
     @respx.mock
     async def test_health_connected(self, provider: EvolutionProvider) -> None:
         respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
-            return_value=Response(200, json={"instance": {"state": "open"}})
+            return_value=Response(200, json={"instance": {"state": "open"}}),
         )
 
         ok = await provider.health()
@@ -95,7 +95,7 @@ class TestEvolutionProvider:
     @respx.mock
     async def test_health_disconnected(self, provider: EvolutionProvider) -> None:
         respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
-            return_value=Response(200, json={"instance": {"state": "close"}})
+            return_value=Response(200, json={"instance": {"state": "close"}}),
         )
 
         ok = await provider.health()
@@ -104,7 +104,7 @@ class TestEvolutionProvider:
     @respx.mock
     async def test_health_unreachable(self, provider: EvolutionProvider) -> None:
         respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
-            return_value=Response(503)
+            return_value=Response(503),
         )
 
         ok = await provider.health()
@@ -130,7 +130,7 @@ class TestEvolutionProvider:
                     "pushName": "Test User",
                     "message": {"conversation": "Hello from WhatsApp"},
                     "messageType": "conversation",
-                }
+                },
             ],
         }
         result = await provider.handle_webhook({}, json.dumps(payload).encode())

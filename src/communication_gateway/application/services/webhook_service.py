@@ -1,12 +1,6 @@
 import logging
+from typing import TYPE_CHECKING
 
-from communication_gateway.application.ports.channel_provider_registry import (
-    ChannelProviderRegistry,
-)
-from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
-from communication_gateway.application.ports.message_mapping_store import (
-    MessageMappingStore,
-)
 from communication_gateway.domain.enums import (
     CommunicationProviderType,
     DeliveryStatus,
@@ -16,6 +10,15 @@ from communication_gateway.domain.events import InboundMessageReceived, MessageD
 from communication_gateway.domain.services.delivery_lifecycle import (
     assert_valid_transition,
 )
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.channel_provider_registry import (
+        ChannelProviderRegistry,
+    )
+    from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
+    from communication_gateway.application.ports.message_mapping_store import (
+        MessageMappingStore,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +42,8 @@ class WebhookService:
     ) -> object:
         provider = self._registry.get_by_provider_type(provider_type)
         if provider is None:
-            raise ValueError(f"Unknown provider type: {provider_type}")
+            msg = f"Unknown provider type: {provider_type}"
+            raise ValueError(msg)
 
         if not await provider.verify_webhook(headers, body):
             raise WebhookVerificationError(provider_type)

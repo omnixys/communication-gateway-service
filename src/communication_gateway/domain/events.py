@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.enums import CommunicationProviderType, ProviderStatus
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationProviderType, ProviderStatus
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
 
 
 @dataclass

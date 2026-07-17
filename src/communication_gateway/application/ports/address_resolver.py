@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.enums import CommunicationChannelType
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationChannelType
 
 
 class AddressResolver(ABC):

@@ -1,5 +1,9 @@
+from typing import TYPE_CHECKING
+
 from communication_gateway.application.ports.address_resolver import AddressResolver
-from communication_gateway.domain.enums import CommunicationChannelType
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationChannelType
 
 
 class DictAddressResolver(AddressResolver):
@@ -20,10 +24,12 @@ class DictAddressResolver(AddressResolver):
     ) -> str:
         user_map = self._forward.get(user_id)
         if user_map is None:
-            raise ValueError(f"No address mapping for user '{user_id}'")
+            msg = f"No address mapping for user '{user_id}'"
+            raise ValueError(msg)
         address = user_map.get(channel)
         if address is None:
-            raise ValueError(f"No {channel.value} address for user '{user_id}'")
+            msg = f"No {channel.value} address for user '{user_id}'"
+            raise ValueError(msg)
         return address
 
     async def reverse_lookup(self, address: str) -> str | None:

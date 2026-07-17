@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING
+
 from communication_gateway.application.ports.communication_provider import CommunicationProvider
 from communication_gateway.domain.enums import CommunicationProviderType
 from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
-from communication_gateway.domain.models.outbound_message import OutboundMessage
-from communication_gateway.domain.models.provider_response import ProviderResponse
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
+    from communication_gateway.domain.models.provider_response import ProviderResponse
 
 
 class WhatsAppCloudProvider(CommunicationProvider):
@@ -13,10 +17,12 @@ class WhatsAppCloudProvider(CommunicationProvider):
         return CommunicationProviderType.WHATSAPP_CLOUD
 
     async def send(self, message: OutboundMessage) -> ProviderResponse:
-        raise NotImplementedError("WhatsApp Cloud API provider — to be implemented")
+        msg = "WhatsApp Cloud API provider — to be implemented"
+        raise NotImplementedError(msg)
 
     async def health(self) -> bool:
-        raise NotImplementedError("WhatsApp Cloud API provider — to be implemented")
+        msg = "WhatsApp Cloud API provider — to be implemented"
+        raise NotImplementedError(msg)
 
     async def capabilities(self) -> ChannelCapabilities:
         return ChannelCapabilities(
@@ -31,9 +37,11 @@ class WhatsAppCloudProvider(CommunicationProvider):
         )
 
     async def verify_webhook(self, headers: dict[str, str], body: bytes) -> bool:
-        raise NotImplementedError("WhatsApp Cloud API provider — to be implemented")
+        msg = "WhatsApp Cloud API provider — to be implemented"
+        raise NotImplementedError(msg)
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes
+        self, headers: dict[str, str], body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
-        raise NotImplementedError("WhatsApp Cloud API provider — to be implemented")
+        msg = "WhatsApp Cloud API provider — to be implemented"
+        raise NotImplementedError(msg)

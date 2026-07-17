@@ -1,6 +1,5 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
 from omnixys_config.settings import AppSettings, CoreSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class GatewayCoreSettings(CoreSettings):
@@ -140,4 +139,5 @@ def validate_production_settings() -> None:
     }
     missing = [name for name, value in required.items() if not value]
     if missing:
-        raise RuntimeError(f"Missing required production settings: {', '.join(missing)}")
+        msg = f"Missing required production settings: {', '.join(missing)}"
+        raise RuntimeError(msg)

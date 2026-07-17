@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import strawberry
-from strawberry.types import Info
+from strawberry.types import Info  # noqa: TC002
 
 from communication_gateway.api.graphql.context import get_registry
 from communication_gateway.api.graphql.types.provider import (
@@ -29,7 +31,7 @@ class ProviderQuery:
                     connected=ok,
                     health=ok,
                     capabilities=cap_names,
-                )
+                ),
             )
         return results
 

@@ -9,10 +9,10 @@ class SendMessageRequest(BaseModel):
     id: str = Field(min_length=1, max_length=255)
     channel: Literal["EMAIL", "WHATSAPP"]
     recipient_address: str | None = Field(
-        default=None, alias="recipientAddress", min_length=1, max_length=500
+        default=None, alias="recipientAddress", min_length=1, max_length=500,
     )
     recipient_id: str | None = Field(
-        default=None, alias="recipientId", min_length=1, max_length=255
+        default=None, alias="recipientId", min_length=1, max_length=255,
     )
     sender_address: str | None = Field(default=None, alias="senderAddress", max_length=500)
     sender_id: str | None = Field(default=None, alias="senderId", max_length=255)
@@ -22,11 +22,14 @@ class SendMessageRequest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def validate_channel_fields(self) -> "SendMessageRequest":
+    def validate_channel_fields(self) -> SendMessageRequest:
         if not self.recipient_address and not self.recipient_id:
-            raise ValueError("recipientAddress or recipientId is required")
+            msg = "recipientAddress or recipientId is required"
+            raise ValueError(msg)
         if self.channel == "EMAIL" and not self.subject:
-            raise ValueError("subject is required for EMAIL")
+            msg = "subject is required for EMAIL"
+            raise ValueError(msg)
         if self.channel == "WHATSAPP" and self.content_type != "TEXT":
-            raise ValueError("WHATSAPP supports TEXT only in V1")
+            msg = "WHATSAPP supports TEXT only in V1"
+            raise ValueError(msg)
         return self

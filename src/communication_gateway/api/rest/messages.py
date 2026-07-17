@@ -1,18 +1,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
 from communication_gateway.api.auth import require_internal_api_key
-from communication_gateway.api.rest.message_dto import SendMessageRequest
+from communication_gateway.api.rest.message_dto import SendMessageRequest  # noqa: TC001
 from communication_gateway.api.rest.providers import get_dispatcher
-from communication_gateway.application.ports.address_resolver import AddressResolver
-from communication_gateway.application.ports.message_mapping_store import (
-    MessageMappingStore,
-)
-from communication_gateway.application.services.gateway_dispatcher import (
+from communication_gateway.application.services.gateway_dispatcher import (  # noqa: TC001
     GatewayDispatcher,
 )
 from communication_gateway.domain.enums import (
@@ -25,6 +21,12 @@ from communication_gateway.domain.models.communication_channel import (
 from communication_gateway.domain.models.message_mapping import MessageMapping
 from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.resolution_context import ResolutionContext
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.address_resolver import AddressResolver
+    from communication_gateway.application.ports.message_mapping_store import (
+        MessageMappingStore,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +47,8 @@ def set_address_resolver(resolver: AddressResolver) -> None:
 
 def get_address_resolver() -> AddressResolver:
     if _address_resolver is None:
-        raise RuntimeError("Address resolver not initialized")
+        msg = "Address resolver not initialized"
+        raise RuntimeError(msg)
     return _address_resolver
 
 
@@ -56,7 +59,8 @@ def set_mapping_store(store: MessageMappingStore) -> None:
 
 def get_mapping_store() -> MessageMappingStore:
     if _mapping_store is None:
-        raise RuntimeError("Mapping store not initialized")
+        msg = "Mapping store not initialized"
+        raise RuntimeError(msg)
     return _mapping_store
 
 

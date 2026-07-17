@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.enums import AttachmentType
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import AttachmentType
 
 
 @dataclass

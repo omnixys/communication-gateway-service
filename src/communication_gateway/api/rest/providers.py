@@ -1,12 +1,15 @@
-from typing import Any
+import contextlib
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends
 
 from communication_gateway.api.auth import require_internal_api_key
-from communication_gateway.application.ports.channel_provider_registry import (
-    ChannelProviderRegistry,
-)
 from communication_gateway.domain.enums import CommunicationProviderType
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.channel_provider_registry import (
+        ChannelProviderRegistry,
+    )
 
 _registry: ChannelProviderRegistry | None = None
 _dispatcher: object | None = None
@@ -19,7 +22,8 @@ def set_registry(registry: ChannelProviderRegistry) -> None:
 
 def get_registry() -> ChannelProviderRegistry:
     if _registry is None:
-        raise RuntimeError("Registry not initialized")
+        msg = "Registry not initialized"
+        raise RuntimeError(msg)
     return _registry
 
 
@@ -30,7 +34,8 @@ def set_dispatcher(dispatcher: object) -> None:
 
 def get_dispatcher() -> object:
     if _dispatcher is None:
-        raise RuntimeError("Dispatcher not initialized")
+        msg = "Dispatcher not initialized"
+        raise RuntimeError(msg)
     return _dispatcher
 
 
@@ -48,10 +53,8 @@ async def list_providers() -> list[dict[str, Any]]:
     for p in registry.list_providers():
         enabled = registry.is_provider_enabled(p.provider_type)
         meta = None
-        try:
+        with contextlib.suppress(Exception):
             meta = p.metadata
-        except Exception:
-            pass
         entry: dict[str, Any] = {
             "provider_type": p.provider_type.value,
             "enabled": enabled,

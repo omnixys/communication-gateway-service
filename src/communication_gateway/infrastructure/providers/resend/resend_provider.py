@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import httpx
 
 from communication_gateway.application.ports.communication_provider import CommunicationProvider
-from communication_gateway.config import ResendSettings
 from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
 from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
-from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.provider_identity import ProviderIdentity
 from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
+
+if TYPE_CHECKING:
+    from communication_gateway.config import ResendSettings
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
 
 
 class ResendProvider(CommunicationProvider):
@@ -103,7 +107,7 @@ class ResendProvider(CommunicationProvider):
         return False
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes
+        self, headers: dict[str, str], body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         return None
 

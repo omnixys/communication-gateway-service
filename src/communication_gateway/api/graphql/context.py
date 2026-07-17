@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from strawberry.fastapi import BaseContext
-from strawberry.types import Info
+from strawberry.types import Info  # noqa: TC002
 
-from communication_gateway.application.ports.channel_provider_registry import (
-    ChannelProviderRegistry,
-)
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.channel_provider_registry import (
+        ChannelProviderRegistry,
+    )
 
 
 @dataclass

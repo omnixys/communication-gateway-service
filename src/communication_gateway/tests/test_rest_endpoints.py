@@ -1,7 +1,7 @@
-from collections.abc import Generator
+
+from typing import TYPE_CHECKING
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
 from httpx import ASGITransport, AsyncClient
 
 from communication_gateway.api.rest.messages import (
@@ -39,9 +39,14 @@ from communication_gateway.main import (
 )
 from communication_gateway.tests.conftest import MockProvider
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from _pytest.monkeypatch import MonkeyPatch
+
 
 @pytest.fixture(autouse=True)
-def _reset_globals() -> Generator[None, None, None]:
+def _reset_globals() -> Generator[None]:
     yield
     from communication_gateway.api.rest import messages, providers, webhooks
 

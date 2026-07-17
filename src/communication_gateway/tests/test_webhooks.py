@@ -1,8 +1,8 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 
-from communication_gateway.application.services.webhook_service import WebhookService
 from communication_gateway.domain.enums import (
     CommunicationChannelType,
     CommunicationProviderType,
@@ -16,10 +16,13 @@ from communication_gateway.domain.models.communication_channel import Communicat
 from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
 from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.domain.models.message_mapping import MessageMapping
-from communication_gateway.infrastructure.persistence.in_memory_message_mapping_store import (
-    InMemoryMessageMappingStore,
-)
-from communication_gateway.tests.conftest import MockProvider
+
+if TYPE_CHECKING:
+    from communication_gateway.application.services.webhook_service import WebhookService
+    from communication_gateway.infrastructure.persistence.in_memory_message_mapping_store import (
+        InMemoryMessageMappingStore,
+    )
+    from communication_gateway.tests.conftest import MockProvider
 
 
 class TestWebhookService:

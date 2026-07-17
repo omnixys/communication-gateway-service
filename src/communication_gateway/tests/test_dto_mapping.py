@@ -57,7 +57,7 @@ class TestDtoMapping:
                     "mimetype": "image/jpeg",
                     "fileLength": "102400",
                     "caption": "Check this out!",
-                }
+                },
             },
             message_type="imageMessage",
         )

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.models.provider_identity import ProviderIdentity
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.provider_identity import ProviderIdentity
 
 
 @dataclass

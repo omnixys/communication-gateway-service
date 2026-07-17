@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from communication_gateway.domain.enums import DeliveryStatus
-from communication_gateway.domain.models.provider_identity import ProviderIdentity
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.provider_identity import ProviderIdentity
 
 
 @dataclass

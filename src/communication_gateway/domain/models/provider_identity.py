@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.enums import CommunicationProviderType
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationProviderType
 
 
 @dataclass(frozen=True)

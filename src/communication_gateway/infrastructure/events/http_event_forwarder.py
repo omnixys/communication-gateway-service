@@ -1,19 +1,22 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from communication_gateway.application.ports.address_resolver import AddressResolver
-from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
-from communication_gateway.application.ports.message_mapping_store import (
-    MessageMappingStore,
-)
 from communication_gateway.domain.enums import DeliveryStatus
 from communication_gateway.domain.events import InboundMessageReceived, MessageDelivered
 from communication_gateway.domain.models.message_mapping import MessageMapping
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.address_resolver import AddressResolver
+    from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
+    from communication_gateway.application.ports.message_mapping_store import (
+        MessageMappingStore,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -47,10 +50,8 @@ class HttpEventForwarder:
     async def stop(self) -> None:
         if self._task is not None:
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
         await self._client.aclose()
 
     async def _run(self) -> None:
@@ -60,7 +61,8 @@ class HttpEventForwarder:
         async def _handle_inbound() -> None:
             async for event in inbound:
                 try:
-                    assert isinstance(event, InboundMessageReceived)
+                    if not isinstance(event, InboundMessageReceived):
+                        continue
                     await self._forward_inbound(event)
                 except Exception:
                     logger.exception("http_event_forwarder_inbound_error")
@@ -68,7 +70,8 @@ class HttpEventForwarder:
         async def _handle_delivery() -> None:
             async for event in delivery:
                 try:
-                    assert isinstance(event, MessageDelivered)
+                    if not isinstance(event, MessageDelivered):
+                        continue
                     await self._forward_delivery(event)
                 except Exception:
                     logger.exception("http_event_forwarder_delivery_error")

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING
 
 from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 
 class InMemoryEventPublisher(OutboundEventPublisher):

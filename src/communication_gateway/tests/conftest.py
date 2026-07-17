@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import pytest_asyncio
 
 from communication_gateway.application.ports.channel_provider_registry import ChannelEntry
@@ -11,9 +13,6 @@ from communication_gateway.domain.enums import (
 )
 from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
 from communication_gateway.domain.models.communication_channel import CommunicationChannel
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
-from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.provider_identity import ProviderIdentity
 from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
@@ -29,6 +28,11 @@ from communication_gateway.infrastructure.persistence.in_memory_registry import 
 from communication_gateway.infrastructure.resolvers.default_provider_resolver import (
     DefaultProviderResolver,
 )
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
 
 
 class MockProvider(CommunicationProvider):
@@ -86,7 +90,7 @@ class MockProvider(CommunicationProvider):
         return self.webhook_should_verify
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes
+        self, headers: dict[str, str], body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         return self.webhook_result
 

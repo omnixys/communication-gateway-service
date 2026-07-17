@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from communication_gateway.application.ports.communication_provider import CommunicationProvider
-from communication_gateway.application.ports.provider_resolver import ProviderResolver
-from communication_gateway.domain.enums import (
-    CommunicationProviderType,
-)
-from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
-from communication_gateway.domain.models.communication_channel import CommunicationChannel
-from communication_gateway.domain.models.provider_metadata import ProviderMetadata
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.communication_provider import CommunicationProvider
+    from communication_gateway.application.ports.provider_resolver import ProviderResolver
+    from communication_gateway.domain.enums import (
+        CommunicationProviderType,
+    )
+    from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
+    from communication_gateway.domain.models.communication_channel import CommunicationChannel
+    from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 
 
 class ChannelEntry:
@@ -33,7 +35,7 @@ class ChannelProviderRegistry(ABC):
 
     @abstractmethod
     def get_by_provider_type(
-        self, provider_type: CommunicationProviderType
+        self, provider_type: CommunicationProviderType,
     ) -> CommunicationProvider | None: ...
 
     @abstractmethod

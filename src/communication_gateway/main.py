@@ -3,8 +3,8 @@ from __future__ import annotations
 import errno
 import json
 import socket
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import TYPE_CHECKING
 
 from aiokafka import AIOKafkaProducer
 from fastapi import Depends, FastAPI
@@ -46,9 +46,6 @@ from communication_gateway.api.rest.webhooks import (
 )
 from communication_gateway.application.ports.channel_provider_registry import (
     ChannelEntry,
-)
-from communication_gateway.application.ports.message_mapping_store import (
-    MessageMappingStore,
 )
 from communication_gateway.application.services.gateway_dispatcher import (
     GatewayDispatcher,
@@ -94,6 +91,13 @@ from communication_gateway.infrastructure.resolvers.dict_address_resolver import
     DictAddressResolver,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
+
+    from communication_gateway.application.ports.message_mapping_store import (
+        MessageMappingStore,
+    )
+
 logger = __import__("structlog").get_logger(__name__)
 
 event_publisher = InMemoryEventPublisher()
@@ -102,7 +106,7 @@ registry = InMemoryChannelProviderRegistry()
 if settings.database.url and settings.database.url != "sqlite+aiosqlite://":
     mapping_store: MessageMappingStore = (
         sqlalchemy_message_mapping_repository.SqlAlchemyMessageMappingRepository(
-            manager.session_factory
+            manager.session_factory,
         )
     )
 else:
@@ -131,7 +135,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     _setup_providers()
     _setup_forwarder()
     await _setup_kafka()
-    assert event_forwarder is not None
+    if event_forwarder is None:
+        msg = "event_forwarder must be initialized before startup"
+        raise RuntimeError(msg)
     await event_forwarder.start()
     set_event_forwarder_ready(True)
     if kafka_handler is not None:
@@ -267,9 +273,12 @@ def ensure_bind_available(host: str, port: int) -> None:
         probe.bind((host, port))
     except OSError as exc:
         if exc.errno == errno.EADDRINUSE:
-            raise SystemExit(
+            msg = (
                 f"Communication Gateway cannot start: {host}:{port} is already in use. "
                 "Set PORT or stop the conflicting process."
+            )
+            raise SystemExit(
+                msg,
             ) from None
         raise
     finally:

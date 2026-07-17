@@ -1,4 +1,7 @@
-from communication_gateway.domain.enums import CommunicationChannelType, CommunicationProviderType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationChannelType, CommunicationProviderType
 
 
 class GatewayError(Exception):

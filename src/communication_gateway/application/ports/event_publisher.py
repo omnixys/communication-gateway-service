@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 
 class OutboundEventPublisher(ABC):

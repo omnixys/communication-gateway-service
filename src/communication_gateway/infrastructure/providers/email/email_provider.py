@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 import ssl
 from email.message import EmailMessage
+from typing import TYPE_CHECKING
 
 import aiosmtplib
 
 from communication_gateway.application.ports.communication_provider import (
     CommunicationProvider,
 )
-from communication_gateway.config import StalwartSettings
 from communication_gateway.domain.enums import (
     CommunicationProviderType,
     DeliveryStatus,
@@ -17,12 +17,15 @@ from communication_gateway.domain.enums import (
 from communication_gateway.domain.models.channel_capabilities import (
     ChannelCapabilities,
 )
-from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
-from communication_gateway.domain.models.inbound_message import InboundMessage
-from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.provider_identity import ProviderIdentity
 from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 from communication_gateway.domain.models.provider_response import ProviderResponse
+
+if TYPE_CHECKING:
+    from communication_gateway.config import StalwartSettings
+    from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
+    from communication_gateway.domain.models.inbound_message import InboundMessage
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +78,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except aiosmtplib.SMTPException as e:
-            logger.error("SMTP error: %s", e)
+            logger.exception("SMTP error")
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -83,7 +86,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except OSError as e:
-            logger.error("SMTP connection error: %s", e)
+            logger.exception("SMTP connection error")
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,

@@ -1,10 +1,12 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, HTTPException, Request
 
-from communication_gateway.application.services.webhook_service import WebhookService
 from communication_gateway.domain.enums import CommunicationProviderType
 from communication_gateway.domain.errors import WebhookVerificationError
+
+if TYPE_CHECKING:
+    from communication_gateway.application.services.webhook_service import WebhookService
 
 _service: WebhookService | None = None
 
@@ -16,7 +18,8 @@ def set_webhook_service(service: WebhookService) -> None:
 
 def get_webhook_service() -> WebhookService:
     if _service is None:
-        raise RuntimeError("Webhook service not initialized")
+        msg = "Webhook service not initialized"
+        raise RuntimeError(msg)
     return _service
 
 
@@ -36,7 +39,7 @@ async def receive_webhook(provider_type: str, request: Request) -> dict[str, Any
         result = await service.process_webhook(ptype, headers, body)
     except WebhookVerificationError as exc:
         raise HTTPException(
-            status_code=401, detail={"code": "WEBHOOK_VERIFICATION_FAILED"}
+            status_code=401, detail={"code": "WEBHOOK_VERIFICATION_FAILED"},
         ) from exc
     return {"received": True, "result": str(type(result).__name__) if result else None}
 

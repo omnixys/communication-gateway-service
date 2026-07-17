@@ -12,7 +12,7 @@ class EvolutionApiConfig(ProviderConfig):
     webhook_secret: str = ""
 
     @classmethod
-    def from_settings(cls) -> "EvolutionApiConfig":
+    def from_settings(cls) -> EvolutionApiConfig:
         return cls(
             base_url=settings.evolution.base_url,
             api_key=settings.evolution.api_key,

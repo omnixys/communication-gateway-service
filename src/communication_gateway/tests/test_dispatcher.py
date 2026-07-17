@@ -1,8 +1,7 @@
+from typing import TYPE_CHECKING
+
 import pytest
 
-from communication_gateway.application.services.gateway_dispatcher import (
-    GatewayDispatcher,
-)
 from communication_gateway.domain.enums import (
     CommunicationChannelType,
     DeliveryStatus,
@@ -11,12 +10,17 @@ from communication_gateway.domain.models.communication_channel import Communicat
 from communication_gateway.domain.models.outbound_message import OutboundMessage
 from communication_gateway.domain.models.provider_response import ProviderResponse
 from communication_gateway.domain.models.resolution_context import ResolutionContext
-from communication_gateway.tests.conftest import MockProvider
+
+if TYPE_CHECKING:
+    from communication_gateway.application.services.gateway_dispatcher import (
+        GatewayDispatcher,
+    )
+    from communication_gateway.tests.conftest import MockProvider
 
 
 class TestDispatcher:
     async def test_dispatch_calls_send(
-        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider
+        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider,
     ) -> None:
         message = OutboundMessage(
             id="msg-1",
@@ -30,7 +34,7 @@ class TestDispatcher:
         assert mock_provider.last_message is message
 
     async def test_dispatch_with_context(
-        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider
+        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider,
     ) -> None:
         message = OutboundMessage(
             id="msg-2",
@@ -44,7 +48,7 @@ class TestDispatcher:
         assert result.success is True
 
     async def test_dispatch_unknown_channel_raises(
-        self, dispatcher: GatewayDispatcher
+        self, dispatcher: GatewayDispatcher,
     ) -> None:
         message = OutboundMessage(
             id="msg-3",

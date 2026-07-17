@@ -1,7 +1,11 @@
-from communication_gateway.application.ports.communication_provider import CommunicationProvider
+from typing import TYPE_CHECKING
+
 from communication_gateway.application.ports.provider_resolver import ProviderResolver
-from communication_gateway.domain.models.outbound_message import OutboundMessage
-from communication_gateway.domain.models.resolution_context import ResolutionContext
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.communication_provider import CommunicationProvider
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
+    from communication_gateway.domain.models.resolution_context import ResolutionContext
 
 
 class DefaultProviderResolver(ProviderResolver):
@@ -19,5 +23,6 @@ class DefaultProviderResolver(ProviderResolver):
         context: ResolutionContext | None = None,
     ) -> CommunicationProvider:
         if not self._providers:
-            raise ValueError("No providers available for this channel")
+            msg = "No providers available for this channel"
+            raise ValueError(msg)
         return self._providers[0]

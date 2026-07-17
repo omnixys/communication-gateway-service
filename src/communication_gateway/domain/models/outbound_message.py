@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.models.attachment_reference import AttachmentReference
-from communication_gateway.domain.models.communication_channel import CommunicationChannel
+if TYPE_CHECKING:
+    from communication_gateway.domain.models.attachment_reference import AttachmentReference
+    from communication_gateway.domain.models.communication_channel import CommunicationChannel
 
 
 @dataclass

@@ -1,10 +1,13 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from communication_gateway.application.ports.message_mapping_store import (
     MessageMappingStore,
 )
-from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
-from communication_gateway.domain.models.message_mapping import MessageMapping
+
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
+    from communication_gateway.domain.models.message_mapping import MessageMapping
 
 
 class InMemoryMessageMappingStore(MessageMappingStore):

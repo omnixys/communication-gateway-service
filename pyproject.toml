@@ -61,12 +61,17 @@ target-version = "py314"
 select = ["ALL"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = [
-    "ANN101", "ANN401", "S101",
+"src/**/tests/**" = [
+    "ANN101", "ANN401", "S101", "SLF001", "PLR2004",
     "T20", "FBT", "D", "INP001",
+    "DTZ001", "PT011", "PT006", "PLC0415", "S106", "B017",
+    "RET504",
 ]
 "src/**" = [
     "D", "ANN401", "ARG002", "S104", "S105", "S107",
+    "BLE001", "PLW0603", "PLC0415", "TRY003", "TRY300",
+    "ARG001", "FBT001", "PLR0911", "B008", "FAST002",
+    "S106", "S110", "S112", "C901",
 ]
 
 [tool.ruff.format]

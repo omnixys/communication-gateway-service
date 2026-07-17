@@ -1,16 +1,20 @@
+from typing import TYPE_CHECKING
+
 from communication_gateway.application.ports.channel_provider_registry import (
     ChannelEntry,
     ChannelProviderRegistry,
 )
-from communication_gateway.application.ports.communication_provider import CommunicationProvider
-from communication_gateway.domain.enums import (
-    CommunicationChannelType,
-    CommunicationProviderType,
-)
 from communication_gateway.domain.errors import ChannelNotFoundError
 from communication_gateway.domain.models.channel_capabilities import ChannelCapabilities
 from communication_gateway.domain.models.communication_channel import CommunicationChannel
-from communication_gateway.domain.models.provider_metadata import ProviderMetadata
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.communication_provider import CommunicationProvider
+    from communication_gateway.domain.enums import (
+        CommunicationChannelType,
+        CommunicationProviderType,
+    )
+    from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 
 
 class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
@@ -25,7 +29,8 @@ class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
         entry: ChannelEntry,
     ) -> None:
         if channel.type in self._channels:
-            raise ValueError(f"Channel already registered: {channel.type}")
+            msg = f"Channel already registered: {channel.type}"
+            raise ValueError(msg)
         self._channels[channel.type] = entry
         for provider in entry.providers:
             self._providers[provider.provider_type] = provider

@@ -1,4 +1,7 @@
-from communication_gateway.tests.conftest import MockProvider
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from communication_gateway.tests.conftest import MockProvider
 
 
 class TestHealth:

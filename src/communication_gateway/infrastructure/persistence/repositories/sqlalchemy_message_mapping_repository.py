@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from communication_gateway.application.ports.message_mapping_store import (
     MessageMappingStore,
@@ -13,6 +13,9 @@ from communication_gateway.domain.enums import (
 )
 from communication_gateway.domain.models.message_mapping import MessageMapping
 from communication_gateway.infrastructure.persistence.models import MessageMappingModel
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 class SqlAlchemyMessageMappingRepository(MessageMappingStore):
@@ -49,8 +52,8 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
         async with self._session_factory() as session:
             result = await session.execute(
                 select(MessageMappingModel).where(
-                    MessageMappingModel.provider_message_id == provider_message_id
-                )
+                    MessageMappingModel.provider_message_id == provider_message_id,
+                ),
             )
             model = result.scalar_one_or_none()
             return self._to_domain(model) if model else None
@@ -61,7 +64,7 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
     ) -> MessageMapping | None:
         async with self._session_factory() as session:
             result = await session.execute(
-                select(MessageMappingModel).where(MessageMappingModel.internal_id == internal_id)
+                select(MessageMappingModel).where(MessageMappingModel.internal_id == internal_id),
             )
             model = result.scalar_one_or_none()
             return self._to_domain(model) if model else None
@@ -76,7 +79,7 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
                 select(MessageMappingModel).where(
                     MessageMappingModel.provider == provider.value,
                     MessageMappingModel.provider_message_id == provider_message_id,
-                )
+                ),
             )
             model = result.scalar_one_or_none()
             return self._to_domain(model) if model else None
@@ -96,14 +99,14 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
                     last_status_change=datetime.now(UTC).replace(tzinfo=None),
                     last_error=error,
                     updated_at=datetime.now(UTC).replace(tzinfo=None),
-                )
+                ),
             )
             await session.commit()
 
     async def increment_retry(self, internal_id: str) -> None:
         async with self._session_factory() as session:
             result = await session.execute(
-                select(MessageMappingModel).where(MessageMappingModel.internal_id == internal_id)
+                select(MessageMappingModel).where(MessageMappingModel.internal_id == internal_id),
             )
             model = result.scalar_one_or_none()
             if model is not None:

@@ -135,7 +135,7 @@ class TestEmailProvider:
         provider: EmailProvider,
     ) -> None:
         mock_smtp.return_value.__aenter__.return_value.send_message.side_effect = OSError(
-            "Connection refused"
+            "Connection refused",
         )
 
         message = OutboundMessage(

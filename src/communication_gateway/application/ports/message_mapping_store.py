@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
-from communication_gateway.domain.models.message_mapping import MessageMapping
+if TYPE_CHECKING:
+    from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
+    from communication_gateway.domain.models.message_mapping import MessageMapping
 
 
 class MessageMappingStore(ABC):

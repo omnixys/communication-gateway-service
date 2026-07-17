@@ -1,9 +1,12 @@
-from communication_gateway.application.ports.channel_provider_registry import (
-    ChannelProviderRegistry,
-)
-from communication_gateway.domain.models.outbound_message import OutboundMessage
-from communication_gateway.domain.models.provider_response import ProviderResponse
-from communication_gateway.domain.models.resolution_context import ResolutionContext
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.channel_provider_registry import (
+        ChannelProviderRegistry,
+    )
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
+    from communication_gateway.domain.models.provider_response import ProviderResponse
+    from communication_gateway.domain.models.resolution_context import ResolutionContext
 
 
 class GatewayDispatcher:

@@ -1,7 +1,12 @@
-from dataclasses import dataclass
-from datetime import datetime
+from __future__ import annotations
 
-from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
 
 
 @dataclass

@@ -1,8 +1,12 @@
-from communication_gateway.application.ports.communication_provider import CommunicationProvider
+from typing import TYPE_CHECKING
+
 from communication_gateway.application.ports.provider_resolver import ProviderResolver
-from communication_gateway.domain.models.outbound_message import OutboundMessage
-from communication_gateway.domain.models.resolution_context import ResolutionContext
-from communication_gateway.infrastructure.providers.base_config import ProviderConfig
+
+if TYPE_CHECKING:
+    from communication_gateway.application.ports.communication_provider import CommunicationProvider
+    from communication_gateway.domain.models.outbound_message import OutboundMessage
+    from communication_gateway.domain.models.resolution_context import ResolutionContext
+    from communication_gateway.infrastructure.providers.base_config import ProviderConfig
 
 
 class PriorityProviderResolver(ProviderResolver):
@@ -27,7 +31,8 @@ class PriorityProviderResolver(ProviderResolver):
                 return provider
         if self._fallback_providers:
             return self._fallback_providers[0]
-        raise ValueError("No enabled providers available for this channel")
+        msg = "No enabled providers available for this channel"
+        raise ValueError(msg)
 
 
 def _provider_priority(provider: CommunicationProvider) -> int:

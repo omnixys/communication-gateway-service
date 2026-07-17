@@ -15,10 +15,10 @@ async def test_resend_sends_subject_html_and_returns_provider_id() -> None:
             api_key="re_test",
             from_address="Omnixys <no-reply@omnixys.com>",
             base_url="https://api.resend.test",
-        )
+        ),
     )
     route = respx.post("https://api.resend.test/emails").mock(
-        return_value=Response(200, json={"id": "email-1"})
+        return_value=Response(200, json={"id": "email-1"}),
     )
     message = OutboundMessage(
         id="notification-1",
