@@ -1,5 +1,9 @@
+from pathlib import Path
+
 from omnixys_config.settings import AppSettings, CoreSettings
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_GATEWAY_PKG_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class GatewayCoreSettings(CoreSettings):
@@ -87,7 +91,7 @@ class StalwartSettings(BaseSettings):
 
 
 class ResendSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", env_prefix="resend_", extra="ignore")
+    model_config = SettingsConfigDict(env_file=str(_GATEWAY_PKG_DIR / ".env"), env_file_encoding="utf-8", env_prefix="resend_", extra="ignore")
 
     api_key: str = ""
     from_address: str = ""
@@ -103,7 +107,7 @@ class GatewayKafkaSettings(BaseSettings):
 
 
 class GatewaySettings(AppSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=str(_GATEWAY_PKG_DIR / ".env"), env_file_encoding="utf-8", extra="ignore")
 
     core: GatewayCoreSettings = GatewayCoreSettings()
 
