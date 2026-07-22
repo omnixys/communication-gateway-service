@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from omnixys_config.settings import AppSettings, CoreSettings
+from config.settings import AppSettings, CoreSettings
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _GATEWAY_PKG_DIR = Path(__file__).resolve().parent.parent.parent

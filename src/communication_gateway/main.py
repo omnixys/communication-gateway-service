@@ -8,16 +8,16 @@ from typing import TYPE_CHECKING
 
 from aiokafka import AIOKafkaProducer
 from fastapi import Depends, FastAPI
-from omnixys_kafka import AIOKafkaEventProducer
-from omnixys_observability import (
+from kafka import AIOKafkaEventProducer
+from observability import (
     configure_logging,
     configure_tracing,
     instrument_fastapi,
     shutdown_tracing,
     uninstrument_fastapi,
 )
-from omnixys_observability.metrics import ObservabilityMiddleware
-from omnixys_security import JwtValidator, SecurityMiddleware
+from observability.metrics import ObservabilityMiddleware
+from security import JwtValidator, SecurityMiddleware
 from strawberry.fastapi import GraphQLRouter
 
 from communication_gateway.api.auth import require_internal_api_key

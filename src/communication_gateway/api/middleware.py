@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from omnixys_observability.request_context import (
+from observability.request_context import (
     RequestContext as ObservabilityRequestContext,
 )
-from omnixys_observability.request_context import (
+from observability.request_context import (
     set_request_context as set_observability_context,
 )
-from omnixys_security.request_context import (
+from security.request_context import (
     current_request_context as get_security_context,
 )
 

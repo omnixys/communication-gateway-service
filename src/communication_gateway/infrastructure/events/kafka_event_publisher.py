@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from communication_gateway.domain.events import MessageDelivered
 
 if TYPE_CHECKING:
-    from omnixys_kafka import AIOKafkaEventProducer
+    from kafka import AIOKafkaEventProducer
 
     from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
     from communication_gateway.application.ports.message_mapping_store import (

@@ -1,7 +1,7 @@
 
 from typing import TYPE_CHECKING
 
-from omnixys_database import DatabaseSessionManager
+from database import DatabaseSessionManager
 
 from communication_gateway.config import settings
 

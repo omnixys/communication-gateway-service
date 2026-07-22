@@ -6,7 +6,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from omnixys_kafka import AIOKafkaEventProducer
+from kafka import AIOKafkaEventProducer
 
 from communication_gateway.domain.enums import (
     CommunicationChannelType,
