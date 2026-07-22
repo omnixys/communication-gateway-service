@@ -48,6 +48,12 @@ def _health_status(label: str, ok: bool) -> None:
     _info_colored(label, status, color)
 
 
+def _status(label: str, enabled: bool) -> None:
+    text = "ENABLED" if enabled else "DISABLED"
+    color = _GREEN if enabled else _RED
+    _info_colored(label, text, color)
+
+
 def _section(title: str) -> None:
     width = 51
     inner = width - 2
@@ -86,7 +92,7 @@ def print_banner(settings: GatewaySettings) -> None:
     _info("Port", str(settings.core.port))
     _info("OS", f"{platform.system()} ({platform.release()})")
     _info("User", getpass.getuser())
-    _info("Hot Reload", "ENABLED" if settings.hot_reload else "DISABLED")
+    _status("Hot Reload", settings.hot_reload)
 
     _section("LOGGER")
     _info("Log Level", settings.core.log_level)
@@ -102,16 +108,16 @@ def print_banner(settings: GatewaySettings) -> None:
     _info("URL", _mask_url(settings.database.url, production=is_production))
     _info("Pool Size", str(settings.database.pool_size))
     _info("Max Overflow", str(settings.database.max_overflow))
-    _info("Echo", "ENABLED" if settings.database.echo else "DISABLED")
+    _status("Echo", settings.database.echo)
 
     _section("SECURITY")
     _info("CORS Origins", ", ".join(settings.security.cors_allowed_origins) or "—")
     if settings.security.rate_limit.enabled:
         _info("Rate Limit", f"{settings.security.rate_limit.default_limit}/min")
     else:
-        _info("Rate Limit", "DISABLED")
+        _info_colored("Rate Limit", "DISABLED", _RED)
     _info("Cookie Secure", str(settings.security.cookie_secure))
-    _info("Stateless", "ENABLED" if settings.security.stateless else "DISABLED")
+    _status("Stateless", settings.security.stateless)
 
 
     _section("KAFKA")
@@ -119,17 +125,17 @@ def print_banner(settings: GatewaySettings) -> None:
     _info("Client ID", settings.kafka.client_id)
     _info("Group ID", settings.kafka.group_id)
     _info("ACKs", settings.kafka.acks)
-    _info("DLQ", "ENABLED" if settings.kafka.dlq_enabled else "DISABLED")
+    _status("DLQ", settings.kafka.dlq_enabled)
 
     _section("VALKEY")
     _info("URL", _mask_url(settings.cache.url, production=is_production))
     _info("Key Prefix", settings.cache.key_prefix)
-    _info("Invalidation", "ENABLED" if settings.cache.invalidation_enabled else "DISABLED")
+    _status("Invalidation", settings.cache.invalidation_enabled)
 
     _section("OBSERVABILITY")
     _info("OTLP Endpoint", settings.observability.otlp_endpoint)
-    _info("Tracing", "ENABLED" if settings.observability.tracing_enabled else "DISABLED")
-    _info("Metrics", "ENABLED" if settings.observability.metrics_enabled else "DISABLED")
+    _status("Tracing", settings.observability.tracing_enabled)
+    _status("Metrics", settings.observability.metrics_enabled)
     _info("Sampling", str(settings.observability.sampling_probability))
 
     _section("STORAGE")
