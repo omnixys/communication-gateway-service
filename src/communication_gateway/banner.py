@@ -36,6 +36,12 @@ def _info_colored(label: str, value: str, color: str) -> None:
     print(f"  {_CYAN}{label}:{_RESET} {color}{value}{_RESET}")  # noqa: T201
 
 
+def _health_status(label: str, ok: bool) -> None:
+    status = "UP" if ok else "DOWN"
+    color = _GREEN if ok else _RED
+    _info_colored(label, status, color)
+
+
 def _section(title: str) -> None:
     width = 51
     inner = width - 2
@@ -124,5 +130,13 @@ def print_banner(settings: GatewaySettings) -> None:
 
     _section("CHAT SERVICE")
     _info("URL", settings.core.chat_service_url)
+
+    _section("HEALTH")
+    _health_status("Database", bool(settings.database.url))
+    _health_status("Kafka", bool(settings.kafka.bootstrap_servers))
+    _health_status("Cache", bool(settings.cache.url))
+    _health_status("Keycloak", bool(settings.keycloak.url))
+    _health_status("Evolution", bool(settings.evolution.base_url))
+    _health_status("Resend", bool(settings.resend.api_key))
 
     print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
