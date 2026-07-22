@@ -295,7 +295,7 @@ def run() -> None:
 
     config = hypercorn.config.Config()
     config.bind = [f"{settings.core.host}:{settings.core.port}"]
-    config.loglevel = settings.core.log_level.lower()
+    config.loglevel = settings.core.log_level.upper()
 
     ensure_bind_available(settings.core.host, settings.core.port)
     asyncio.run(hypercorn.asyncio.serve(app, config))  # type: ignore[arg-type]
