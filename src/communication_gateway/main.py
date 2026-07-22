@@ -220,7 +220,6 @@ async def _setup_kafka() -> None:
         bootstrap_servers=settings.gateway_kafka.broker,
         client_id="omnixys-communication-gateway",
         acks=settings.kafka.acks,
-        max_retries=settings.kafka.retries,
     )
     producer = AIOKafkaEventProducer(producer=raw)
     await producer.start()
