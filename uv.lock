@@ -700,11 +700,11 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "hypercorn", specifier = ">=0.17.0" },
-    { name = "omnixys-config", url = "https://github.com/omnixys/config-python/releases/download/v1.0.0/omnixys_config-1.0.0-py3-none-any.whl" },
-    { name = "omnixys-database", url = "https://github.com/omnixys/database-python/releases/download/v1.0.0/omnixys_database-1.0.0-py3-none-any.whl" },
-    { name = "omnixys-kafka", url = "https://github.com/omnixys/kafka-python/releases/download/v1.0.0/omnixys_kafka-1.0.0-py3-none-any.whl" },
-    { name = "omnixys-observability", url = "https://github.com/omnixys/observability-python/releases/download/v1.0.0/omnixys_observability-1.0.0-py3-none-any.whl" },
-    { name = "omnixys-security", url = "https://github.com/omnixys/security-python/releases/download/v1.0.6/omnixys_security-1.0.0-py3-none-any.whl" },
+    { name = "omnixys-config", editable = "../../packages/python/config" },
+    { name = "omnixys-database", editable = "../../packages/python/database" },
+    { name = "omnixys-kafka", editable = "../../packages/python/kafka" },
+    { name = "omnixys-observability", editable = "../../packages/python/observability" },
+    { name = "omnixys-security", editable = "../../packages/python/security" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.0" },
     { name = "strawberry-graphql", extras = ["fastapi", "asgi"], specifier = ">=0.260.0" },
@@ -725,14 +725,10 @@ dev = [
 
 [[package]]
 name = "omnixys-config"
-version = "1.0.0"
-source = { url = "https://github.com/omnixys/config-python/releases/download/v1.0.0/omnixys_config-1.0.0-py3-none-any.whl" }
+source = { editable = "../../packages/python/config" }
 dependencies = [
     { name = "pydantic" },
     { name = "pydantic-settings" },
-]
-wheels = [
-    { url = "https://github.com/omnixys/config-python/releases/download/v1.0.0/omnixys_config-1.0.0-py3-none-any.whl", hash = "sha256:7af167129961556da8e3ad2df7a0be44145910497c464b4f0ddcee79a661f2f8" },
 ]
 
 [package.metadata]
@@ -741,19 +737,23 @@ requires-dist = [
     { name = "pydantic-settings", specifier = "==2.14.1" },
 ]
 
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=2.3.0" },
+    { name = "pytest", specifier = ">=9.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "ruff", specifier = ">=0.15.21" },
+]
+
 [[package]]
 name = "omnixys-database"
-version = "1.0.0"
-source = { url = "https://github.com/omnixys/database-python/releases/download/v1.0.0/omnixys_database-1.0.0-py3-none-any.whl" }
+source = { editable = "../../packages/python/database" }
 dependencies = [
     { name = "asyncpg" },
     { name = "greenlet" },
     { name = "psycopg" },
     { name = "psycopg-binary" },
     { name = "sqlalchemy" },
-]
-wheels = [
-    { url = "https://github.com/omnixys/database-python/releases/download/v1.0.0/omnixys_database-1.0.0-py3-none-any.whl", hash = "sha256:45935d19202270cf98b93fafb03d3a8905c341795b6624fb1a6ac17207eea3ee" },
 ]
 
 [package.metadata]
@@ -765,18 +765,22 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.51" },
 ]
 
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=2.3.0" },
+    { name = "pytest", specifier = ">=9.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "ruff", specifier = ">=0.15.21" },
+]
+
 [[package]]
 name = "omnixys-kafka"
-version = "1.0.0"
-source = { url = "https://github.com/omnixys/kafka-python/releases/download/v1.0.0/omnixys_kafka-1.0.0-py3-none-any.whl" }
+source = { editable = "../../packages/python/kafka" }
 dependencies = [
     { name = "aiokafka" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-instrumentation-aiokafka" },
     { name = "opentelemetry-sdk" },
-]
-wheels = [
-    { url = "https://github.com/omnixys/kafka-python/releases/download/v1.0.0/omnixys_kafka-1.0.0-py3-none-any.whl", hash = "sha256:eee8c4ebdce72ba5e88350b4aa19148b82ff744d595dc5cbeb28f9efb57367fe" },
 ]
 
 [package.metadata]
@@ -787,10 +791,18 @@ requires-dist = [
     { name = "opentelemetry-sdk", specifier = ">=1.42.1" },
 ]
 
+[package.metadata.requires-dev]
+dev = [
+    { name = "dishka", specifier = ">=1.10.1" },
+    { name = "mypy", specifier = ">=2.3.0" },
+    { name = "pytest", specifier = ">=9.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "ruff", specifier = ">=0.15.21" },
+]
+
 [[package]]
 name = "omnixys-observability"
-version = "1.0.0"
-source = { url = "https://github.com/omnixys/observability-python/releases/download/v1.0.0/omnixys_observability-1.0.0-py3-none-any.whl" }
+source = { editable = "../../packages/python/observability" }
 dependencies = [
     { name = "fastapi" },
     { name = "httpx" },
@@ -805,9 +817,6 @@ dependencies = [
     { name = "opentelemetry-sdk" },
     { name = "prometheus-client" },
     { name = "structlog" },
-]
-wheels = [
-    { url = "https://github.com/omnixys/observability-python/releases/download/v1.0.0/omnixys_observability-1.0.0-py3-none-any.whl", hash = "sha256:f601ba94c913fe4504a7b0cd74d678389d64a5709bb29f5e78f94dc5ed2e3dcb" },
 ]
 
 [package.metadata]
@@ -827,22 +836,36 @@ requires-dist = [
     { name = "structlog", specifier = ">=26.1.0" },
 ]
 
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=2.3.0" },
+    { name = "pytest", specifier = ">=9.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "ruff", specifier = ">=0.15.21" },
+]
+
 [[package]]
 name = "omnixys-security"
-version = "1.0.0"
-source = { url = "https://github.com/omnixys/security-python/releases/download/v1.0.6/omnixys_security-1.0.0-py3-none-any.whl" }
+source = { editable = "../../packages/python/security" }
 dependencies = [
     { name = "httpx" },
     { name = "python-jose", extra = ["cryptography"] },
-]
-wheels = [
-    { url = "https://github.com/omnixys/security-python/releases/download/v1.0.6/omnixys_security-1.0.0-py3-none-any.whl", hash = "sha256:e6f4c06706b8d82384079cda1403d6743ee507ccc94079df4643c14fe8a2176f" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.5.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=2.3.0" },
+    { name = "pydantic", specifier = ">=2.13.4" },
+    { name = "pytest", specifier = ">=9.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "ruff", specifier = ">=0.15.21" },
+    { name = "types-python-jose", specifier = ">=3.5.0.20260408" },
 ]
 
 [[package]]
