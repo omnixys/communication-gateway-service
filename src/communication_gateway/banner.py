@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 _GREEN = "\033[32m"
 _CYAN = "\033[36m"
 _YELLOW = "\033[33m"
+_RED = "\033[31m"
 _RESET = "\033[0m"
 
 
@@ -29,6 +30,10 @@ def _mask_url(url: str, *, production: bool = True) -> str:
 
 def _info(label: str, value: str) -> None:
     print(f"  {_CYAN}{label}:{_RESET} {_YELLOW}{value}{_RESET}")  # noqa: T201
+
+
+def _info_colored(label: str, value: str, color: str) -> None:
+    print(f"  {_CYAN}{label}:{_RESET} {color}{value}{_RESET}")  # noqa: T201
 
 
 def _section(title: str) -> None:
@@ -54,7 +59,17 @@ def print_banner(settings: GatewaySettings) -> None:
     _section("ANWENDUNGSINFORMATIONEN")
     _info("Anwendungsname", name)
     _info("Python-Version", platform.python_version())
-    _info("Umgebung", settings.core.environment)
+
+    env = settings.core.environment.lower()
+    if env in ("local", "development"):
+        env_color = _GREEN
+    elif env == "staging":
+        env_color = _YELLOW
+    elif env == "production":
+        env_color = _RED
+    else:
+        env_color = _YELLOW
+    _info_colored("Umgebung", settings.core.environment, env_color)
     _info("Host", settings.core.host)
     _info("Port", str(settings.core.port))
     _info("Betriebssystem", f"{platform.system()} ({platform.release()})")
