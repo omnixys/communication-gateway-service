@@ -47,11 +47,11 @@ dev = [
 package = true
 
 [tool.uv.sources]
-omnixys-config = { url = "https://github.com/omnixys/config-python/releases/download/v1.0.0/omnixys_config-1.0.0-py3-none-any.whl" }
-omnixys-database = { url = "https://github.com/omnixys/database-python/releases/download/v1.0.0/omnixys_database-1.0.0-py3-none-any.whl" }
-omnixys-kafka = { url = "https://github.com/omnixys/kafka-python/releases/download/v1.0.0/omnixys_kafka-1.0.0-py3-none-any.whl" }
-omnixys-observability = { url = "https://github.com/omnixys/observability-python/releases/download/v1.0.0/omnixys_observability-1.0.0-py3-none-any.whl" }
-omnixys-security = { url = "https://github.com/omnixys/security-python/releases/download/v1.0.6/omnixys_security-1.0.0-py3-none-any.whl" }
+omnixys-config = { path = "../../packages/python/config", editable = true }
+omnixys-database = { path = "../../packages/python/database", editable = true }
+omnixys-kafka = { path = "../../packages/python/kafka", editable = true }
+omnixys-observability = { path = "../../packages/python/observability", editable = true }
+omnixys-security = { path = "../../packages/python/security", editable = true }
 
 [tool.ruff]
 line-length = 120
@@ -70,7 +70,7 @@ select = ["ALL"]
 "src/**" = [
     "D", "ANN401", "ARG002", "S104", "S105", "S107",
     "BLE001", "PLW0603", "PLC0415", "TRY003", "TRY300",
-    "ARG001", "FBT001", "PLR0911", "B008", "FAST002",
+    "ARG001", "FBT001", "PLR0911", "PLR0915", "B008", "FAST002",
     "S106", "S110", "S112", "C901",
 ]
 

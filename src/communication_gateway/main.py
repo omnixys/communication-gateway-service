@@ -51,6 +51,7 @@ from communication_gateway.application.services.gateway_dispatcher import (
     GatewayDispatcher,
 )
 from communication_gateway.application.services.webhook_service import WebhookService
+from communication_gateway.banner import print_banner
 from communication_gateway.config import settings, validate_production_settings
 from communication_gateway.database import manager
 from communication_gateway.domain.enums import (
@@ -123,11 +124,14 @@ kafka_handler: KafkaDeliveryEventHandler | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    configure_logging()
+    configure_logging(settings.core.log_level)
+    print_banner(settings)
     configure_tracing(
         service_name=settings.core.service_name,
         otlp_endpoint=settings.observability.otlp_endpoint,
         environment=settings.core.environment,
+        enabled=settings.observability.tracing_enabled,
+        sampling_probability=settings.observability.sampling_probability,
     )
     instrument_fastapi(app)
 
@@ -215,6 +219,8 @@ async def _setup_kafka() -> None:
     raw = AIOKafkaProducer(
         bootstrap_servers=settings.gateway_kafka.broker,
         client_id="omnixys-communication-gateway",
+        acks=settings.kafka.acks,
+        max_retries=settings.kafka.retries,
     )
     producer = AIOKafkaEventProducer(producer=raw)
     await producer.start()
@@ -296,6 +302,7 @@ def run() -> None:
     config = hypercorn.config.Config()
     config.bind = [f"{settings.core.host}:{settings.core.port}"]
     config.loglevel = settings.core.log_level.upper()
+    config.use_reloader = settings.hot_reload
 
     ensure_bind_available(settings.core.host, settings.core.port)
     asyncio.run(hypercorn.asyncio.serve(app, config))  # type: ignore[arg-type]
