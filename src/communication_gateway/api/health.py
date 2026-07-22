@@ -1,5 +1,6 @@
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
@@ -13,6 +14,17 @@ _event_forwarder_ready = False
 def set_event_forwarder_ready(value: bool) -> None:
     global _event_forwarder_ready
     _event_forwarder_ready = value
+
+
+async def _check_http(name: str, url: str) -> dict[str, Any]:
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, timeout=5.0)
+        if resp.is_success:
+            return {"status": "up"}
+        return {"status": "down", "message": f"HTTP {resp.status_code}"}
+    except Exception as exc:
+        return {"status": "down", "message": str(exc)}
 
 
 @router.get("/health")
@@ -40,6 +52,12 @@ async def readiness(response: Response) -> dict[str, Any]:
         checks["database"] = True
     except Exception:
         checks["database"] = False
+    if settings.observability.tempo_health_url:
+        result = await _check_http("tempo", settings.observability.tempo_health_url)
+        checks["tempo"] = result["status"] == "up"
+    if settings.observability.prometheus_health_url:
+        result = await _check_http("prometheus", settings.observability.prometheus_health_url)
+        checks["prometheus"] = result["status"] == "up"
     ready = all(checks.values())
     if not ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
