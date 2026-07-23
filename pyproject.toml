@@ -13,11 +13,11 @@ dependencies = [
     "httpx>=0.28.0",
     "hypercorn>=0.17.0",
     "aiosmtplib>=3.0.0",
-    "omnixys-config",
-    "omnixys-database",
-    "omnixys-kafka",
-    "omnixys-observability",
-    "omnixys-security",
+    "omnixys-config @ git+https://github.com/omnixys/config-python.git",
+    "omnixys-database @ git+https://github.com/omnixys/database-python.git",
+    "omnixys-kafka @ git+https://github.com/omnixys/kafka-python.git",
+    "omnixys-observability @ git+https://github.com/omnixys/observability-python.git",
+    "omnixys-security @ git+https://github.com/omnixys/security-python.git",
 ]
 
 [project.scripts]
@@ -29,6 +29,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/communication_gateway"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [dependency-groups]
 dev = [
