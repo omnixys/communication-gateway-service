@@ -27,6 +27,9 @@ ARG PYTHON_VERSION=3.14
 # ---------------------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION}-slim-bookworm AS base
 RUN pip install --no-cache-dir uv
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # ---------------------------------------------------------------------------------------
 # Stage 1: Production dependencies
