@@ -5,7 +5,7 @@ from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from communication_gateway.config import settings
-from omnixys_database import Base
+from database import Base
 
 config = context.config
 if config.config_file_name is not None:
