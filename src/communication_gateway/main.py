@@ -10,10 +10,9 @@ from aiokafka import AIOKafkaProducer
 from fastapi import Depends, FastAPI
 from kafka import AIOKafkaEventProducer
 from observability import (
-    configure_logging,
-    configure_tracing,
+    configure_observability,
     instrument_fastapi,
-    shutdown_tracing,
+    shutdown_observability,
     uninstrument_fastapi,
 )
 from observability.metrics import ObservabilityMiddleware
@@ -24,7 +23,7 @@ from communication_gateway.api.auth import require_internal_api_key
 from communication_gateway.api.graphql.context import GraphQLContext
 from communication_gateway.api.graphql.schema import schema as graphql_schema
 from communication_gateway.api.health import router as health_router
-from communication_gateway.api.health import set_event_forwarder_ready
+from communication_gateway.api.health import set_event_forwarder_ready, set_provider_registry
 from communication_gateway.api.middleware import ContextBridgeMiddleware
 from communication_gateway.api.rest.messages import router as messages_router
 from communication_gateway.api.rest.messages import (
@@ -78,6 +77,7 @@ from communication_gateway.infrastructure.persistence.in_memory_registry import 
 from communication_gateway.infrastructure.persistence.repositories import (
     sqlalchemy_message_mapping_repository,
 )
+from communication_gateway.infrastructure.providers.email.email_provider import EmailProvider
 from communication_gateway.infrastructure.providers.evolution.evolution_config import (
     EvolutionApiConfig,
 )
@@ -95,6 +95,9 @@ from communication_gateway.infrastructure.resolvers.dict_address_resolver import
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
+    from communication_gateway.application.ports.communication_provider import (
+        CommunicationProvider,
+    )
     from communication_gateway.application.ports.message_mapping_store import (
         MessageMappingStore,
     )
@@ -124,15 +127,15 @@ kafka_handler: KafkaDeliveryEventHandler | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    configure_logging(settings.core.log_level)
-    print_banner(settings)
-    configure_tracing(
+    configure_observability(
         service_name=settings.core.service_name,
         otlp_endpoint=settings.observability.otlp_endpoint,
         environment=settings.core.environment,
-        enabled=settings.observability.tracing_enabled,
+        log_level=settings.core.log_level,
+        tracing_enabled=settings.observability.tracing_enabled,
         sampling_probability=settings.observability.sampling_probability,
     )
+    print_banner(settings)
     instrument_fastapi(app)
 
     validate_production_settings()
@@ -159,7 +162,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         if close is not None:
             await close()
     uninstrument_fastapi(app)
-    shutdown_tracing()
+    shutdown_observability()
     await manager.close()
 
 
@@ -176,21 +179,38 @@ def _setup_providers() -> None:
         whatsapp_entry,
     )
 
-    email = ResendProvider(settings.resend)
-    email_entry = ChannelEntry(
-        resolver=DefaultProviderResolver(providers=[email]),
-        providers=[email],
-    )
-    registry.register_channel(
-        CommunicationChannel(type=CommunicationChannelType.EMAIL),
-        email_entry,
-    )
+    email_providers: list[CommunicationProvider] = []
+    email_fallback_providers: list[CommunicationProvider] = []
+
+    if settings.email_primary == "resend":
+        email_providers.append(ResendProvider(settings.resend))
+    elif settings.email_primary == "stalwart":
+        email_providers.append(EmailProvider(settings.stalwart))
+
+    if settings.email_fallback == "resend":
+        email_fallback_providers.append(ResendProvider(settings.resend))
+    elif settings.email_fallback == "stalwart":
+        email_fallback_providers.append(EmailProvider(settings.stalwart))
+
+    if email_providers:
+        email_entry = ChannelEntry(
+            resolver=DefaultProviderResolver(
+                providers=email_providers,
+                fallback_providers=email_fallback_providers,
+            ),
+            providers=email_providers + email_fallback_providers,
+        )
+        registry.register_channel(
+            CommunicationChannel(type=CommunicationChannelType.EMAIL),
+            email_entry,
+        )
 
     dispatcher = GatewayDispatcher(registry)
     webhook_service = WebhookService(registry, event_publisher, mapping_store)
 
     set_dispatcher(dispatcher)
     set_registry(registry)
+    set_provider_registry(registry)
     set_webhook_service(webhook_service)
 
 

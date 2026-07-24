@@ -17,8 +17,13 @@ from communication_gateway.application.ports.channel_provider_registry import Ch
 from communication_gateway.application.services.gateway_dispatcher import GatewayDispatcher
 from communication_gateway.application.services.webhook_service import WebhookService
 from communication_gateway.config import settings
-from communication_gateway.domain.enums import CommunicationChannelType, CommunicationProviderType
+from communication_gateway.domain.enums import (
+    CommunicationChannelType,
+    CommunicationProviderType,
+    DeliveryStatus,
+)
 from communication_gateway.domain.models.communication_channel import CommunicationChannel
+from communication_gateway.domain.models.provider_response import ProviderResponse
 from communication_gateway.infrastructure.events.in_memory_event_publisher import (
     InMemoryEventPublisher,
 )
@@ -46,7 +51,8 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def _reset_globals() -> Generator[None]:
+def _reset_globals(monkeypatch: MonkeyPatch) -> Generator[None]:
+    monkeypatch.setattr(settings.core, "internal_api_key", "")
     yield
     from communication_gateway.api.rest import messages, providers, webhooks
 
@@ -193,3 +199,37 @@ class TestRestEndpoints:
             )
         assert response.status_code == 401
         assert response.json()["detail"]["code"] == "INVALID_INTERNAL_API_KEY"
+
+    async def test_send_message_returns_normalized_provider_code(self) -> None:
+        registry = InMemoryChannelProviderRegistry()
+        provider = MockProvider(CommunicationProviderType.RESEND)
+        provider.send_result = ProviderResponse(
+            success=False,
+            status=DeliveryStatus.FAILED,
+            error="RESEND_AUTH_FAILED",
+        )
+        entry = ChannelEntry(
+            resolver=DefaultProviderResolver(providers=[provider]),
+            providers=[provider],
+        )
+        registry.register_channel(
+            CommunicationChannel(type=CommunicationChannelType.EMAIL),
+            entry,
+        )
+        set_dispatcher(GatewayDispatcher(registry))
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/messages/send",
+                json={
+                    "id": "email-failure",
+                    "channel": "EMAIL",
+                    "recipientAddress": "person@example.com",
+                    "body": "Hello",
+                    "subject": "Welcome",
+                },
+            )
+
+        assert response.status_code == 502
+        assert response.json()["detail"]["code"] == "RESEND_AUTH_FAILED"

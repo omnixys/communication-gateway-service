@@ -7,6 +7,8 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.outbound_message import OutboundMessage
     from communication_gateway.domain.models.resolution_context import ResolutionContext
 
+logger = __import__("structlog").get_logger(__name__)
+
 
 class DefaultProviderResolver(ProviderResolver):
     def __init__(
@@ -22,7 +24,26 @@ class DefaultProviderResolver(ProviderResolver):
         message: OutboundMessage,
         context: ResolutionContext | None = None,
     ) -> CommunicationProvider:
-        if not self._providers:
-            msg = "No providers available for this channel"
-            raise ValueError(msg)
-        return self._providers[0]
+        for provider in self._providers:
+            try:
+                if await provider.health():
+                    return provider
+                logger.warning("provider_unavailable", provider=provider.provider_type.value)
+            except Exception as exc:
+                logger.warning("provider_health_check_failed", provider=provider.provider_type.value, error=str(exc))
+
+        for provider in self._fallback_providers:
+            try:
+                if await provider.health():
+                    logger.info("using_fallback_provider", provider=provider.provider_type.value)
+                    return provider
+                logger.warning("fallback_provider_unavailable", provider=provider.provider_type.value)
+            except Exception as exc:
+                logger.warning(
+                    "fallback_provider_health_check_failed",
+                    provider=provider.provider_type.value,
+                    error=str(exc),
+                )
+
+        msg = "No healthy providers available"
+        raise ValueError(msg)

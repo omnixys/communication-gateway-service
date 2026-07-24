@@ -1,3 +1,5 @@
+import httpx
+import pytest
 import respx
 from httpx import Response
 
@@ -39,7 +41,7 @@ async def test_resend_sends_subject_html_and_returns_provider_id() -> None:
 
 
 async def test_resend_rejects_missing_configuration() -> None:
-    provider = ResendProvider(ResendSettings())
+    provider = ResendProvider(ResendSettings(api_key="", from_address=""))
     message = OutboundMessage(
         id="notification-2",
         channel=CommunicationChannel(type=CommunicationChannelType.EMAIL),
@@ -50,4 +52,71 @@ async def test_resend_rejects_missing_configuration() -> None:
     result = await provider.send(message)
     assert result.success is False
     assert result.error == "RESEND_NOT_CONFIGURED"
+    await provider.close()
+
+
+@pytest.mark.parametrize(
+    ("status_code", "body", "expected_error"),
+    [
+        (400, {"message": "API key is invalid"}, "RESEND_AUTH_FAILED"),
+        (429, {"message": "Too many requests"}, "RESEND_RATE_LIMITED"),
+        (422, {"message": "Sender is not verified"}, "RESEND_REQUEST_REJECTED"),
+        (503, {"message": "Service unavailable"}, "RESEND_UNAVAILABLE"),
+    ],
+)
+@respx.mock
+async def test_resend_normalizes_provider_failures(
+    status_code: int,
+    body: dict[str, str],
+    expected_error: str,
+) -> None:
+    provider = ResendProvider(
+        ResendSettings(
+            api_key="re_test",
+            from_address="Omnixys <no-reply@omnixys.com>",
+            base_url="https://api.resend.test",
+        ),
+    )
+    respx.post("https://api.resend.test/emails").mock(
+        return_value=Response(status_code, json=body),
+    )
+    message = OutboundMessage(
+        id="notification-failure",
+        channel=CommunicationChannel(type=CommunicationChannelType.EMAIL),
+        to="person@example.com",
+        body="Hello",
+        metadata={"subject": "Welcome"},
+    )
+
+    result = await provider.send(message)
+
+    assert result.success is False
+    assert result.error == expected_error
+    await provider.close()
+
+
+@respx.mock
+async def test_resend_normalizes_timeout_as_unavailable() -> None:
+    provider = ResendProvider(
+        ResendSettings(
+            api_key="re_test",
+            from_address="Omnixys <no-reply@omnixys.com>",
+            base_url="https://api.resend.test",
+        ),
+    )
+    respx.post("https://api.resend.test/emails").mock(
+        side_effect=httpx.ReadTimeout("timed out"),
+    )
+    message = OutboundMessage(
+        id="notification-timeout",
+        channel=CommunicationChannel(type=CommunicationChannelType.EMAIL),
+        to="person@example.com",
+        body="Hello",
+        metadata={"subject": "Welcome"},
+    )
+
+    result = await provider.send(message)
+
+    assert result.success is False
+    assert result.error == "RESEND_UNAVAILABLE"
     await provider.close()

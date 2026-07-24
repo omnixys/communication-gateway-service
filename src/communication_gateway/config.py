@@ -91,7 +91,12 @@ class StalwartSettings(BaseSettings):
 
 
 class ResendSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=str(_GATEWAY_PKG_DIR / ".env"), env_file_encoding="utf-8", env_prefix="resend_", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(_GATEWAY_PKG_DIR / ".env"),
+        env_file_encoding="utf-8",
+        env_prefix="resend_",
+        extra="ignore",
+    )
 
     api_key: str = ""
     from_address: str = ""
@@ -107,7 +112,11 @@ class GatewayKafkaSettings(BaseSettings):
 
 
 class GatewaySettings(AppSettings):
-    model_config = SettingsConfigDict(env_file=str(_GATEWAY_PKG_DIR / ".env"), env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=str(_GATEWAY_PKG_DIR / ".env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     core: GatewayCoreSettings = GatewayCoreSettings()
 
@@ -122,6 +131,9 @@ class GatewaySettings(AppSettings):
     stalwart: StalwartSettings = StalwartSettings()
     resend: ResendSettings = ResendSettings()
     gateway_kafka: GatewayKafkaSettings = GatewayKafkaSettings()
+
+    email_primary: str = "resend"
+    email_fallback: str = "none"
 
 
 settings = GatewaySettings()

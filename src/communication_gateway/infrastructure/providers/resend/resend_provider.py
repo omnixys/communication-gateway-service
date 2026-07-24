@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import httpx
@@ -16,6 +18,27 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.delivery_receipt import DeliveryReceipt
     from communication_gateway.domain.models.inbound_message import InboundMessage
     from communication_gateway.domain.models.outbound_message import OutboundMessage
+
+logger = logging.getLogger(__name__)
+
+
+def _error_code(response: httpx.Response) -> str:
+    status_code = response.status_code
+    if status_code in {HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN}:
+        return "RESEND_AUTH_FAILED"
+    if status_code == HTTPStatus.BAD_REQUEST:
+        try:
+            data = response.json()
+        except (TypeError, ValueError):
+            data = {}
+        message = str(data.get("message", "")).lower() if isinstance(data, dict) else ""
+        if "api key" in message and ("invalid" in message or "missing" in message):
+            return "RESEND_AUTH_FAILED"
+    if status_code == HTTPStatus.TOO_MANY_REQUESTS:
+        return "RESEND_RATE_LIMITED"
+    if status_code >= HTTPStatus.INTERNAL_SERVER_ERROR:
+        return "RESEND_UNAVAILABLE"
+    return "RESEND_REQUEST_REJECTED"
 
 
 class ResendProvider(CommunicationProvider):
@@ -68,7 +91,10 @@ class ResendProvider(CommunicationProvider):
         payload["html" if message.content_type == "HTML" else "text"] = message.body
         try:
             response = await self._client.post("/emails", json=payload)
-            data = response.json() if response.content else {}
+            try:
+                data = response.json() if response.content else {}
+            except ValueError:
+                data = {}
             if response.is_success and data.get("id"):
                 return ProviderResponse(
                     success=True,
@@ -76,24 +102,32 @@ class ResendProvider(CommunicationProvider):
                     status=DeliveryStatus.SENT,
                     provider_identity=self._identity,
                 )
+            error = _error_code(response)
+            logger.warning(
+                "resend_send_failed status=%s code=%s",
+                response.status_code,
+                error,
+            )
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
-                error=f"RESEND_HTTP_{response.status_code}",
+                error=error,
                 provider_identity=self._identity,
             )
         except httpx.TimeoutException:
+            logger.warning("resend_send_failed status=timeout code=RESEND_UNAVAILABLE")
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
-                error="RESEND_TIMEOUT",
+                error="RESEND_UNAVAILABLE",
                 provider_identity=self._identity,
             )
         except httpx.HTTPError:
+            logger.warning("resend_send_failed status=network_error code=RESEND_UNAVAILABLE")
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
-                error="RESEND_UNREACHABLE",
+                error="RESEND_UNAVAILABLE",
                 provider_identity=self._identity,
             )
 

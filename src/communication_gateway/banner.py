@@ -137,11 +137,17 @@ def print_banner(settings: GatewaySettings) -> None:
     _status("Tracing", settings.observability.tracing_enabled)
     _status("Metrics", settings.observability.metrics_enabled)
     _info("Sampling", str(settings.observability.sampling_probability))
+    _info("Tempo Health", settings.observability.tempo_health_url or "—")
+    _info("Prometheus Health", settings.observability.prometheus_health_url or "—")
 
     _section("STORAGE")
     _info("Endpoint", settings.storage.endpoint)
     _info("Bucket", settings.storage.bucket)
     _info("Region", settings.storage.region)
+
+    _section("EMAIL PROVIDER")
+    _info("Primary", settings.email_primary)
+    _info("Fallback", settings.email_fallback)
 
     _section("CHAT SERVICE")
     _info("URL", settings.core.chat_service_url)
@@ -153,5 +159,8 @@ def print_banner(settings: GatewaySettings) -> None:
     _health_status("Keycloak", bool(settings.keycloak.url))
     _health_status("Evolution", bool(settings.evolution.base_url))
     _health_status("Resend", bool(settings.resend.api_key))
+    _health_status("Stalwart", settings.stalwart.enabled and bool(settings.stalwart.host))
+    _health_status("Tempo", bool(settings.observability.tempo_health_url))
+    _health_status("Prometheus", bool(settings.observability.prometheus_health_url))
 
     print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
