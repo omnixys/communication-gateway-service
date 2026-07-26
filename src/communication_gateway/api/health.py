@@ -106,7 +106,7 @@ async def readiness(response: Response) -> dict[str, Any]:
         result = await _check_http("prometheus", settings.observability.prometheus_health_url)
         checks["prometheus"] = result["status"] == "up"
 
-    ready = all(checks.values())
+    ready = all(v for k, v in checks.items() if k != "stalwart")
     if not ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     return {"status": "ready" if ready else "not_ready", "checks": checks}
