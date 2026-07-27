@@ -99,12 +99,7 @@ class EvolutionProvider(CommunicationProvider):
             response = await self._client.get(
                 f"/instance/connectionState/{self._config.instance_name}",
             )
-            if response.is_success:
-                data = response.json()
-                instance = data.get("instance", {})
-                state = instance.get("state", "") if isinstance(instance, dict) else ""
-                return state == "open"
-            return False
+            return response.is_success
         except Exception:
             return False
 

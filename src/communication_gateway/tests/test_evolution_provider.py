@@ -117,9 +117,18 @@ class TestEvolutionProvider:
         assert ok is True
 
     @respx.mock
-    async def test_health_disconnected(self, provider: EvolutionProvider) -> None:
+    async def test_health_instance_closed_but_exists(self, provider: EvolutionProvider) -> None:
         respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
             return_value=Response(200, json={"instance": {"state": "close"}}),
+        )
+
+        ok = await provider.health()
+        assert ok is True
+
+    @respx.mock
+    async def test_health_disconnected(self, provider: EvolutionProvider) -> None:
+        respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
+            return_value=Response(500),
         )
 
         ok = await provider.health()
