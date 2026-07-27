@@ -28,7 +28,7 @@ def set_provider_registry(registry: ChannelProviderRegistry) -> None:
     _registry = registry
 
 
-async def _check_http(name: str, url: str) -> dict[str, Any]:
+async def check_http(_name: str, url: str) -> dict[str, Any]:
     try:
         async with httpx.AsyncClient() as client:
             resp = await client.get(url, timeout=5.0)
@@ -39,17 +39,16 @@ async def _check_http(name: str, url: str) -> dict[str, Any]:
         return {"status": "down", "message": str(exc)}
 
 
-@router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok", "service": "communication-gateway", "version": "0.1.0"}
+async def check_database() -> bool:
+    try:
+        async with manager.session_factory() as session:
+            await session.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False
 
 
-@router.get("/health/live")
-async def liveness() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-async def _check_resend_api_key() -> bool:
+async def check_resend_api_key() -> bool:
     if not settings.resend.api_key:
         return False
     try:
@@ -62,6 +61,16 @@ async def _check_resend_api_key() -> bool:
         return resp.is_success
     except Exception:
         return False
+
+
+@router.get("/health")
+async def health() -> dict[str, str]:
+    return {"status": "ok", "service": "communication-gateway", "version": "0.1.0"}
+
+
+@router.get("/health/live")
+async def liveness() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @router.get("/health/ready")
@@ -77,7 +86,7 @@ async def readiness(response: Response) -> dict[str, Any]:
     else:
         checks["evolution"] = bool(settings.evolution.base_url and settings.evolution.api_key)
 
-    checks["resend"] = await _check_resend_api_key()
+    checks["resend"] = await check_resend_api_key()
 
     if _registry is not None:
         stalwart = _registry.get_by_provider_type(CommunicationProviderType.STALWART)
@@ -92,18 +101,13 @@ async def readiness(response: Response) -> dict[str, Any]:
     checks["eventForwarder"] = _event_forwarder_ready
     checks["internalApiKey"] = bool(settings.core.internal_api_key)
 
-    try:
-        async with manager.session_factory() as session:
-            await session.execute(text("SELECT 1"))
-        checks["database"] = True
-    except Exception:
-        checks["database"] = False
+    checks["database"] = await check_database()
 
     if settings.observability.tempo_health_url:
-        result = await _check_http("tempo", settings.observability.tempo_health_url)
+        result = await check_http("tempo", settings.observability.tempo_health_url)
         checks["tempo"] = result["status"] == "up"
     if settings.observability.prometheus_health_url:
-        result = await _check_http("prometheus", settings.observability.prometheus_health_url)
+        result = await check_http("prometheus", settings.observability.prometheus_health_url)
         checks["prometheus"] = result["status"] == "up"
 
     ready = all(v for k, v in checks.items() if k != "stalwart")

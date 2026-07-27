@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import getpass
 import platform
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
 if TYPE_CHECKING:
+    from communication_gateway.application.ports.channel_provider_registry import (
+        ChannelProviderRegistry,
+    )
     from communication_gateway.config import GatewaySettings
 
 
@@ -121,7 +125,7 @@ def print_banner(settings: GatewaySettings) -> None:
 
 
     _section("KAFKA")
-    _info("Bootstrap Servers", settings.kafka.bootstrap_servers)
+    _info("Bootstrap Servers", settings.gateway_kafka.broker)
     _info("Client ID", settings.kafka.client_id)
     _info("Group ID", settings.kafka.group_id)
     _info("ACKs", settings.kafka.acks)
@@ -152,15 +156,77 @@ def print_banner(settings: GatewaySettings) -> None:
     _section("CHAT SERVICE")
     _info("URL", settings.core.chat_service_url)
 
-    _section("HEALTH")
-    _health_status("Database", bool(settings.database.url))
-    _health_status("Kafka", bool(settings.kafka.bootstrap_servers))
+    _section("CONFIGURATION")
+    _health_status("Database", bool(settings.database.url and settings.database.url != "sqlite+aiosqlite://"))
+    _health_status("Kafka", bool(settings.gateway_kafka.broker))
     _health_status("Cache", bool(settings.cache.url))
     _health_status("Keycloak", bool(settings.keycloak.url))
-    _health_status("Evolution", bool(settings.evolution.base_url))
-    _health_status("Resend", bool(settings.resend.api_key))
-    _health_status("Stalwart", settings.stalwart.enabled and bool(settings.stalwart.host))
+    _health_status("Evolution", bool(settings.evolution.base_url and settings.evolution.api_key))
+    _health_status("Resend", bool(settings.resend.api_key and settings.resend.from_address))
+    _health_status("Stalwart", settings.stalwart.enabled and bool(settings.stalwart.host and settings.stalwart.username))
+    _health_status("Chat Service", bool(settings.core.chat_service_url and settings.core.chat_service_api_key))
     _health_status("Tempo", bool(settings.observability.tempo_health_url))
     _health_status("Prometheus", bool(settings.observability.prometheus_health_url))
 
+    print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
+
+
+async def print_health_banner(
+    settings: GatewaySettings,
+    registry: ChannelProviderRegistry | None = None,
+) -> None:
+    """Run live health checks after startup and print results."""
+    from communication_gateway.api.health import (
+        check_database,
+        check_http,
+        check_resend_api_key,
+    )
+
+    logger = __import__("structlog").get_logger("banner")
+
+    async def _run(name: str, coro: Any) -> tuple[str, str]:
+        try:
+            result = await coro
+            if isinstance(result, bool):
+                return name, "UP" if result else "DOWN"
+            if isinstance(result, dict):
+                if result.get("status") == "up":
+                    return name, "UP"
+                return name, f"DOWN ({result.get('message', 'unknown')})"
+            return name, "UP" if result else "DOWN"
+        except Exception as exc:
+            return name, f"DOWN ({exc!s:.60})"
+
+    tasks: list[tuple[str, Any]] = [
+        ("Database", check_database()),
+        ("Resend", check_resend_api_key()),
+    ]
+
+    if registry is not None:
+        from communication_gateway.domain.enums import CommunicationProviderType
+
+        evolution = registry.get_by_provider_type(CommunicationProviderType.EVOLUTION)
+        if evolution is not None:
+            tasks.append(("Evolution", evolution.health()))
+
+    if settings.core.chat_service_url:
+        tasks.append((
+            "Chat Service",
+            check_http("chat", f"{settings.core.chat_service_url.rstrip('/')}/health"),
+        ))
+
+    if settings.observability.tempo_health_url:
+        tasks.append(("Tempo", check_http("tempo", settings.observability.tempo_health_url)))
+
+    if settings.observability.prometheus_health_url:
+        tasks.append(("Prometheus", check_http("prometheus", settings.observability.prometheus_health_url)))
+
+    results = await asyncio.gather(*[_run(name, coro) for name, coro in tasks])
+
+    _section("HEALTH")
+    for name, status in results:
+        is_up = status == "UP"
+        _health_status(name, is_up)
+        if not is_up:
+            logger.warning("health_check_down", service=name, status=status)
     print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201

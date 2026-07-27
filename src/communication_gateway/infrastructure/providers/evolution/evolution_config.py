@@ -10,6 +10,7 @@ class EvolutionApiConfig(ProviderConfig):
     api_key: str = ""
     instance_name: str = ""
     webhook_secret: str = ""
+    cors_origin: str = ""
 
     @classmethod
     def from_settings(cls) -> EvolutionApiConfig:
@@ -18,6 +19,7 @@ class EvolutionApiConfig(ProviderConfig):
             api_key=settings.evolution.api_key,
             instance_name=settings.evolution.instance_name,
             webhook_secret=settings.evolution.webhook_secret,
+            cors_origin=settings.evolution.cors_origin,
             enabled=True,
             priority=10,
             timeout=30,

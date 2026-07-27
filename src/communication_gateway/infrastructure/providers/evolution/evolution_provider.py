@@ -32,12 +32,15 @@ if TYPE_CHECKING:
 class EvolutionProvider(CommunicationProvider):
     def __init__(self, config: EvolutionApiConfig) -> None:
         self._config = config
+        headers: dict[str, str] = {
+            "apiKey": config.api_key,
+            "Content-Type": "application/json",
+        }
+        if config.cors_origin:
+            headers["Origin"] = config.cors_origin
         self._client = httpx.AsyncClient(
             base_url=config.base_url.rstrip("/"),
-            headers={
-                "apiKey": config.api_key,
-                "Content-Type": "application/json",
-            },
+            headers=headers,
             timeout=httpx.Timeout(30.0),
         )
 

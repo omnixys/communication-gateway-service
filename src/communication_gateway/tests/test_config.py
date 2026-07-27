@@ -10,6 +10,7 @@ class TestConfig:
         assert s.base_url
         assert s.api_key == ""
         assert s.instance_name
+        assert s.cors_origin == ""
 
     def test_settings_defaults(self) -> None:
         s = GatewaySettings()

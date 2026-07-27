@@ -27,6 +27,7 @@ def config() -> EvolutionApiConfig:
         api_key="test-api-key",
         instance_name="test-instance",
         webhook_secret="test-secret",
+        cors_origin="http://localhost:8000",
     )
 
 
@@ -42,6 +43,29 @@ class TestEvolutionProvider:
 
     async def test_provider_type(self, provider: EvolutionProvider) -> None:
         assert provider.provider_type == CommunicationProviderType.EVOLUTION
+
+    @respx.mock
+    async def test_origin_header_sent(self, provider: EvolutionProvider) -> None:
+        route = respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
+            return_value=Response(200, json={"instance": {"state": "open"}}),
+        )
+        await provider.health()
+        assert route.calls[0].request.headers["Origin"] == "http://localhost:8000"
+
+    @respx.mock
+    async def test_no_origin_header_when_empty(self) -> None:
+        config = EvolutionApiConfig(
+            base_url="http://evolution:8080",
+            api_key="test-api-key",
+            instance_name="test-instance",
+            cors_origin="",
+        )
+        provider = EvolutionProvider(config)
+        route = respx.get("http://evolution:8080/instance/connectionState/test-instance").mock(
+            return_value=Response(200, json={"instance": {"state": "open"}}),
+        )
+        await provider.health()
+        assert "Origin" not in route.calls[0].request.headers
 
     @respx.mock
     async def test_send_text_success(self, provider: EvolutionProvider) -> None:

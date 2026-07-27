@@ -50,7 +50,7 @@ from communication_gateway.application.services.gateway_dispatcher import (
     GatewayDispatcher,
 )
 from communication_gateway.application.services.webhook_service import WebhookService
-from communication_gateway.banner import print_banner
+from communication_gateway.banner import print_banner, print_health_banner
 from communication_gateway.config import settings, validate_production_settings
 from communication_gateway.database import manager
 from communication_gateway.domain.enums import (
@@ -149,6 +149,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     set_event_forwarder_ready(True)
     if kafka_handler is not None:
         await kafka_handler.start()
+    await print_health_banner(settings, registry)
     logger.info("application_started")
     yield
     logger.info("application_shutdown")

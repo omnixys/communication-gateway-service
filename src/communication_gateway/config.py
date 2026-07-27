@@ -20,6 +20,7 @@ class EvolutionSettings(BaseSettings):
     api_key: str = ""
     instance_name: str = "omnixys"
     webhook_secret: str = ""
+    cors_origin: str = ""
 
 
 class SMTPSettings(BaseSettings):
