@@ -3,6 +3,8 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.0.4](https://github.com/omnixys/communication-gateway-service/compare/v1.0.3...v1.0.4) (2026-07-27)
+
 ## [1.0.3](https://github.com/omnixys/communication-gateway-service/compare/v1.0.2...v1.0.3) (2026-07-26)
 
 ## [1.0.2](https://github.com/omnixys/communication-gateway-service/compare/v1.0.1...v1.0.2) (2026-07-24)
