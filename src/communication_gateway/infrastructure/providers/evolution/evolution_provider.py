@@ -1,3 +1,4 @@
+import contextlib
 import json
 from typing import TYPE_CHECKING
 
@@ -133,9 +134,14 @@ class EvolutionProvider(CommunicationProvider):
         )
 
     async def verify_webhook(self, headers: dict[str, str], body: bytes) -> bool:
-        api_key = headers.get("apiKey") or headers.get("apikey") or headers.get("x-api-key") or ""
         expected = self._config.api_key
-        if expected and api_key == expected:
+        header_key = headers.get("apiKey") or headers.get("apikey") or headers.get("x-api-key") or ""
+        if expected and header_key == expected:
+            return True
+        body_key = ""
+        with contextlib.suppress(json.JSONDecodeError, AttributeError):
+            body_key = json.loads(body).get("apikey", "")
+        if expected and body_key == expected:
             return True
         if self._config.webhook_secret:
             return self._verify_signature(headers, body, self._config.webhook_secret)
