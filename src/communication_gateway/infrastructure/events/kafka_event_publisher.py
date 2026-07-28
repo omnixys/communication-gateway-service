@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
-import logging
 from typing import TYPE_CHECKING
 
 from communication_gateway.domain.events import MessageDelivered
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
         MessageMappingStore,
     )
 
-logger = logging.getLogger(__name__)
+logger = __import__("structlog").get_logger(__name__)
 
 DELIVERY_STATUS_TOPIC = "gateway.delivery.status"
 
@@ -35,7 +34,7 @@ class KafkaDeliveryEventHandler:
 
     async def start(self) -> None:
         self._task = asyncio.create_task(self._run())
-        logger.info("Kafka delivery event handler started — topic=%s", DELIVERY_STATUS_TOPIC)
+        logger.info("kafka_delivery_handler_started", topic=DELIVERY_STATUS_TOPIC)
 
     async def stop(self) -> None:
         if self._task is not None:
@@ -72,7 +71,7 @@ class KafkaDeliveryEventHandler:
             else:
                 logger.debug("mapping_not_found", provider_msg_id=receipt.provider_message_id)
         except Exception:
-            logger.exception("mapping_lookup_error")
+            logger.exception("mapping_lookup_error", provider_msg_id=receipt.provider_message_id)
 
         payload = {
             "messageId": internal_msg_id,
@@ -92,10 +91,6 @@ class KafkaDeliveryEventHandler:
                 key=key,
             )
         except Exception:
-            logger.exception("kafka_publish_error", topic=DELIVERY_STATUS_TOPIC, key=key)
+            logger.exception("kafka_publish_error", topic=DELIVERY_STATUS_TOPIC, key=key, provider_msg_id=receipt.provider_message_id)
             raise
-        logger.info(
-            "kafka_delivery_published msg=%s status=%s",
-            receipt.provider_message_id,
-            receipt.status.value,
-        )
+        logger.info("kafka_delivery_published", provider_msg_id=receipt.provider_message_id, status=receipt.status.value, topic=DELIVERY_STATUS_TOPIC)

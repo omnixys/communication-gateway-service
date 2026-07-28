@@ -1,9 +1,7 @@
-import logging
-
 from communication_gateway.domain.enums import DeliveryStatus
 from communication_gateway.domain.errors import InvalidStatusTransitionError
 
-logger = logging.getLogger(__name__)
+logger = __import__("structlog").get_logger(__name__)
 
 _VALID_TRANSITIONS: dict[DeliveryStatus, set[DeliveryStatus]] = {
     DeliveryStatus.UNKNOWN: {DeliveryStatus.PENDING, DeliveryStatus.FAILED},

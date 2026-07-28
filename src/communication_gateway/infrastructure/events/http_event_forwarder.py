@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import logging
 from typing import TYPE_CHECKING, Any
 
 import httpx
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
         MessageMappingStore,
     )
 
-logger = logging.getLogger(__name__)
+logger = __import__("structlog").get_logger(__name__)
 
 
 class HttpEventForwarder:
@@ -108,7 +107,7 @@ class HttpEventForwarder:
                 msg.message_id,
             )
         except Exception:
-            logger.exception("mapping_lookup_error")
+            logger.exception("mapping_lookup_error", provider_msg_id=msg.message_id)
 
         if mapping is not None:
             payload["conversation_id"] = mapping.conversation_id
@@ -116,11 +115,12 @@ class HttpEventForwarder:
             payload["conversation_id"] = None
 
         logger.info(
-            "forward_inbound chat=%s msg=%s user=%s conv=%s",
-            self._chat_service_url,
-            msg.message_id,
-            user_id,
-            payload.get("conversation_id"),
+            "forward_inbound",
+            chat_url=self._chat_service_url,
+            msg_id=msg.message_id,
+            user_id=user_id,
+            conversation_id=payload.get("conversation_id"),
+            channel=msg.channel.type.value,
         )
 
         response = await self._client.post(
@@ -129,7 +129,7 @@ class HttpEventForwarder:
         )
 
         if response.is_success:
-            logger.info("forward_inbound_success msg=%s", msg.message_id)
+            logger.info("forward_inbound_success", msg_id=msg.message_id)
             data = response.json()
             mapping = MessageMapping(
                 internal_id=str(data["id"]),
@@ -144,13 +144,13 @@ class HttpEventForwarder:
             try:
                 await self._mapping_store.save(mapping)
             except Exception as exc:
-                logger.warning("inbound_mapping_save_error", msg=msg.message_id, error=str(exc))
+                logger.warning("inbound_mapping_save_error", msg_id=msg.message_id, error=str(exc))
         else:
             logger.warning(
-                "forward_inbound_failed msg=%s status=%s body=%s",
-                msg.message_id,
-                response.status_code,
-                response.text[:200],
+                "forward_inbound_failed",
+                msg_id=msg.message_id,
+                status_code=response.status_code,
+                response_body=response.text[:200],
             )
 
     async def _forward_delivery(self, event: MessageDelivered) -> None:
@@ -168,7 +168,7 @@ class HttpEventForwarder:
                 receipt.provider_message_id,
             )
         except Exception:
-            logger.exception("mapping_lookup_error")
+            logger.exception("mapping_lookup_error", provider_msg_id=receipt.provider_message_id)
 
         if mapping is not None:
             payload["internal_message_id"] = mapping.internal_id
@@ -178,10 +178,10 @@ class HttpEventForwarder:
             payload["conversation_id"] = ""
 
         logger.info(
-            "forward_delivery msg=%s status=%s chat=%s",
-            receipt.provider_message_id,
-            receipt.status,
-            self._chat_service_url,
+            "forward_delivery",
+            provider_msg_id=receipt.provider_message_id,
+            status=receipt.status.value,
+            chat_url=self._chat_service_url,
         )
 
         response = await self._client.post(
@@ -190,11 +190,11 @@ class HttpEventForwarder:
         )
 
         if response.is_success:
-            logger.info("forward_delivery_success msg=%s", receipt.provider_message_id)
+            logger.info("forward_delivery_success", provider_msg_id=receipt.provider_message_id)
         else:
             logger.warning(
-                "forward_delivery_failed msg=%s status=%s body=%s",
-                receipt.provider_message_id,
-                response.status_code,
-                response.text[:200],
+                "forward_delivery_failed",
+                provider_msg_id=receipt.provider_message_id,
+                status_code=response.status_code,
+                response_body=response.text[:200],
             )

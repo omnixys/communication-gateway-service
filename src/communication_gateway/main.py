@@ -145,10 +145,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     if event_forwarder is None:
         msg = "event_forwarder must be initialized before startup"
         raise RuntimeError(msg)
-    await event_forwarder.start()
-    set_event_forwarder_ready(True)
+    try:
+        await event_forwarder.start()
+    except Exception:
+        logger.exception("event_forwarder_start_failed")
+        set_event_forwarder_ready(False)
+    else:
+        set_event_forwarder_ready(True)
     if kafka_handler is not None:
-        await kafka_handler.start()
+        try:
+            await kafka_handler.start()
+        except Exception:
+            logger.exception("kafka_handler_start_failed")
     await print_health_banner(settings, registry)
     logger.info("application_started")
     yield
@@ -238,22 +246,26 @@ async def _setup_kafka() -> None:
     global kafka_handler
 
     if not settings.gateway_kafka.broker:
-        logger.info("KAFKA_BROKER not set — Kafka delivery events disabled")
+        logger.info("kafka_broker_not_set", message="Kafka delivery events disabled")
         return
 
-    raw = AIOKafkaProducer(
-        bootstrap_servers=settings.gateway_kafka.broker,
-        client_id="omnixys-communication-gateway",
-        acks=settings.kafka.acks,
-    )
-    producer = AIOKafkaEventProducer(producer=raw)
-    await producer.start()
-    kafka_handler = KafkaDeliveryEventHandler(
-        publisher=event_publisher,
-        producer=producer,
-        mapping_store=mapping_store,
-    )
-    logger.info("Kafka producer started — brokers=%s", settings.gateway_kafka.broker)
+    try:
+        raw = AIOKafkaProducer(
+            bootstrap_servers=settings.gateway_kafka.broker,
+            client_id="omnixys-communication-gateway",
+            acks=settings.kafka.acks,
+        )
+        producer = AIOKafkaEventProducer(producer=raw)
+        await producer.start()
+        kafka_handler = KafkaDeliveryEventHandler(
+            publisher=event_publisher,
+            producer=producer,
+            mapping_store=mapping_store,
+        )
+        logger.info("kafka_producer_started", broker=settings.gateway_kafka.broker)
+    except Exception:
+        logger.exception("kafka_setup_failed", broker=settings.gateway_kafka.broker)
+        kafka_handler = None
 
 
 def create_application() -> FastAPI:
