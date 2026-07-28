@@ -144,6 +144,11 @@ class EvolutionProvider(CommunicationProvider):
         if expected and body_key == expected:
             return True
         if self._config.webhook_secret:
+            auth_header = headers.get("authorization") or headers.get("Authorization") or ""
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:]
+                if token == self._config.webhook_secret:
+                    return True
             return self._verify_signature(headers, body, self._config.webhook_secret)
         logger.warning("evolution_webhook_verification_failed", reason="no_matching_key_or_signature")
         return False

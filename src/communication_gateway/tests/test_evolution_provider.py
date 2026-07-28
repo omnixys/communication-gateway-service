@@ -153,6 +153,26 @@ class TestEvolutionProvider:
         result = await provider.verify_webhook(headers, b"{}")
         assert result is False
 
+    async def test_verify_webhook_with_bearer_token(self, provider: EvolutionProvider) -> None:
+        headers = {"Authorization": "Bearer test-secret"}
+        result = await provider.verify_webhook(headers, b"{}")
+        assert result is True
+
+    async def test_verify_webhook_with_bearer_token_lowercase_header(self, provider: EvolutionProvider) -> None:
+        headers = {"authorization": "Bearer test-secret"}
+        result = await provider.verify_webhook(headers, b"{}")
+        assert result is True
+
+    async def test_verify_webhook_with_wrong_bearer_token(self, provider: EvolutionProvider) -> None:
+        headers = {"Authorization": "Bearer wrong-secret"}
+        result = await provider.verify_webhook(headers, b"{}")
+        assert result is False
+
+    async def test_verify_webhook_with_bearer_no_space(self, provider: EvolutionProvider) -> None:
+        headers = {"Authorization": "Bearertest-secret"}
+        result = await provider.verify_webhook(headers, b"{}")
+        assert result is False
+
     async def test_handle_webhook_message_upsert(self, provider: EvolutionProvider) -> None:
         payload = {
             "event": "messages.upsert",
