@@ -16,7 +16,7 @@ dependencies = [
     "omnixys-config @ git+https://github.com/omnixys/config-python.git",
     "omnixys-database @ git+https://github.com/omnixys/database-python.git",
     "omnixys-kafka @ git+https://github.com/omnixys/kafka-python.git",
-    "omnixys-observability @ git+https://github.com/omnixys/observability-python.git",
+    "omnixys-observability>=2.0.4",
     "omnixys-security @ git+https://github.com/omnixys/security-python.git",
 ]
 
