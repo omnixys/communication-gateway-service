@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import httpx
+from observability import get_logger
 
 from communication_gateway.application.ports.communication_provider import CommunicationProvider
 from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.inbound_message import InboundMessage
     from communication_gateway.domain.models.outbound_message import OutboundMessage
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _error_code(response: httpx.Response) -> str:
@@ -104,9 +104,12 @@ class ResendProvider(CommunicationProvider):
                 )
             error = _error_code(response)
             logger.warning(
-                "resend_send_failed status=%s code=%s",
-                response.status_code,
-                error,
+                "resend_send_failed",
+                provider="resend",
+                message_id=message.id,
+                to=message.to,
+                status_code=response.status_code,
+                error=error,
             )
             return ProviderResponse(
                 success=False,
@@ -115,7 +118,7 @@ class ResendProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except httpx.TimeoutException:
-            logger.warning("resend_send_failed status=timeout code=RESEND_UNAVAILABLE")
+            logger.warning("resend_send_timeout", provider="resend", message_id=message.id, to=message.to)
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -123,7 +126,7 @@ class ResendProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except httpx.HTTPError:
-            logger.warning("resend_send_failed status=network_error code=RESEND_UNAVAILABLE")
+            logger.warning("resend_send_network_error", provider="resend", message_id=message.id, to=message.to)
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,

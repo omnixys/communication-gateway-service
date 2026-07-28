@@ -2,6 +2,7 @@ import json
 from typing import TYPE_CHECKING
 
 import httpx
+from observability import get_logger
 
 from communication_gateway.application.ports.communication_provider import CommunicationProvider
 from communication_gateway.domain.enums import CommunicationProviderType, DeliveryStatus
@@ -27,6 +28,8 @@ if TYPE_CHECKING:
     from communication_gateway.infrastructure.providers.evolution.evolution_config import (
         EvolutionApiConfig,
     )
+
+logger = get_logger(__name__)
 
 
 class EvolutionProvider(CommunicationProvider):
@@ -100,7 +103,8 @@ class EvolutionProvider(CommunicationProvider):
                 f"/instance/connectionState/{self._config.instance_name}",
             )
             return response.is_success
-        except Exception:
+        except Exception as e:
+            logger.warning("evolution_health_check_failed", provider="evolution", error=str(e))
             return False
 
     async def capabilities(self) -> ChannelCapabilities:
@@ -174,10 +178,23 @@ class EvolutionProvider(CommunicationProvider):
                 data=data if isinstance(data, dict) else None,
                 error=data.get("error", str(response.text)) if not response.is_success else None,
             )
+            if not response.is_success:
+                logger.warning(
+                    "evolution_api_error",
+                    provider="evolution",
+                    status_code=response.status_code,
+                    error=api_response.error,
+                )
             pr = map_to_provider_response(api_response)
             pr.provider_identity = self.metadata.identity
             return pr
-        except Exception:
+        except Exception as e:
+            logger.error(
+                "evolution_parse_error",
+                provider="evolution",
+                status_code=response.status_code,
+                error=str(e),
+            )
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,

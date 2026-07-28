@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import logging
 import ssl
 from email.message import EmailMessage
 from typing import TYPE_CHECKING
 
 import aiosmtplib
+from observability import get_logger
 
 from communication_gateway.application.ports.communication_provider import (
     CommunicationProvider,
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.inbound_message import InboundMessage
     from communication_gateway.domain.models.outbound_message import OutboundMessage
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class EmailProvider(CommunicationProvider):
@@ -78,7 +78,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except aiosmtplib.SMTPException as e:
-            logger.exception("SMTP error")
+            logger.error("smtp_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -86,7 +86,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except OSError as e:
-            logger.exception("SMTP connection error")
+            logger.error("smtp_connection_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -94,7 +94,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except Exception as e:
-            logger.exception("Unexpected email send error")
+            logger.error("email_send_unexpected_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
