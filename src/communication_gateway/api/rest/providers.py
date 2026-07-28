@@ -1,4 +1,3 @@
-import contextlib
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends
@@ -10,6 +9,8 @@ if TYPE_CHECKING:
     from communication_gateway.application.ports.channel_provider_registry import (
         ChannelProviderRegistry,
     )
+
+logger = __import__("structlog").get_logger(__name__)
 
 _registry: ChannelProviderRegistry | None = None
 _dispatcher: object | None = None
@@ -53,8 +54,10 @@ async def list_providers() -> list[dict[str, Any]]:
     for p in registry.list_providers():
         enabled = registry.is_provider_enabled(p.provider_type)
         meta = None
-        with contextlib.suppress(Exception):
+        try:
             meta = p.metadata
+        except Exception as exc:
+            logger.warning("provider_metadata_error", provider=p.provider_type.value, error=str(exc))
         entry: dict[str, Any] = {
             "provider_type": p.provider_type.value,
             "enabled": enabled,
@@ -82,4 +85,5 @@ async def provider_health(provider_type: str) -> dict[str, Any]:
     except NotImplementedError:
         return {"status": "not_implemented", "provider": provider_type}
     except Exception as e:
+        logger.warning("provider_health_error", provider=provider_type, error=str(e))
         return {"status": "error", "provider": provider_type, "error": str(e)}

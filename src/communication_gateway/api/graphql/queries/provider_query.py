@@ -9,6 +9,8 @@ from communication_gateway.api.graphql.types.provider import (
     ProviderStatus,
 )
 
+logger = __import__("structlog").get_logger(__name__)
+
 
 @strawberry.type
 class ProviderQuery:
@@ -21,7 +23,8 @@ class ProviderQuery:
                 ok = await p.health()
             except NotImplementedError:
                 ok = False
-            except Exception:
+            except Exception as exc:
+                logger.warning("provider_health_check_error", provider=p.provider_type.value, error=str(exc))
                 ok = False
             caps = await p.capabilities()
             cap_names = [k.removeprefix("supports_") for k, v in caps.__dict__.items() if v]
@@ -47,7 +50,8 @@ class ProviderQuery:
             ok = await p.health()
         except NotImplementedError:
             ok = False
-        except Exception:
+        except Exception as exc:
+            logger.warning("provider_health_check_error", provider=p.provider_type.value, error=str(exc))
             ok = False
         caps = await p.capabilities()
         cap_names = [k.removeprefix("supports_") for k, v in caps.__dict__.items() if v]
@@ -67,8 +71,8 @@ class ProviderQuery:
             try:
                 if await p.health():
                     healthy += 1
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("gateway_health_check_error", provider=p.provider_type.value, error=str(exc))
         return GatewayHealth(
             status="healthy" if healthy == len(providers) else "degraded",
             provider_count=len(providers),

@@ -46,6 +46,7 @@ class HttpEventForwarder:
 
     async def start(self) -> None:
         self._task = asyncio.create_task(self._run())
+        logger.info("http_event_forwarder_started")
 
     async def stop(self) -> None:
         if self._task is not None:
@@ -53,6 +54,7 @@ class HttpEventForwarder:
             with contextlib.suppress(asyncio.CancelledError):
                 await self._task
         await self._client.aclose()
+        logger.info("http_event_forwarder_stopped")
 
     async def _run(self) -> None:
         inbound = self._publisher.subscribe(InboundMessageReceived)
@@ -141,9 +143,8 @@ class HttpEventForwarder:
             )
             try:
                 await self._mapping_store.save(mapping)
-            except Exception:
-                # A concurrent duplicate webhook may have persisted the same provider ID.
-                logger.info("inbound_mapping_already_exists msg=%s", msg.message_id)
+            except Exception as exc:
+                logger.warning("inbound_mapping_save_error", msg=msg.message_id, error=str(exc))
         else:
             logger.warning(
                 "forward_inbound_failed msg=%s status=%s body=%s",

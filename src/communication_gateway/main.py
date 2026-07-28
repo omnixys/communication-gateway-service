@@ -168,6 +168,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 
 def _setup_providers() -> None:
+    logger.info("setting_up_providers")
     evolution_config = EvolutionApiConfig.from_settings()
     evolution = EvolutionProvider(evolution_config)
 
@@ -179,6 +180,7 @@ def _setup_providers() -> None:
         CommunicationChannel(type=CommunicationChannelType.WHATSAPP),
         whatsapp_entry,
     )
+    logger.info("registered_channel", channel="WHATSAPP", provider="evolution")
 
     email_providers: list[CommunicationProvider] = []
     email_fallback_providers: list[CommunicationProvider] = []
@@ -205,6 +207,7 @@ def _setup_providers() -> None:
             CommunicationChannel(type=CommunicationChannelType.EMAIL),
             email_entry,
         )
+        logger.info("registered_channel", channel="EMAIL", providers=[p.provider_type.value for p in email_providers])
 
     dispatcher = GatewayDispatcher(registry)
     webhook_service = WebhookService(registry, event_publisher, mapping_store)
@@ -228,6 +231,7 @@ def _setup_forwarder() -> None:
         address_resolver=address_resolver,
         mapping_store=mapping_store,
     )
+    logger.info("setting_up_forwarder", chat_service_url=settings.core.chat_service_url)
 
 
 async def _setup_kafka() -> None:
@@ -269,7 +273,7 @@ def create_application() -> FastAPI:
     app.add_middleware(
         SecurityMiddleware,
         jwt_validator=jwt_validator,
-        exclude_paths=["/health", "/health/live", "/health/ready", "/api/v1/webhooks"],
+        exclude_paths=["/health", "/health/live", "/health/ready", "/webhooks"],
     )
     app.add_middleware(ContextBridgeMiddleware)
 
@@ -299,6 +303,7 @@ def ensure_bind_available(host: str, port: int) -> None:
         probe.bind((host, port))
     except OSError as exc:
         if exc.errno == errno.EADDRINUSE:
+            logger.critical("port_in_use", host=host, port=port)
             msg = (
                 f"Communication Gateway cannot start: {host}:{port} is already in use. "
                 "Set PORT or stop the conflicting process."

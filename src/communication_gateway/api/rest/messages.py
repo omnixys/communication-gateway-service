@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
         MessageMappingStore,
     )
 
-logger = logging.getLogger(__name__)
+logger = __import__("structlog").get_logger(__name__)
 
 router = APIRouter(
     prefix="/api/v1",
@@ -72,12 +71,26 @@ async def send_message(
     channel_type = CommunicationChannelType(body.channel)
     recipient_id = body.recipient_id or ""
 
+    logger.info(
+        "send_message_request",
+        message_id=body.id,
+        channel=body.channel,
+        recipient_id=recipient_id,
+    )
+
     recipient_address = body.recipient_address
     if not recipient_address:
         resolver = get_address_resolver()
         try:
             recipient_address = await resolver.resolve(recipient_id, channel_type)
         except ValueError as exc:
+            logger.warning(
+                "address_resolution_failed",
+                message_id=body.id,
+                recipient_id=recipient_id,
+                channel=body.channel,
+                error=str(exc),
+            )
             raise HTTPException(
                 status_code=422,
                 detail={"code": "ADDRESS_RESOLUTION_FAILED", "message": str(exc)},
@@ -107,6 +120,12 @@ async def send_message(
     if not result.success:
         error_code = result.error or "PROVIDER_FAILURE"
         status_code = 504 if "TIMEOUT" in error_code.upper() else 502
+        logger.warning(
+            "send_message_failed",
+            message_id=body.id,
+            channel=body.channel,
+            error=error_code,
+        )
         raise HTTPException(
             status_code=status_code,
             detail={"code": error_code},
@@ -132,6 +151,13 @@ async def send_message(
             await store.save(mapping)
         except Exception:
             logger.exception("failed_to_save_message_mapping")
+
+    logger.info(
+        "send_message_success",
+        message_id=body.id,
+        provider_message_id=result.provider_message_id,
+        channel=body.channel,
+    )
 
     provider_identity = None
     if result.provider_identity is not None:

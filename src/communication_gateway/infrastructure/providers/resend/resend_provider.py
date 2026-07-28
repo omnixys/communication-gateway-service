@@ -83,6 +83,7 @@ class ResendProvider(CommunicationProvider):
                 error="RESEND_NOT_CONFIGURED",
                 provider_identity=self._identity,
             )
+        logger.info("resend_send_started", message_id=message.id, to=message.to, subject=subject)
         payload: dict[str, object] = {
             "from": sender,
             "to": [message.to],
@@ -96,6 +97,7 @@ class ResendProvider(CommunicationProvider):
             except ValueError:
                 data = {}
             if response.is_success and data.get("id"):
+                logger.info("resend_send_success", message_id=message.id, provider_msg_id=str(data["id"]))
                 return ProviderResponse(
                     success=True,
                     provider_message_id=str(data["id"]),

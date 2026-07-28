@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     )
     from communication_gateway.domain.models.provider_metadata import ProviderMetadata
 
+logger = __import__("structlog").get_logger(__name__)
+
 
 class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
     def __init__(self) -> None:
@@ -115,7 +117,8 @@ class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
                 merged.supports_bulk_messaging = (
                     merged.supports_bulk_messaging or caps.supports_bulk_messaging
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning("provider_capabilities_error", provider=provider.provider_type.value, error=str(exc))
                 continue
         return merged
 
@@ -128,5 +131,6 @@ class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
             return None
         try:
             return provider.metadata
-        except Exception:
+        except Exception as exc:
+            logger.warning("provider_metadata_error", provider=provider_type.value, error=str(exc))
             return None

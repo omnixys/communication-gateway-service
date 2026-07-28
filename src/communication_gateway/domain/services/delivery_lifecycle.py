@@ -48,4 +48,9 @@ def assert_valid_transition(
     next_status: DeliveryStatus,
 ) -> None:
     if not is_valid_transition(current, next_status):
+        logger.warning(
+            "invalid_status_transition",
+            current_status=current.value,
+            attempted_status=next_status.value,
+        )
         raise InvalidStatusTransitionError(current, next_status)

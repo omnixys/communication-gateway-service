@@ -29,7 +29,7 @@ The Chat Service never knows which concrete provider delivered the message. It s
 
 ```
 External API (WhatsApp, Email, etc.)
-    │  Webhook POST /api/v1/webhooks/{provider_type}
+    │  Webhook POST /webhooks/{provider_type}
     ▼
 Communication Gateway
     │  verify → parse → normalize → publish event

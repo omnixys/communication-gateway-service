@@ -17,6 +17,8 @@ from communication_gateway.infrastructure.persistence.models import MessageMappi
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+logger = __import__("structlog").get_logger(__name__)
+
 
 class SqlAlchemyMessageMappingRepository(MessageMappingStore):
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
@@ -41,9 +43,24 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
             extra_metadata=mapping.metadata,
             created_at=mapping.created_at or datetime.now(UTC).replace(tzinfo=None),
         )
-        async with self._session_factory() as session:
-            session.add(model)
-            await session.commit()
+        try:
+            async with self._session_factory() as session:
+                session.add(model)
+                await session.commit()
+            logger.debug(
+                "mapping_save",
+                internal_id=mapping.internal_id,
+                provider=mapping.provider.value,
+                provider_message_id=mapping.provider_message_id,
+            )
+        except Exception as exc:
+            logger.exception(
+                "mapping_save_failed",
+                internal_id=mapping.internal_id,
+                provider=mapping.provider.value,
+                error=str(exc),
+            )
+            raise
 
     async def get_by_provider_message_id(
         self,
@@ -90,18 +107,32 @@ class SqlAlchemyMessageMappingRepository(MessageMappingStore):
         status: DeliveryStatus,
         error: str | None = None,
     ) -> None:
-        async with self._session_factory() as session:
-            await session.execute(
-                update(MessageMappingModel)
-                .where(MessageMappingModel.provider_message_id == provider_message_id)
-                .values(
-                    status=status.value,
-                    last_status_change=datetime.now(UTC).replace(tzinfo=None),
-                    last_error=error,
-                    updated_at=datetime.now(UTC).replace(tzinfo=None),
-                ),
+        try:
+            async with self._session_factory() as session:
+                await session.execute(
+                    update(MessageMappingModel)
+                    .where(MessageMappingModel.provider_message_id == provider_message_id)
+                    .values(
+                        status=status.value,
+                        last_status_change=datetime.now(UTC).replace(tzinfo=None),
+                        last_error=error,
+                        updated_at=datetime.now(UTC).replace(tzinfo=None),
+                    ),
+                )
+                await session.commit()
+            logger.debug(
+                "mapping_update_status",
+                provider_message_id=provider_message_id,
+                status=status.value,
             )
-            await session.commit()
+        except Exception as exc:
+            logger.exception(
+                "mapping_update_status_failed",
+                provider_message_id=provider_message_id,
+                status=status.value,
+                error=str(exc),
+            )
+            raise
 
     async def increment_retry(self, internal_id: str) -> None:
         async with self._session_factory() as session:

@@ -34,7 +34,7 @@ return `401`, provider failures return `502`, and provider timeouts return `504`
 
 ## Evolution webhooks
 
-`POST /api/v1/webhooks/EVOLUTION`
+`POST /webhooks/EVOLUTION`
 
 Inbound messages and delivery receipts are idempotent by provider message ID.
 Mappings between provider IDs, internal IDs and conversation IDs are persisted.

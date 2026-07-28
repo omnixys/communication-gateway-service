@@ -8,6 +8,8 @@ from communication_gateway.domain.errors import WebhookVerificationError
 if TYPE_CHECKING:
     from communication_gateway.application.services.webhook_service import WebhookService
 
+logger = __import__("structlog").get_logger(__name__)
+
 _service: WebhookService | None = None
 
 
@@ -23,7 +25,7 @@ def get_webhook_service() -> WebhookService:
     return _service
 
 
-router = APIRouter(prefix="/api/v1/webhooks", tags=["webhooks"])
+router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
 @router.post("/{provider_type}")
@@ -33,14 +35,17 @@ async def receive_webhook(provider_type: str, request: Request) -> dict[str, Any
         ptype = CommunicationProviderType(provider_type.upper())
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "UNKNOWN_PROVIDER"}) from exc
+    logger.info("webhook_received", provider_type=ptype.value)
     body = await request.body()
     headers = dict(request.headers)
     try:
         result = await service.process_webhook(ptype, headers, body)
     except WebhookVerificationError as exc:
+        logger.warning("webhook_verification_failed", provider_type=ptype.value, error=str(exc))
         raise HTTPException(
             status_code=401, detail={"code": "WEBHOOK_VERIFICATION_FAILED"},
         ) from exc
+    logger.info("webhook_processed", provider_type=ptype.value, result_type=type(result).__name__ if result else None)
     return {"received": True, "result": str(type(result).__name__) if result else None}
 
 

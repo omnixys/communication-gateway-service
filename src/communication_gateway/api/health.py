@@ -13,6 +13,8 @@ if TYPE_CHECKING:
         ChannelProviderRegistry,
     )
 
+logger = __import__("structlog").get_logger(__name__)
+
 router = APIRouter(tags=["health"])
 _event_forwarder_ready = False
 _registry: ChannelProviderRegistry | None = None
@@ -36,6 +38,7 @@ async def check_http(_name: str, url: str) -> dict[str, Any]:
             return {"status": "up"}
         return {"status": "down", "message": f"HTTP {resp.status_code}"}
     except Exception as exc:
+        logger.warning("health_check_failed", check=_name, url=url, error=str(exc))
         return {"status": "down", "message": str(exc)}
 
 
@@ -44,7 +47,8 @@ async def check_database() -> bool:
         async with manager.session_factory() as session:
             await session.execute(text("SELECT 1"))
         return True
-    except Exception:
+    except Exception as exc:
+        logger.warning("health_check_failed", check="database", error=str(exc))
         return False
 
 
@@ -59,7 +63,8 @@ async def check_resend_api_key() -> bool:
                 timeout=10.0,
             )
         return resp.is_success
-    except Exception:
+    except Exception as exc:
+        logger.warning("health_check_failed", check="resend", error=str(exc))
         return False
 
 

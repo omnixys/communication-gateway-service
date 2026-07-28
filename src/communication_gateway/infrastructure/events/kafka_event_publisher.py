@@ -69,6 +69,8 @@ class KafkaDeliveryEventHandler:
             if mapping is not None:
                 internal_msg_id = mapping.internal_id
                 conversation_id = mapping.conversation_id
+            else:
+                logger.debug("mapping_not_found", provider_msg_id=receipt.provider_message_id)
         except Exception:
             logger.exception("mapping_lookup_error")
 
@@ -83,11 +85,15 @@ class KafkaDeliveryEventHandler:
             "error": receipt.error,
         }
         key = internal_msg_id or receipt.provider_message_id
-        await self._producer.publish_raw(
-            DELIVERY_STATUS_TOPIC,
-            value=json.dumps(payload).encode("utf-8"),
-            key=key,
-        )
+        try:
+            await self._producer.publish_raw(
+                DELIVERY_STATUS_TOPIC,
+                value=json.dumps(payload).encode("utf-8"),
+                key=key,
+            )
+        except Exception:
+            logger.exception("kafka_publish_error", topic=DELIVERY_STATUS_TOPIC, key=key)
+            raise
         logger.info(
             "kafka_delivery_published msg=%s status=%s",
             receipt.provider_message_id,

@@ -8,6 +8,8 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.provider_response import ProviderResponse
     from communication_gateway.domain.models.resolution_context import ResolutionContext
 
+logger = __import__("structlog").get_logger(__name__)
+
 
 class GatewayDispatcher:
     def __init__(self, registry: ChannelProviderRegistry) -> None:
@@ -18,6 +20,29 @@ class GatewayDispatcher:
         message: OutboundMessage,
         context: ResolutionContext | None = None,
     ) -> ProviderResponse:
-        entry = self._registry.get_by_channel(message.channel)
-        provider = await entry.resolver.resolve(message, context)
-        return await provider.send(message)
+        logger.info(
+            "dispatch_started",
+            message_id=message.id,
+            channel=message.channel.type.value,
+            to=message.to,
+        )
+        try:
+            entry = self._registry.get_by_channel(message.channel)
+            provider = await entry.resolver.resolve(message, context)
+            result = await provider.send(message)
+            logger.info(
+                "dispatch_completed",
+                message_id=message.id,
+                provider=provider.provider_type.value,
+                provider_message_id=result.provider_message_id,
+                success=result.success,
+            )
+            return result
+        except Exception as exc:
+            logger.error(
+                "dispatch_failed",
+                message_id=message.id,
+                channel=message.channel.type.value,
+                error=str(exc),
+            )
+            raise

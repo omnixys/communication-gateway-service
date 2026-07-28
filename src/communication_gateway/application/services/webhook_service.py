@@ -1,4 +1,3 @@
-import logging
 from typing import TYPE_CHECKING
 
 from communication_gateway.domain.enums import (
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
         MessageMappingStore,
     )
 
-logger = logging.getLogger(__name__)
+logger = __import__("structlog").get_logger(__name__)
 
 
 class WebhookService:
@@ -40,6 +39,7 @@ class WebhookService:
         headers: dict[str, str],
         body: bytes,
     ) -> object:
+        logger.info("webhook_processing_started", provider_type=provider_type.value)
         provider = self._registry.get_by_provider_type(provider_type)
         if provider is None:
             msg = f"Unknown provider type: {provider_type}"
@@ -63,13 +63,14 @@ class WebhookService:
                     DeliveryStatus.PENDING,
                 ):
                     logger.info(
-                        "duplicate_webhook_skipped provider=%s msg=%s status=%s",
-                        provider_type,
-                        result.message_id,
-                        existing.status,
+                        "duplicate_webhook_skipped",
+                        provider=provider_type.value,
+                        msg=result.message_id,
+                        status=existing.status.value,
                     )
                     return result
                 await self._publisher.publish(InboundMessageReceived(message=result))
+                logger.info("inbound_message_published", provider=provider_type.value, msg=result.message_id)
             elif isinstance(result, DeliveryReceipt):
                 existing = await self._mapping_store.find_by_provider_and_provider_message_id(
                     provider_type,
@@ -78,18 +79,36 @@ class WebhookService:
                 if existing is not None:
                     if existing.status == result.status:
                         logger.info(
-                            "duplicate_receipt_skipped provider=%s msg=%s status=%s",
-                            provider_type,
-                            result.provider_message_id,
-                            result.status,
+                            "duplicate_receipt_skipped",
+                            provider=provider_type.value,
+                            msg=result.provider_message_id,
+                            status=result.status.value,
                         )
                         return result
-                    assert_valid_transition(existing.status, result.status)
+                    try:
+                        assert_valid_transition(existing.status, result.status)
+                    except Exception as exc:
+                        logger.error(
+                            "invalid_status_transition",
+                            provider=provider_type.value,
+                            msg=result.provider_message_id,
+                            current_status=existing.status.value,
+                            attempted_status=result.status.value,
+                            error=str(exc),
+                        )
+                        raise
                     await self._mapping_store.update_status(
                         result.provider_message_id,
                         result.status,
                         result.error,
                     )
+                    logger.info(
+                        "status_update_applied",
+                        provider=provider_type.value,
+                        msg=result.provider_message_id,
+                        status=result.status.value,
+                    )
                 await self._publisher.publish(MessageDelivered(receipt=result))
+                logger.info("message_delivered_event_published", provider=provider_type.value, msg=result.provider_message_id)
 
         return result

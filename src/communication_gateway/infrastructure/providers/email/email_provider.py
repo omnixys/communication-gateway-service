@@ -71,6 +71,7 @@ class EmailProvider(CommunicationProvider):
                     await smtp.login(self._settings.username, self._settings.password)
                 await smtp.send_message(msg)
 
+            logger.info("stalwart_send_success", message_id=message.id, to=message.to)
             return ProviderResponse(
                 success=True,
                 provider_message_id=message.id,
@@ -147,7 +148,8 @@ class EmailProvider(CommunicationProvider):
                 timeout=10,
             ):
                 return True
-        except Exception:
+        except Exception as exc:
+            logger.warning("stalwart_health_check_failed", error=str(exc))
             return False
 
     def _tls_context(self) -> ssl.SSLContext | None:

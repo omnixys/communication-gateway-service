@@ -70,32 +70,41 @@ class EvolutionProvider(CommunicationProvider):
         )
 
     async def send(self, message: OutboundMessage) -> ProviderResponse:
+        logger.info("evolution_send_started", to=message.to, message_id=message.id, channel=message.channel.type.value)
         if message.attachment is not None:
             return await self._send_media(message)
         return await self._send_text(message)
 
     async def _send_text(self, message: OutboundMessage) -> ProviderResponse:
-        response = await self._client.post(
-            f"/message/sendText/{self._config.instance_name}",
-            json={
-                "number": message.to,
-                "text": message.body,
-            },
-        )
-        return self._parse_response(response)
+        try:
+            response = await self._client.post(
+                f"/message/sendText/{self._config.instance_name}",
+                json={
+                    "number": message.to,
+                    "text": message.body,
+                },
+            )
+            return self._parse_response(response)
+        except Exception as exc:
+            logger.error("evolution_send_text_failed", message_id=message.id, to=message.to, error=str(exc))
+            raise
 
     async def _send_media(self, message: OutboundMessage) -> ProviderResponse:
-        att = message.attachment
-        response = await self._client.post(
-            f"/message/sendMedia/{self._config.instance_name}",
-            json={
-                "number": message.to,
-                "mediatype": att.type.value.lower() if att else "document",
-                "media": att.url if att else "",
-                "caption": message.body,
-            },
-        )
-        return self._parse_response(response)
+        try:
+            att = message.attachment
+            response = await self._client.post(
+                f"/message/sendMedia/{self._config.instance_name}",
+                json={
+                    "number": message.to,
+                    "mediatype": att.type.value.lower() if att else "document",
+                    "media": att.url if att else "",
+                    "caption": message.body,
+                },
+            )
+            return self._parse_response(response)
+        except Exception as exc:
+            logger.error("evolution_send_media_failed", message_id=message.id, to=message.to, error=str(exc))
+            raise
 
     async def health(self) -> bool:
         try:
@@ -130,6 +139,7 @@ class EvolutionProvider(CommunicationProvider):
             return True
         if self._config.webhook_secret:
             return self._verify_signature(headers, body, self._config.webhook_secret)
+        logger.warning("evolution_webhook_verification_failed", reason="no_matching_key_or_signature")
         return False
 
     async def handle_webhook(
@@ -141,6 +151,7 @@ class EvolutionProvider(CommunicationProvider):
             instance=raw.get("instance", ""),
             data=raw.get("data", {}),
         )
+        logger.info("evolution_webhook_received", event=payload.event, instance=payload.instance)
         return self._process_event(payload)
 
     def _process_event(
@@ -207,9 +218,13 @@ class EvolutionProvider(CommunicationProvider):
 
         signature = headers.get("x-signature", headers.get("X-Signature", ""))
         if not signature:
+            logger.warning("evolution_signature_verification_failed", reason="missing_signature")
             return False
         expected = hmac.new(secret.encode(), body, "sha256").hexdigest()
-        return hmac.compare_digest(expected, signature)
+        if not hmac.compare_digest(expected, signature):
+            logger.warning("evolution_signature_verification_failed", reason="signature_mismatch")
+            return False
+        return True
 
     async def close(self) -> None:
         await self._client.aclose()
