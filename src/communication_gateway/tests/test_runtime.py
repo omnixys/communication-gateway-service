@@ -38,6 +38,9 @@ class FakeSocket:
         self.error = error
         self.closed = False
 
+    def setsockopt(self, *_args: object) -> None:
+        pass
+
     def bind(self, _address: tuple[str, int]) -> None:
         if self.error is not None:
             raise self.error

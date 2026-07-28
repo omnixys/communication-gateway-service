@@ -153,7 +153,7 @@ class EvolutionProvider(CommunicationProvider):
             instance=raw.get("instance", ""),
             data=raw.get("data", {}),
         )
-        logger.info("evolution_webhook_received", event=payload.event, instance=payload.instance)
+        logger.info("evolution_webhook_received", webhook_event=payload.event, instance=payload.instance)
         return self._process_event(payload)
 
     def _process_event(
