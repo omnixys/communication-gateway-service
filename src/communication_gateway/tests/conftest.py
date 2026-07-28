@@ -90,7 +90,9 @@ class MockProvider(CommunicationProvider):
         return self.webhook_should_verify
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         return self.webhook_result
 

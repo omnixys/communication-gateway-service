@@ -21,10 +21,15 @@ class ProviderConfigModel(Base):
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     settings: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), onupdate=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -37,7 +42,10 @@ class ProviderConnectionModel(Base):
     details: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
     connected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), onupdate=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 
@@ -52,7 +60,9 @@ class DeliveryLogModel(Base):
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     attempts: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        nullable=False,
     )
 
 
@@ -62,7 +72,10 @@ class MessageMappingModel(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
     internal_id: Mapped[str] = mapped_column(String(36), nullable=False, unique=True, index=True)
     provider_message_id: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True, index=True,
+        String(255),
+        nullable=False,
+        unique=True,
+        index=True,
     )
     provider: Mapped[str] = mapped_column(String(50), nullable=False)
     channel: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -75,13 +88,19 @@ class MessageMappingModel(Base):
     provider_instance: Mapped[str] = mapped_column(String(100), nullable=False, default="")
     retry_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_status_change: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=False), nullable=True,
+        DateTime(timezone=False),
+        nullable=True,
     )
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False), server_default=func.now(), onupdate=func.now(), nullable=False,
+        DateTime(timezone=False),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )

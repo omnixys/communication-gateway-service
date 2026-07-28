@@ -9,10 +9,16 @@ class SendMessageRequest(BaseModel):
     id: str = Field(min_length=1, max_length=255)
     channel: Literal["EMAIL", "WHATSAPP"]
     recipient_address: str | None = Field(
-        default=None, alias="recipientAddress", min_length=1, max_length=500,
+        default=None,
+        alias="recipientAddress",
+        min_length=1,
+        max_length=500,
     )
     recipient_id: str | None = Field(
-        default=None, alias="recipientId", min_length=1, max_length=255,
+        default=None,
+        alias="recipientId",
+        min_length=1,
+        max_length=255,
     )
     sender_address: str | None = Field(default=None, alias="senderAddress", max_length=500)
     sender_id: str | None = Field(default=None, alias="senderId", max_length=255)

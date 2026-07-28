@@ -112,8 +112,8 @@ class TestEmailProvider:
     ) -> None:
         import aiosmtplib
 
-        mock_smtp.return_value.__aenter__.return_value.send_message.side_effect = (
-            aiosmtplib.SMTPException("Connection refused")
+        mock_smtp.return_value.__aenter__.return_value.send_message.side_effect = aiosmtplib.SMTPException(
+            "Connection refused",
         )
 
         message = OutboundMessage(

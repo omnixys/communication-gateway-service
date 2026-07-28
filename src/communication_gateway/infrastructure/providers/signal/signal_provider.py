@@ -37,7 +37,9 @@ class SignalProvider(CommunicationProvider):
         raise NotImplementedError(msg)
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         msg = "Signal provider — to be implemented"
         raise NotImplementedError(msg)

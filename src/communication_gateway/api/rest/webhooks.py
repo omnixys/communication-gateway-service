@@ -43,7 +43,8 @@ async def receive_webhook(provider_type: str, request: Request) -> dict[str, Any
     except WebhookVerificationError as exc:
         logger.warning("webhook_verification_failed", provider_type=ptype.value, error=str(exc))
         raise HTTPException(
-            status_code=401, detail={"code": "WEBHOOK_VERIFICATION_FAILED"},
+            status_code=401,
+            detail={"code": "WEBHOOK_VERIFICATION_FAILED"},
         ) from exc
     logger.info("webhook_processed", provider_type=ptype.value, result_type=type(result).__name__ if result else None)
     return {"received": True, "result": str(type(result).__name__) if result else None}

@@ -39,7 +39,7 @@ class GatewayDispatcher:
             )
             return result
         except Exception as exc:
-            logger.error(
+            logger.exception(
                 "dispatch_failed",
                 message_id=message.id,
                 channel=message.channel.type.value,

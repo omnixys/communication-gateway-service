@@ -36,7 +36,9 @@ class TwilioProvider(CommunicationProvider):
         raise NotImplementedError(msg)
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         msg = "Twilio provider — to be implemented"
         raise NotImplementedError(msg)

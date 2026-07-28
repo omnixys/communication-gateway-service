@@ -34,5 +34,7 @@ class CommunicationProvider(ABC):
 
     @abstractmethod
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None: ...

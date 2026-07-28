@@ -74,7 +74,7 @@ def print_banner(settings: GatewaySettings) -> None:
     banner = f"""
 {_GREEN}  ╔══════════════════════════════════════════════════╗
   ║{_CYAN}{name:^48}{_GREEN}  ║
-  ║{_YELLOW}{'Omnixys Technologies':^48}{_GREEN}  ║
+  ║{_YELLOW}{"Omnixys Technologies":^48}{_GREEN}  ║
   ╚══════════════════════════════════════════════════╝{_RESET}"""
     print(banner)  # noqa: T201
 
@@ -122,7 +122,6 @@ def print_banner(settings: GatewaySettings) -> None:
         _info_colored("Rate Limit", "DISABLED", _RED)
     _info("Cookie Secure", str(settings.security.cookie_secure))
     _status("Stateless", settings.security.stateless)
-
 
     _section("KAFKA")
     _info("Bootstrap Servers", settings.gateway_kafka.broker)
@@ -211,10 +210,12 @@ async def print_health_banner(
             tasks.append(("Evolution", evolution.health()))
 
     if settings.core.chat_service_url:
-        tasks.append((
-            "Chat Service",
-            check_http("chat", f"{settings.core.chat_service_url.rstrip('/')}/health"),
-        ))
+        tasks.append(
+            (
+                "Chat Service",
+                check_http("chat", f"{settings.core.chat_service_url.rstrip('/')}/health"),
+            ),
+        )
 
     if settings.observability.tempo_health_url:
         tasks.append(("Tempo", check_http("tempo", settings.observability.tempo_health_url)))

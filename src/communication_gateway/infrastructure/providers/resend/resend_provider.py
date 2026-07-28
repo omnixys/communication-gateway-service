@@ -29,7 +29,7 @@ def _error_code(response: httpx.Response) -> str:
     if status_code == HTTPStatus.BAD_REQUEST:
         try:
             data = response.json()
-        except (TypeError, ValueError):
+        except TypeError, ValueError:
             data = {}
         message = str(data.get("message", "")).lower() if isinstance(data, dict) else ""
         if "api key" in message and ("invalid" in message or "missing" in message):
@@ -146,7 +146,9 @@ class ResendProvider(CommunicationProvider):
         return False
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         return None
 

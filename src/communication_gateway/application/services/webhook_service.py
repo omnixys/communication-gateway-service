@@ -88,7 +88,7 @@ class WebhookService:
                     try:
                         assert_valid_transition(existing.status, result.status)
                     except Exception as exc:
-                        logger.error(
+                        logger.exception(
                             "invalid_status_transition",
                             provider=provider_type.value,
                             msg=result.provider_message_id,
@@ -109,6 +109,10 @@ class WebhookService:
                         status=result.status.value,
                     )
                 await self._publisher.publish(MessageDelivered(receipt=result))
-                logger.info("message_delivered_event_published", provider=provider_type.value, msg=result.provider_message_id)
+                logger.info(
+                    "message_delivered_event_published",
+                    provider=provider_type.value,
+                    msg=result.provider_message_id,
+                )
 
         return result

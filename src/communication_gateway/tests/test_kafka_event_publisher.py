@@ -58,7 +58,9 @@ class TestKafkaDeliveryEventHandler:
     ) -> None:
         raw, producer = mock_producer
         handler = KafkaDeliveryEventHandler(
-            publisher, producer=producer, mapping_store=mapping_store,
+            publisher,
+            producer=producer,
+            mapping_store=mapping_store,
         )
         await handler.start()
         assert handler._task is not None
@@ -82,7 +84,9 @@ class TestKafkaDeliveryEventHandler:
         await mapping_store.save(mapping)
 
         handler = KafkaDeliveryEventHandler(
-            publisher, producer=producer, mapping_store=mapping_store,
+            publisher,
+            producer=producer,
+            mapping_store=mapping_store,
         )
         await handler.start()
         await asyncio.sleep(0)
@@ -132,7 +136,9 @@ class TestKafkaDeliveryEventHandler:
         await mapping_store.save(mapping)
 
         handler = KafkaDeliveryEventHandler(
-            publisher, producer=producer, mapping_store=mapping_store,
+            publisher,
+            producer=producer,
+            mapping_store=mapping_store,
         )
         await handler.start()
         await asyncio.sleep(0)
@@ -177,7 +183,9 @@ class TestKafkaDeliveryEventHandler:
         await mapping_store.save(mapping)
 
         handler = KafkaDeliveryEventHandler(
-            publisher, producer=producer, mapping_store=mapping_store,
+            publisher,
+            producer=producer,
+            mapping_store=mapping_store,
         )
         await handler.start()
         await asyncio.sleep(0)
@@ -209,7 +217,9 @@ class TestKafkaDeliveryEventHandler:
     ) -> None:
         raw, producer = mock_producer
         handler = KafkaDeliveryEventHandler(
-            publisher, producer=producer, mapping_store=mapping_store,
+            publisher,
+            producer=producer,
+            mapping_store=mapping_store,
         )
         await handler.start()
         await asyncio.sleep(0)

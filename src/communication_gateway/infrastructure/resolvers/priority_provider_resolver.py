@@ -30,10 +30,20 @@ class PriorityProviderResolver(ProviderResolver):
     ) -> CommunicationProvider:
         for provider in self._providers:
             if _is_enabled(provider):
-                logger.info("provider_selected", provider=provider.provider_type.value, channel=message.channel.type.value, strategy="priority")
+                logger.info(
+                    "provider_selected",
+                    provider=provider.provider_type.value,
+                    channel=message.channel.type.value,
+                    strategy="priority",
+                )
                 return provider
         if self._fallback_providers:
-            logger.info("provider_selected", provider=self._fallback_providers[0].provider_type.value, channel=message.channel.type.value, strategy="priority_fallback")
+            logger.info(
+                "provider_selected",
+                provider=self._fallback_providers[0].provider_type.value,
+                channel=message.channel.type.value,
+                strategy="priority_fallback",
+            )
             return self._fallback_providers[0]
         logger.warning("no_providers_available", channel=message.channel.type.value)
         msg = "No enabled providers available for this channel"

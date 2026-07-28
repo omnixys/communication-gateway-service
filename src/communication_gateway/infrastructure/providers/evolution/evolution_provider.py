@@ -86,7 +86,7 @@ class EvolutionProvider(CommunicationProvider):
             )
             return self._parse_response(response)
         except Exception as exc:
-            logger.error("evolution_send_text_failed", message_id=message.id, to=message.to, error=str(exc))
+            logger.exception("evolution_send_text_failed", message_id=message.id, to=message.to, error=str(exc))
             raise
 
     async def _send_media(self, message: OutboundMessage) -> ProviderResponse:
@@ -103,7 +103,7 @@ class EvolutionProvider(CommunicationProvider):
             )
             return self._parse_response(response)
         except Exception as exc:
-            logger.error("evolution_send_media_failed", message_id=message.id, to=message.to, error=str(exc))
+            logger.exception("evolution_send_media_failed", message_id=message.id, to=message.to, error=str(exc))
             raise
 
     async def health(self) -> bool:
@@ -143,7 +143,9 @@ class EvolutionProvider(CommunicationProvider):
         return False
 
     async def handle_webhook(
-        self, headers: dict[str, str], body: bytes,
+        self,
+        headers: dict[str, str],
+        body: bytes,
     ) -> InboundMessage | DeliveryReceipt | None:
         raw = json.loads(body)
         payload = EvolutionWebhookPayload(
@@ -155,7 +157,8 @@ class EvolutionProvider(CommunicationProvider):
         return self._process_event(payload)
 
     def _process_event(
-        self, payload: EvolutionWebhookPayload,
+        self,
+        payload: EvolutionWebhookPayload,
     ) -> InboundMessage | DeliveryReceipt | None:
         if payload.event == "messages.upsert":
             messages = payload.data if isinstance(payload.data, list) else [payload.data]
@@ -200,7 +203,7 @@ class EvolutionProvider(CommunicationProvider):
             pr.provider_identity = self.metadata.identity
             return pr
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "evolution_parse_error",
                 provider="evolution",
                 status_code=response.status_code,

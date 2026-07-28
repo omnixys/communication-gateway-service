@@ -93,30 +93,20 @@ class InMemoryChannelProviderRegistry(ChannelProviderRegistry):
         for provider in providers:
             try:
                 caps = await provider.capabilities()
-                merged.supports_attachments = (
-                    merged.supports_attachments or caps.supports_attachments
-                )
+                merged.supports_attachments = merged.supports_attachments or caps.supports_attachments
                 merged.supports_rich_text = merged.supports_rich_text or caps.supports_rich_text
                 merged.supports_formatting = merged.supports_formatting or caps.supports_formatting
                 merged.supports_typing = merged.supports_typing or caps.supports_typing
-                merged.supports_read_receipts = (
-                    merged.supports_read_receipts or caps.supports_read_receipts
-                )
+                merged.supports_read_receipts = merged.supports_read_receipts or caps.supports_read_receipts
                 merged.supports_reactions = merged.supports_reactions or caps.supports_reactions
-                merged.supports_quoted_replies = (
-                    merged.supports_quoted_replies or caps.supports_quoted_replies
-                )
+                merged.supports_quoted_replies = merged.supports_quoted_replies or caps.supports_quoted_replies
                 merged.supports_forwarding = merged.supports_forwarding or caps.supports_forwarding
                 merged.supports_editing = merged.supports_editing or caps.supports_editing
                 merged.supports_deletion = merged.supports_deletion or caps.supports_deletion
-                merged.supports_delivery_status = (
-                    merged.supports_delivery_status or caps.supports_delivery_status
-                )
+                merged.supports_delivery_status = merged.supports_delivery_status or caps.supports_delivery_status
                 merged.supports_presence = merged.supports_presence or caps.supports_presence
                 merged.supports_templates = merged.supports_templates or caps.supports_templates
-                merged.supports_bulk_messaging = (
-                    merged.supports_bulk_messaging or caps.supports_bulk_messaging
-                )
+                merged.supports_bulk_messaging = merged.supports_bulk_messaging or caps.supports_bulk_messaging
             except Exception as exc:
                 logger.warning("provider_capabilities_error", provider=provider.provider_type.value, error=str(exc))
                 continue

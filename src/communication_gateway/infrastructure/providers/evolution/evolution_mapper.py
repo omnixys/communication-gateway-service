@@ -25,9 +25,7 @@ def map_to_provider_response(
 ) -> ProviderResponse:
     if api_response.status == "success" and api_response.data:
         provider_message_id = (
-            api_response.data.get("key", {}).get("id")
-            if isinstance(api_response.data, dict)
-            else None
+            api_response.data.get("key", {}).get("id") if isinstance(api_response.data, dict) else None
         )
         return ProviderResponse(
             success=True,

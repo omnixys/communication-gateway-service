@@ -108,10 +108,8 @@ event_publisher = InMemoryEventPublisher()
 registry = InMemoryChannelProviderRegistry()
 
 if settings.database.url and settings.database.url != "sqlite+aiosqlite://":
-    mapping_store: MessageMappingStore = (
-        sqlalchemy_message_mapping_repository.SqlAlchemyMessageMappingRepository(
-            manager.session_factory,
-        )
+    mapping_store: MessageMappingStore = sqlalchemy_message_mapping_repository.SqlAlchemyMessageMappingRepository(
+        manager.session_factory,
     )
 else:
     mapping_store = InMemoryMessageMappingStore()

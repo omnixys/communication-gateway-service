@@ -20,7 +20,9 @@ if TYPE_CHECKING:
 
 class TestDispatcher:
     async def test_dispatch_calls_send(
-        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider,
+        self,
+        dispatcher: GatewayDispatcher,
+        mock_provider: MockProvider,
     ) -> None:
         message = OutboundMessage(
             id="msg-1",
@@ -34,7 +36,9 @@ class TestDispatcher:
         assert mock_provider.last_message is message
 
     async def test_dispatch_with_context(
-        self, dispatcher: GatewayDispatcher, mock_provider: MockProvider,
+        self,
+        dispatcher: GatewayDispatcher,
+        mock_provider: MockProvider,
     ) -> None:
         message = OutboundMessage(
             id="msg-2",
@@ -48,7 +52,8 @@ class TestDispatcher:
         assert result.success is True
 
     async def test_dispatch_unknown_channel_raises(
-        self, dispatcher: GatewayDispatcher,
+        self,
+        dispatcher: GatewayDispatcher,
     ) -> None:
         message = OutboundMessage(
             id="msg-3",

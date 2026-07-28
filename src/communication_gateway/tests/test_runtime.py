@@ -18,10 +18,14 @@ async def test_federation_endpoint_requires_internal_key(monkeypatch: pytest.Mon
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         missing = await client.post("/graphql", json=query)
         wrong = await client.post(
-            "/graphql", json=query, headers={"x-internal-api-key": "wrong"},
+            "/graphql",
+            json=query,
+            headers={"x-internal-api-key": "wrong"},
         )
         accepted = await client.post(
-            "/graphql", json=query, headers={"x-internal-api-key": "shared-secret"},
+            "/graphql",
+            json=query,
+            headers={"x-internal-api-key": "shared-secret"},
         )
     assert missing.status_code == 401
     assert wrong.status_code == 401

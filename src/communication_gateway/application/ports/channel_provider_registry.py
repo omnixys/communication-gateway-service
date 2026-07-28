@@ -35,7 +35,8 @@ class ChannelProviderRegistry(ABC):
 
     @abstractmethod
     def get_by_provider_type(
-        self, provider_type: CommunicationProviderType,
+        self,
+        provider_type: CommunicationProviderType,
     ) -> CommunicationProvider | None: ...
 
     @abstractmethod

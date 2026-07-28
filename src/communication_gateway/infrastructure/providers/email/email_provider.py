@@ -79,7 +79,7 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except aiosmtplib.SMTPException as e:
-            logger.error("smtp_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
+            logger.exception("smtp_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -87,7 +87,13 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except OSError as e:
-            logger.error("smtp_connection_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
+            logger.exception(
+                "smtp_connection_error",
+                provider="stalwart",
+                message_id=message.id,
+                to=message.to,
+                error=str(e),
+            )
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -95,7 +101,13 @@ class EmailProvider(CommunicationProvider):
                 provider_identity=self._identity,
             )
         except Exception as e:
-            logger.error("email_send_unexpected_error", provider="stalwart", message_id=message.id, to=message.to, error=str(e))
+            logger.exception(
+                "email_send_unexpected_error",
+                provider="stalwart",
+                message_id=message.id,
+                to=message.to,
+                error=str(e),
+            )
             return ProviderResponse(
                 success=False,
                 status=DeliveryStatus.FAILED,
@@ -107,11 +119,7 @@ class EmailProvider(CommunicationProvider):
         msg = EmailMessage()
         msg["From"] = self._settings.from_address
         msg["To"] = [message.to]
-        subject = (
-            message.metadata.get("subject", "No Subject")
-            if isinstance(message.metadata, dict)
-            else "No Subject"
-        )
+        subject = message.metadata.get("subject", "No Subject") if isinstance(message.metadata, dict) else "No Subject"
         msg["Subject"] = subject
         msg["Message-ID"] = f"<{message.id}@omnixys>"
 
@@ -121,13 +129,9 @@ class EmailProvider(CommunicationProvider):
             msg.set_content(message.body, subtype="plain")
 
         if message.attachment is not None:
-            maintype = (
-                message.attachment.type.value.lower() if message.attachment.type else "application"
-            )
+            maintype = message.attachment.type.value.lower() if message.attachment.type else "application"
             subtype = (
-                message.attachment.mime_type.split("/")[-1]
-                if "/" in message.attachment.mime_type
-                else "octet-stream"
+                message.attachment.mime_type.split("/")[-1] if "/" in message.attachment.mime_type else "octet-stream"
             )
             msg.add_attachment(
                 message.attachment.url,

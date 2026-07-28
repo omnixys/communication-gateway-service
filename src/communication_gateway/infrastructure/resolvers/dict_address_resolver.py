@@ -26,12 +26,22 @@ class DictAddressResolver(AddressResolver):
     ) -> str:
         user_map = self._forward.get(user_id)
         if user_map is None:
-            logger.warning("address_resolution_failed", user_id=user_id, channel=channel.value, reason="no_user_mapping")
+            logger.warning(
+                "address_resolution_failed",
+                user_id=user_id,
+                channel=channel.value,
+                reason="no_user_mapping",
+            )
             msg = f"No address mapping for user '{user_id}'"
             raise ValueError(msg)
         address = user_map.get(channel)
         if address is None:
-            logger.warning("address_resolution_failed", user_id=user_id, channel=channel.value, reason="no_channel_address")
+            logger.warning(
+                "address_resolution_failed",
+                user_id=user_id,
+                channel=channel.value,
+                reason="no_channel_address",
+            )
             msg = f"No {channel.value} address for user '{user_id}'"
             raise ValueError(msg)
         return address

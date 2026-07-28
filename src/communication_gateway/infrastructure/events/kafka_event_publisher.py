@@ -91,6 +91,16 @@ class KafkaDeliveryEventHandler:
                 key=key,
             )
         except Exception:
-            logger.exception("kafka_publish_error", topic=DELIVERY_STATUS_TOPIC, key=key, provider_msg_id=receipt.provider_message_id)
+            logger.exception(
+                "kafka_publish_error",
+                topic=DELIVERY_STATUS_TOPIC,
+                key=key,
+                provider_msg_id=receipt.provider_message_id,
+            )
             raise
-        logger.info("kafka_delivery_published", provider_msg_id=receipt.provider_message_id, status=receipt.status.value, topic=DELIVERY_STATUS_TOPIC)
+        logger.info(
+            "kafka_delivery_published",
+            provider_msg_id=receipt.provider_message_id,
+            status=receipt.status.value,
+            topic=DELIVERY_STATUS_TOPIC,
+        )
