@@ -58,3 +58,14 @@ class InMemoryMessageMappingStore(MessageMappingStore):
         if mapping is not None:
             mapping.retry_count += 1
             mapping.updated_at = datetime.now(UTC).replace(tzinfo=None)
+
+    async def record_failure(
+        self,
+        *,
+        internal_id: str,
+        provider: CommunicationProviderType,
+        channel: str,
+        organization_id: str,
+        error_code: str,
+    ) -> None:
+        return None

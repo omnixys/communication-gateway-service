@@ -42,3 +42,14 @@ class MessageMappingStore(ABC):
         self,
         internal_id: str,
     ) -> None: ...
+
+    @abstractmethod
+    async def record_failure(
+        self,
+        *,
+        internal_id: str,
+        provider: CommunicationProviderType,
+        channel: str,
+        organization_id: str,
+        error_code: str,
+    ) -> None: ...

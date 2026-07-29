@@ -5,7 +5,7 @@ from datetime import datetime  # noqa: TC003
 from typing import Any
 
 from database import Base
-from sqlalchemy import JSON, Boolean, DateTime, Integer, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -58,6 +58,7 @@ class DeliveryLogModel(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="PENDING")
     provider_message_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False, default="")
     attempts: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
@@ -103,4 +104,33 @@ class MessageMappingModel(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+
+class AnalyticsOutboxModel(Base):
+    __tablename__ = "analytics_outbox"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    deduplication_key: Mapped[str] = mapped_column(String(500), nullable=False)
+    tenant_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    topic: Mapped[str] = mapped_column(String(200), nullable=False)
+    payload: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False)
+    correlation_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=func.now())
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    locked_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    dead_lettered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("deduplication_key", name="uq_analytics_outbox_deduplication_key"),
+        Index(
+            "ix_analytics_outbox_ready",
+            "published_at",
+            "dead_lettered_at",
+            "next_attempt_at",
+        ),
     )

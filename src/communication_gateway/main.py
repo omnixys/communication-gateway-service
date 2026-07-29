@@ -59,6 +59,10 @@ from communication_gateway.domain.enums import (
 from communication_gateway.domain.models.communication_channel import (
     CommunicationChannel,
 )
+from communication_gateway.infrastructure.analytics.outbox import (
+    AnalyticsOutboxPublisher,
+    AnalyticsOutboxWorker,
+)
 from communication_gateway.infrastructure.events.http_event_forwarder import (
     HttpEventForwarder,
 )
@@ -121,6 +125,7 @@ for uid, channels in _raw_mappings.items():
 address_resolver = DictAddressResolver(mapping=_mapped)
 event_forwarder: HttpEventForwarder | None = None
 kafka_handler: KafkaDeliveryEventHandler | None = None
+analytics_outbox_worker: AnalyticsOutboxWorker | None = None
 
 
 @asynccontextmanager
@@ -155,6 +160,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             await kafka_handler.start()
         except Exception:
             logger.exception("kafka_handler_start_failed")
+    if analytics_outbox_worker is not None:
+        await analytics_outbox_worker.start()
     await print_health_banner(settings, registry)
     logger.info("application_started")
     yield
@@ -163,6 +170,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         set_event_forwarder_ready(False)
         await event_forwarder.stop()
     if kafka_handler is not None:
+        if analytics_outbox_worker is not None:
+            await analytics_outbox_worker.stop()
         await kafka_handler.stop()
     for provider in registry.list_providers():
         close = getattr(provider, "close", None)
@@ -241,7 +250,7 @@ def _setup_forwarder() -> None:
 
 
 async def _setup_kafka() -> None:
-    global kafka_handler
+    global analytics_outbox_worker, kafka_handler
 
     if not settings.gateway_kafka.broker:
         logger.info("kafka_broker_not_set", message="Kafka delivery events disabled")
@@ -259,6 +268,9 @@ async def _setup_kafka() -> None:
             publisher=event_publisher,
             producer=producer,
             mapping_store=mapping_store,
+        )
+        analytics_outbox_worker = AnalyticsOutboxWorker(
+            AnalyticsOutboxPublisher(manager.session_factory, producer),
         )
         logger.info("kafka_producer_started", broker=settings.gateway_kafka.broker)
     except Exception:

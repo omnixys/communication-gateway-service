@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from security import current_request_context
 
 from communication_gateway.api.auth import require_internal_api_key
 from communication_gateway.api.rest.message_dto import SendMessageRequest  # noqa: TC001
@@ -97,11 +98,17 @@ async def send_message(
             ) from exc
 
     metadata = dict(body.metadata)
+    metadata.pop("tenantId", None)
     if body.subject:
         metadata["subject"] = body.subject
     if body.sender_address:
         metadata["senderAddress"] = body.sender_address
-    tenant_id = metadata.get("tenantId", "") if isinstance(metadata, dict) else ""
+    request_context = current_request_context()
+    organization_id = (
+        request_context.organization_id if request_context.is_authenticated and request_context.organization_id else ""
+    )
+    if organization_id:
+        metadata["tenantId"] = organization_id
 
     message = OutboundMessage(
         id=body.id,
@@ -112,13 +119,34 @@ async def send_message(
         metadata=metadata,
     )
     context = ResolutionContext(
-        tenant_id=tenant_id,
+        tenant_id=organization_id,
         metadata=metadata,
     )
     result = await dispatcher.dispatch(message, context)
+    provider_type = (
+        result.provider_identity.provider_type
+        if result.provider_identity is not None
+        else (
+            CommunicationProviderType.RESEND
+            if channel_type is CommunicationChannelType.EMAIL
+            else CommunicationProviderType.EVOLUTION
+        )
+    )
 
     if not result.success:
         error_code = result.error or "PROVIDER_FAILURE"
+        try:
+            outcome_store = get_mapping_store()
+        except RuntimeError:
+            logger.warning("delivery_outcome_store_not_initialized", message_id=body.id)
+        else:
+            await outcome_store.record_failure(
+                internal_id=body.id,
+                provider=provider_type,
+                channel=channel_type.value,
+                organization_id=organization_id,
+                error_code=error_code,
+            )
         status_code = 504 if "TIMEOUT" in error_code.upper() else 502
         logger.warning(
             "send_message_failed",
@@ -134,9 +162,6 @@ async def send_message(
     if result.success and result.provider_message_id:
         store = get_mapping_store()
         conv_id = metadata.get("conversationId", "") if isinstance(metadata, dict) else ""
-        provider_type = CommunicationProviderType.EVOLUTION
-        if result.provider_identity is not None:
-            provider_type = result.provider_identity.provider_type
         mapping = MessageMapping(
             internal_id=body.id,
             provider_message_id=result.provider_message_id,
@@ -145,12 +170,18 @@ async def send_message(
             conversation_id=conv_id,
             sender=body.sender_id or "",
             recipient=recipient_address,
-            tenant_id=tenant_id,
+            status=result.status,
+            tenant_id=organization_id,
+            organization_id=organization_id,
         )
         try:
             await store.save(mapping)
-        except Exception:
+        except Exception as exc:
             logger.exception("failed_to_save_message_mapping")
+            raise HTTPException(
+                status_code=503,
+                detail={"code": "DELIVERY_STATE_PERSISTENCE_FAILED"},
+            ) from exc
 
     logger.info(
         "send_message_success",
