@@ -1,6 +1,6 @@
 [project]
 name = "omnixys-communication-gateway"
-version = "1.1.1"
+version = "1.2.0"
 description = "Omnixys Communication Gateway – External Provider Integration Layer"
 requires-python = ">=3.14"
 dependencies = [
