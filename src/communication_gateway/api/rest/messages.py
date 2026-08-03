@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from security import current_request_context
 
 from communication_gateway.api.auth import require_internal_api_key
@@ -68,6 +68,7 @@ def get_mapping_store() -> MessageMappingStore:
 async def send_message(
     body: SendMessageRequest,
     dispatcher: GatewayDispatcher = Depends(get_dispatcher),
+    x_tenant_id: str | None = Header(default=None, alias="x-tenant-id"),
 ) -> dict[str, Any]:
     channel_type = CommunicationChannelType(body.channel)
     recipient_id = body.recipient_id or ""
@@ -107,6 +108,8 @@ async def send_message(
     organization_id = (
         request_context.organization_id if request_context.is_authenticated and request_context.organization_id else ""
     )
+    if not organization_id and x_tenant_id:
+        organization_id = x_tenant_id
     if organization_id:
         metadata["tenantId"] = organization_id
 

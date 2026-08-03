@@ -168,7 +168,7 @@ def print_banner(settings: GatewaySettings) -> None:
     _health_status("Tempo", bool(settings.observability.tempo_health_url))
     _health_status("Prometheus", bool(settings.observability.prometheus_health_url))
 
-    print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
+    # print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
 
 
 async def print_health_banner(
@@ -213,7 +213,7 @@ async def print_health_banner(
         tasks.append(
             (
                 "Chat Service",
-                check_http("chat", f"{settings.core.chat_service_url.rstrip('/')}/health"),
+                check_http("chat", f"{settings.core.chat_service_url.rstrip('/')}/health/liveness"),
             ),
         )
 

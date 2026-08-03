@@ -73,12 +73,12 @@ async def health() -> dict[str, str]:
     return {"status": "ok", "service": "communication-gateway", "version": "0.1.0"}
 
 
-@router.get("/health/live")
+@router.get("/health/liveness")
 async def liveness() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@router.get("/health/ready")
+@router.get("/health/readiness")
 async def readiness(response: Response) -> dict[str, Any]:
     checks: dict[str, bool] = {}
 
