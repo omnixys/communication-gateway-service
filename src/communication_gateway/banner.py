@@ -168,9 +168,6 @@ def print_banner(settings: GatewaySettings) -> None:
     _health_status("Tempo", bool(settings.observability.tempo_health_url))
     _health_status("Prometheus", bool(settings.observability.prometheus_health_url))
 
-    # print(f"{_GREEN}{'=' * 51}{_RESET}\n")  # noqa: T201
-
-
 async def print_health_banner(
     settings: GatewaySettings,
     registry: ChannelProviderRegistry | None = None,
