@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import errno
 import json
-import logging
 import socket
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
@@ -131,10 +130,6 @@ analytics_outbox_worker: AnalyticsOutboxWorker | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    logging.basicConfig(
-        level=getattr(logging, settings.core.log_level.upper(), logging.INFO),
-        format="%(message)s",
-    )
     configure_observability(
         service_name=settings.core.service_name,
         otlp_endpoint=settings.observability.otlp_endpoint,

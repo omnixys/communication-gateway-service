@@ -106,7 +106,7 @@ async def send_message(
         metadata["senderAddress"] = body.sender_address
     request_context = current_request_context()
     organization_id = (
-        request_context.organization_id if request_context.is_authenticated and request_context.organization_id else ""
+        request_context.tenant_id if request_context.is_authenticated and request_context.tenant_id else ""
     )
     if not organization_id and x_tenant_id:
         organization_id = x_tenant_id
