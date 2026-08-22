@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from communication_gateway.config import (
     EvolutionSettings,
     GatewaySettings,
+    StalwartSettings,
 )
 
 if TYPE_CHECKING:
@@ -34,3 +35,16 @@ class TestConfig:
         assert s.core.host == "0.0.0.0"
         assert s.core.port == 8002
         assert s.database.url.startswith("postgresql")
+
+    def test_stalwart_oauthbearer_settings(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("STALWART_AUTH_MODE", "oauthbearer")
+        monkeypatch.setenv("STALWART_OAUTH_TOKEN_URL", "https://keycloak.example/token")
+        monkeypatch.setenv("STALWART_OAUTH_CLIENT_ID", "communication-gateway-mail")
+        monkeypatch.setenv("STALWART_OAUTH_CLIENT_SECRET", "secret")
+
+        s = StalwartSettings()
+
+        assert s.auth_mode == "oauthbearer"
+        assert s.oauth_token_url == "https://keycloak.example/token"
+        assert s.oauth_client_id == "communication-gateway-mail"
+        assert s.oauth_client_secret == "secret"

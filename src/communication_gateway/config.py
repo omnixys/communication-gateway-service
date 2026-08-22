@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from config.settings import AppSettings, CoreSettings
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -86,6 +87,10 @@ class StalwartSettings(BaseSettings):
     port: int = 587
     username: str = ""
     password: str = ""
+    auth_mode: Literal["password", "oauthbearer"] = "password"
+    oauth_token_url: str = ""
+    oauth_client_id: str = ""
+    oauth_client_secret: str = ""
     from_address: str = ""
     tls_enabled: bool = True
     tls_verify: bool = True
@@ -154,6 +159,14 @@ def validate_production_settings() -> None:
         "RESEND_API_KEY": settings.resend.api_key,
         "RESEND_FROM_ADDRESS": settings.resend.from_address,
     }
+    if settings.stalwart.enabled and settings.stalwart.auth_mode == "oauthbearer":
+        required.update(
+            {
+                "STALWART_OAUTH_TOKEN_URL": settings.stalwart.oauth_token_url,
+                "STALWART_OAUTH_CLIENT_ID": settings.stalwart.oauth_client_id,
+                "STALWART_OAUTH_CLIENT_SECRET": settings.stalwart.oauth_client_secret,
+            },
+        )
     missing = [name for name, value in required.items() if not value]
     if missing:
         import logging

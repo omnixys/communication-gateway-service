@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import asyncio
+import base64
 import ssl
+import time
 from email.message import EmailMessage
 from typing import TYPE_CHECKING
 
 import aiosmtplib
+import httpx
 from observability import get_logger
 
 from communication_gateway.application.ports.communication_provider import (
@@ -28,11 +32,16 @@ if TYPE_CHECKING:
     from communication_gateway.domain.models.outbound_message import OutboundMessage
 
 logger = get_logger(__name__)
+_SMTP_AUTH_CHALLENGE = 334
+_SMTP_AUTH_SUCCESS = 235
 
 
 class EmailProvider(CommunicationProvider):
     def __init__(self, settings: StalwartSettings) -> None:
         self._settings = settings
+        self._oauth_token = ""
+        self._oauth_token_expires_at = 0.0
+        self._oauth_lock = asyncio.Lock()
         self._identity = ProviderIdentity(
             name="Stalwart",
             provider_type=CommunicationProviderType.STALWART,
@@ -68,7 +77,7 @@ class EmailProvider(CommunicationProvider):
                 timeout=self._settings.timeout,
             ) as smtp:
                 if self._settings.username:
-                    await smtp.login(self._settings.username, self._settings.password)
+                    await self._authenticate(smtp)
                 await smtp.send_message(msg)
 
             logger.info("stalwart_send_success", message_id=message.id, to=message.to)
@@ -114,6 +123,70 @@ class EmailProvider(CommunicationProvider):
                 error=f"EMAIL_SEND_FAILED: {e}",
                 provider_identity=self._identity,
             )
+
+    async def _authenticate(self, smtp: aiosmtplib.SMTP) -> None:
+        if self._settings.auth_mode == "password":
+            await smtp.login(self._settings.username, self._settings.password)
+            return
+
+        token = await self._get_oauth_token()
+        try:
+            await self._auth_oauthbearer(smtp, token)
+        except aiosmtplib.SMTPAuthenticationError:
+            token = await self._get_oauth_token(force_refresh=True)
+            await self._auth_oauthbearer(smtp, token)
+
+    async def _auth_oauthbearer(self, smtp: aiosmtplib.SMTP, token: str) -> None:
+        await smtp.ehlo()
+        sasl = f"n,a={self._settings.username},\x01auth=Bearer {token}\x01\x01"
+        encoded = base64.b64encode(sasl.encode("utf-8"))
+        response = await smtp.execute_command(b"AUTH", b"OAUTHBEARER", encoded)
+        if response.code == _SMTP_AUTH_CHALLENGE:
+            response = await smtp.execute_command(b"")
+        if response.code != _SMTP_AUTH_SUCCESS:
+            raise aiosmtplib.SMTPAuthenticationError(response.code, response.message)
+
+    async def _get_oauth_token(self, *, force_refresh: bool = False) -> str:
+        if not force_refresh and self._oauth_token and time.monotonic() < self._oauth_token_expires_at:
+            return self._oauth_token
+
+        async with self._oauth_lock:
+            if not force_refresh and self._oauth_token and time.monotonic() < self._oauth_token_expires_at:
+                return self._oauth_token
+            if not all(
+                (
+                    self._settings.oauth_token_url,
+                    self._settings.oauth_client_id,
+                    self._settings.oauth_client_secret,
+                ),
+            ):
+                msg = "Stalwart OAUTHBEARER requires token URL, client ID, and client secret"
+                raise RuntimeError(msg)
+
+            async with httpx.AsyncClient(timeout=self._settings.timeout) as client:
+                response = await client.post(
+                    self._settings.oauth_token_url,
+                    data={
+                        "grant_type": "client_credentials",
+                        "client_id": self._settings.oauth_client_id,
+                        "client_secret": self._settings.oauth_client_secret,
+                    },
+                )
+                response.raise_for_status()
+                payload = response.json()
+
+            token = payload.get("access_token")
+            if not isinstance(token, str) or not token:
+                msg = "OIDC token response did not contain access_token"
+                raise RuntimeError(msg)
+            expires_in = payload.get("expires_in", 300)
+            try:
+                lifetime = max(0, int(expires_in))
+            except (TypeError, ValueError):
+                lifetime = 300
+            self._oauth_token = token
+            self._oauth_token_expires_at = time.monotonic() + max(0, lifetime - 30)
+            return token
 
     def _build_mime(self, message: OutboundMessage) -> EmailMessage:
         msg = EmailMessage()
