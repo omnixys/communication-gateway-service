@@ -3,6 +3,25 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.3.0](https://github.com/omnixys/communication-gateway-service/compare/v1.2.1...v1.3.0) (2026-08-26)
+
+### Agent
+
+* **Agent:** add repository development instructions ([](https://github.com/omnixys/communication-gateway-service/commit/65901e1c466a7174807ae8c1c42feefb6e806282))
+
+### Dir
+
+* **Dir:** remove target dir ([](https://github.com/omnixys/communication-gateway-service/commit/2c293e9178e31b272805fdec6bef13a07770a9e3))
+
+### Otel
+
+* **Otel:** add otel logs ([](https://github.com/omnixys/communication-gateway-service/commit/eb49bb215244ed078deaab623c3ea75d38c0df9c))
+
+### Semver
+
+* **Semver:** add semver ([](https://github.com/omnixys/communication-gateway-service/commit/ea3d5605140cc0dd1719c0ed16acd294296d5547))
+* **Semver:** add semver ([](https://github.com/omnixys/communication-gateway-service/commit/6cbcbbbf8de29aa45aa53b60167c013d63b99f68))
+
 ## [1.2.1](https://github.com/omnixys/communication-gateway-service/compare/v1.2.0...v1.2.1) (2026-08-03)
 
 ## [1.2.0](https://github.com/omnixys/communication-gateway-service/compare/v1.1.1...v1.2.0) (2026-08-03)
