@@ -128,7 +128,7 @@ export default {
       "@semantic-release/exec",
       {
         prepareCmd:
-          'sed -i.bak \'s/^version = ".*"/version = "${nextRelease.version}"/\' pyproject.toml && rm -f pyproject.toml.bak',
+          'sed -i.bak \'s/^version = ".*"/version = "${nextRelease.version}"/\' pyproject.toml && rm -f pyproject.toml.bak && uv lock',
       },
     ],
 
@@ -138,7 +138,7 @@ export default {
     [
       "@semantic-release/git",
       {
-        assets: ["pyproject.toml", "CHANGELOG.md"],
+        assets: ["pyproject.toml", "uv.lock", "CHANGELOG.md", "package-lock.json"],
         message:
           "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
       },
