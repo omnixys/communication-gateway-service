@@ -107,6 +107,11 @@ jobs:
         with:
           node-version: "24"
 
+      - name: 🐍 Setup uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - name: 📦 Install semantic-release plugins
         run: npm ci
 
