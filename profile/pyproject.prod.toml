@@ -1,6 +1,6 @@
 [project]
 name = "omnixys-communication-gateway"
-version = "0.1.0"
+version = "1.3.0"
 description = "Omnixys Communication Gateway – External Provider Integration Layer"
 requires-python = ">=3.14"
 dependencies = [
@@ -13,11 +13,11 @@ dependencies = [
     "httpx>=0.28.0",
     "hypercorn>=0.17.0",
     "aiosmtplib>=3.0.0",
-    "omnixys-config",
-    "omnixys-database",
-    "omnixys-kafka",
-    "omnixys-observability",
-    "omnixys-security",
+    "omnixys-config @ git+https://github.com/omnixys/config-python.git",
+    "omnixys-database @ git+https://github.com/omnixys/database-python.git",
+    "omnixys-kafka @ git+https://github.com/omnixys/kafka-python.git",
+    "omnixys-observability>=3.0.0",
+    "omnixys-security>=3.0.0",
 ]
 
 [project.scripts]
@@ -29,6 +29,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/communication_gateway"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [dependency-groups]
 dev = [
@@ -45,13 +48,6 @@ dev = [
 
 [tool.uv]
 package = true
-
-[tool.uv.sources]
-omnixys-config = { index = "https://pypi.org/simple/" }
-omnixys-database = { index = "https://pypi.org/simple/" }
-omnixys-kafka = { index = "https://pypi.org/simple/" }
-omnixys-observability = { index = "https://pypi.org/simple/" }
-omnixys-security = { index = "https://pypi.org/simple/" }
 
 [tool.ruff]
 line-length = 120
@@ -70,7 +66,7 @@ select = ["ALL"]
 "src/**" = [
     "D", "ANN401", "ARG002", "S104", "S105", "S107",
     "BLE001", "PLW0603", "PLC0415", "TRY003", "TRY300",
-    "ARG001", "FBT001", "PLR0911", "B008", "FAST002",
+    "ARG001", "FBT001", "PLR0911", "PLR0915", "B008", "FAST002",
     "S106", "S110", "S112", "C901",
 ]
 
