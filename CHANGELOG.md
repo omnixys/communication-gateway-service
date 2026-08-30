@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.3.1](https://github.com/omnixys/communication-gateway-service/compare/v1.3.0...v1.3.1) (2026-08-30)
+
+### Chat
+
+* **Chat:** test ([](https://github.com/omnixys/communication-gateway-service/commit/510a9770c915a3011d36cf63ce0befd649714773))
+
+### Deps
+
+* **Deps:** update contracts-ts ([](https://github.com/omnixys/communication-gateway-service/commit/0c1c2c705b7e423bae7922f58f6c9c67596b2dd7))
+
 ## [1.3.0](https://github.com/omnixys/communication-gateway-service/compare/v1.2.1...v1.3.0) (2026-08-26)
 
 ### Agent
