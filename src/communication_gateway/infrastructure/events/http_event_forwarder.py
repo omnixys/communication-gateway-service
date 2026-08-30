@@ -18,25 +18,35 @@ if TYPE_CHECKING:
     )
 
 logger = __import__("structlog").get_logger(__name__)
+SUPPORT_THREAD_NOT_FOUND = 404
 
 
 class HttpEventForwarder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         publisher: OutboundEventPublisher,
         chat_service_url: str,
-        api_key: str,
+        chat_api_key: str,
+        notification_service_url: str,
+        notification_api_key: str,
         address_resolver: AddressResolver,
         mapping_store: MessageMappingStore,
     ) -> None:
         self._publisher = publisher
         self._chat_service_url = chat_service_url.rstrip("/")
-        self._api_key = api_key
+        self._notification_service_url = notification_service_url.rstrip("/")
         self._address_resolver = address_resolver
         self._mapping_store = mapping_store
-        self._client = httpx.AsyncClient(
+        self._chat_client = httpx.AsyncClient(
             headers={
-                "x-api-key": api_key,
+                "x-api-key": chat_api_key,
+                "Content-Type": "application/json",
+            },
+            timeout=httpx.Timeout(15.0),
+        )
+        self._notification_client = httpx.AsyncClient(
+            headers={
+                "x-internal-token": notification_api_key,
                 "Content-Type": "application/json",
             },
             timeout=httpx.Timeout(15.0),
@@ -52,7 +62,8 @@ class HttpEventForwarder:
             self._task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-        await self._client.aclose()
+        await self._chat_client.aclose()
+        await self._notification_client.aclose()
         logger.info("http_event_forwarder_stopped")
 
     async def _run(self) -> None:
@@ -90,6 +101,31 @@ class HttpEventForwarder:
 
     async def _forward_inbound(self, event: InboundMessageReceived) -> None:
         msg = event.message
+        support_response = await self._notification_client.post(
+            f"{self._notification_service_url}/internal/support/inbound-message",
+            json={
+                "externalId": msg.message_id,
+                "from": msg.from_,
+                "body": msg.body,
+                "mediaUrl": msg.attachment.url if msg.attachment else None,
+                "mimeType": msg.attachment.mime_type if msg.attachment else None,
+            },
+        )
+        if support_response.is_success:
+            logger.info(
+                "forward_inbound_support_success",
+                msg_id=msg.message_id,
+                channel=msg.channel.type.value,
+            )
+            return
+        if support_response.status_code != SUPPORT_THREAD_NOT_FOUND:
+            logger.warning(
+                "forward_inbound_support_failed",
+                msg_id=msg.message_id,
+                status_code=support_response.status_code,
+            )
+            return
+
         payload: dict[str, Any] = {
             "message_id": msg.message_id,
             "channel": msg.channel.type.value,
@@ -123,7 +159,7 @@ class HttpEventForwarder:
             channel=msg.channel.type.value,
         )
 
-        response = await self._client.post(
+        response = await self._chat_client.post(
             f"{self._chat_service_url}/api/v1/internal/inbound-message",
             json=payload,
         )
@@ -184,7 +220,7 @@ class HttpEventForwarder:
             chat_url=self._chat_service_url,
         )
 
-        response = await self._client.post(
+        response = await self._chat_client.post(
             f"{self._chat_service_url}/api/v1/internal/delivery-status",
             json=payload,
         )

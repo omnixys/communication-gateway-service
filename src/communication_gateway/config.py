@@ -11,6 +11,8 @@ class GatewayCoreSettings(CoreSettings):
     internal_api_key: str = ""
     chat_service_url: str = "http://localhost:8001"
     chat_service_api_key: str = ""
+    notification_service_url: str = "http://localhost:7402"
+    notification_service_api_key: str = ""
     address_mappings: str = "{}"
 
 
@@ -155,6 +157,7 @@ def validate_production_settings() -> None:
     required = {
         "INTERNAL_API_KEY": settings.core.internal_api_key,
         "CHAT_SERVICE_API_KEY": settings.core.chat_service_api_key,
+        "NOTIFICATION_SERVICE_API_KEY": settings.core.notification_service_api_key,
         "EVOLUTION_API_KEY": settings.evolution.api_key,
         "RESEND_API_KEY": settings.resend.api_key,
         "RESEND_FROM_ADDRESS": settings.resend.from_address,

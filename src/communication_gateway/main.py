@@ -244,7 +244,9 @@ def _setup_forwarder() -> None:
     event_forwarder = HttpEventForwarder(
         publisher=event_publisher,
         chat_service_url=settings.core.chat_service_url,
-        api_key=settings.core.chat_service_api_key,
+        chat_api_key=settings.core.chat_service_api_key,
+        notification_service_url=settings.core.notification_service_url,
+        notification_api_key=settings.core.notification_service_api_key,
         address_resolver=address_resolver,
         mapping_store=mapping_store,
     )
