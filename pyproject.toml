@@ -17,7 +17,7 @@ dependencies = [
     "omnixys-database @ git+https://github.com/omnixys/database-python.git",
     "omnixys-kafka @ git+https://github.com/omnixys/kafka-python.git",
     "omnixys-observability>=4.0.1",
-    "omnixys-security>=3.0.0",
+    "omnixys-security @ file:///Users/gentlebookpro/Projekte/Omnixys/packages/python/security",
 ]
 
 [project.scripts]
