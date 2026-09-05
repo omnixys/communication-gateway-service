@@ -32,7 +32,7 @@ omnixys-config, database, kafka, observability, security
 ## Commands
 
 Commands below are the authoritative validation commands for this repository. Run them
-with the appropriate tooling (observed versions: node 26.6.0, pnpm 11.20.0, uv 0.12.1, java 26.0.2).
+with the appropriate tooling (observed versions: node 26.8.1, pnpm 11.24.0, uv 0.12.8, java 26.0.2).
 
 ### Install
 
@@ -150,6 +150,14 @@ Schema changes must use this repository's migration mechanism. Never rely solely
 ## Multi-Tenancy
 
 Where this repository is tenant-aware, tenant isolation is a hard security boundary. Never allow: cross-tenant reads, cross-tenant writes, tenant IDs supplied by untrusted clients to override the authenticated tenant context, cache keys without tenant isolation, events without required tenant context, or queries that accidentally omit tenant predicates. Add tests for tenant isolation when changing tenant-aware behavior.
+
+## Identity
+
+- **K** = Keycloak `sub` (subject claim); **U** = internal UUIDv7 user id.
+- The `omnixys_user_id` JWT claim carries U.
+- `sender_id` on outbound messages must be validated as UUIDv7.
+- Service-to-service tokens have no U (`userId=null`).
+- Never trust client-supplied identity without validation.
 
 ## Security
 

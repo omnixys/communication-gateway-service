@@ -1,6 +1,12 @@
+import re
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+_UUID_V7_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
 
 
 class SendMessageRequest(BaseModel):
@@ -26,6 +32,14 @@ class SendMessageRequest(BaseModel):
     content_type: Literal["TEXT", "HTML"] = Field(default="TEXT", alias="contentType")
     subject: str | None = Field(default=None, min_length=1, max_length=998)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("sender_id", mode="after")
+    @classmethod
+    def validate_sender_id(cls, v: str | None) -> str | None:
+        if v is not None and not _UUID_V7_RE.match(v):
+            msg = "senderId must be a valid UUIDv7"
+            raise ValueError(msg)
+        return v
 
     @model_validator(mode="after")
     def validate_channel_fields(self) -> SendMessageRequest:

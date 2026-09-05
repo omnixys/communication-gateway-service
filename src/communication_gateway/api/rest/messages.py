@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -64,6 +65,22 @@ def get_mapping_store() -> MessageMappingStore:
     return _mapping_store
 
 
+def _resolve_tenant_id(request_context: Any, x_tenant_id: str | None) -> str:
+    organization_id = (
+        request_context.tenant_id if request_context.is_authenticated and request_context.tenant_id else ""
+    )
+    if not organization_id and x_tenant_id:
+        try:
+            uuid.UUID(x_tenant_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": "INVALID_TENANT_ID", "message": "x-tenant-id must be a valid UUID"},
+            ) from exc
+        organization_id = x_tenant_id
+    return organization_id
+
+
 @router.post("/messages/send")
 async def send_message(
     body: SendMessageRequest,
@@ -105,11 +122,7 @@ async def send_message(
     if body.sender_address:
         metadata["senderAddress"] = body.sender_address
     request_context = current_request_context()
-    organization_id = (
-        request_context.tenant_id if request_context.is_authenticated and request_context.tenant_id else ""
-    )
-    if not organization_id and x_tenant_id:
-        organization_id = x_tenant_id
+    organization_id = _resolve_tenant_id(request_context, x_tenant_id)
     if organization_id:
         metadata["tenantId"] = organization_id
 

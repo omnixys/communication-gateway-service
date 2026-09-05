@@ -232,3 +232,70 @@ class TestRestEndpoints:
 
         assert response.status_code == 502
         assert response.json()["detail"]["code"] == "RESEND_AUTH_FAILED"
+
+    async def test_send_message_rejects_invalid_x_tenant_id(self) -> None:
+        registry = InMemoryChannelProviderRegistry()
+        provider = MockProvider(CommunicationProviderType.RESEND)
+        entry = ChannelEntry(
+            resolver=DefaultProviderResolver(providers=[provider]),
+            providers=[provider],
+        )
+        registry.register_channel(
+            CommunicationChannel(type=CommunicationChannelType.EMAIL),
+            entry,
+        )
+        set_dispatcher(GatewayDispatcher(registry))
+        set_mapping_store(InMemoryMessageMappingStore())
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/messages/send",
+                json={
+                    "id": "email-valid",
+                    "channel": "EMAIL",
+                    "recipientAddress": "person@example.com",
+                    "body": "Hello",
+                    "subject": "Welcome",
+                },
+                headers={"x-tenant-id": "not-a-uuid"},
+            )
+
+        assert response.status_code == 400
+        assert response.json()["detail"]["code"] == "INVALID_TENANT_ID"
+
+    async def test_send_message_accepts_valid_uuidv7_sender_id(self) -> None:
+        registry = InMemoryChannelProviderRegistry()
+        provider = MockProvider(CommunicationProviderType.RESEND)
+        entry = ChannelEntry(
+            resolver=DefaultProviderResolver(providers=[provider]),
+            providers=[provider],
+        )
+        registry.register_channel(
+            CommunicationChannel(type=CommunicationChannelType.EMAIL),
+            entry,
+        )
+        dispatcher = GatewayDispatcher(registry)
+        mapping_store = InMemoryMessageMappingStore()
+        set_dispatcher(dispatcher)
+        set_mapping_store(mapping_store)
+
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/messages/send",
+                json={
+                    "id": "email-valid",
+                    "channel": "EMAIL",
+                    "recipientAddress": "person@example.com",
+                    "body": "Hello",
+                    "subject": "Welcome",
+                    "senderId": "0192f0a0-3b1c-7a00-8000-000000000001",
+                },
+            )
+
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        saved = mapping_store._by_internal.get("email-valid")
+        assert saved is not None
+        assert saved.sender == "0192f0a0-3b1c-7a00-8000-000000000001"
