@@ -3,6 +3,33 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.0](https://github.com/omnixys/communication-gateway-service/compare/v1.3.1...v2.0.0) (2026-09-05)
+
+### Communication-gateway
+
+* **Communication-gateway:** point omnixys-security at local package ([](https://github.com/omnixys/communication-gateway-service/commit/5bac9a5d6eb786743180efc0487c74e74f3647e9))
+
+### Deps
+
+* **Deps:** update omnixys deps ([](https://github.com/omnixys/communication-gateway-service/commit/ee7a2e9ecbf4d004a4abdff2d6ca4531dcf89621))
+
+### Identity
+
+* **Identity:** validate sender_id as UUIDv7, validate x-tenant-id, document U/K conventions ([](https://github.com/omnixys/communication-gateway-service/commit/61462bcf2c060b4ca4ddce2d5015d2ac2b654fc1))
+
+### Other
+
+* **Other:** Merge pull request #1 from omnixys/migration/uuid-v7 ([](https://github.com/omnixys/communication-gateway-service/commit/38cd87084014b6814602c0c0fbcbf91736fc67f9)), closes [#1](https://github.com/omnixys/communication-gateway-service/issues/1)
+* **Other:** Update release.yaml ([](https://github.com/omnixys/communication-gateway-service/commit/7e1a9983315a0dcea9084e6d8e1179b1c022b896))
+
+### Runtime
+
+* **Runtime:** require python 3.14.7 and node 26.8.1 ([](https://github.com/omnixys/communication-gateway-service/commit/b7a9decaa6c1c131dc93e6b77d0dc8efcd5d2810))
+
+### V7
+
+* **V7:** add UUIDv7 ([](https://github.com/omnixys/communication-gateway-service/commit/f13cbed0bfdc42e063d4badda1c1c7812b685b6a))
+
 ## [1.3.1](https://github.com/omnixys/communication-gateway-service/compare/v1.3.0...v1.3.1) (2026-08-30)
 
 ### Chat
