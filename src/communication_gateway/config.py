@@ -165,7 +165,7 @@ def validate_production_settings() -> None:
     if not environment:
         msg = "Missing required env: ENVIRONMENT"
         raise RuntimeError(msg)
-    if environment.lower() != "production":
+    if environment.lower() not in {"production", "development", "staging"}:
         return
     required = {
         "CHAT_SERVICE_URL": settings.core.chat_service_url,
