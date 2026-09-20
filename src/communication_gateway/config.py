@@ -1,7 +1,9 @@
 from pathlib import Path
 from typing import Literal
+from uuid import UUID  # noqa: TC003 - Pydantic resolves this annotation at runtime.
 
 from config.settings import AppSettings, CoreSettings
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _GATEWAY_PKG_DIR = Path(__file__).resolve().parent.parent.parent
@@ -24,6 +26,12 @@ class EvolutionSettings(BaseSettings):
     instance_name: str = "omnixys"
     webhook_secret: str = ""
     cors_origin: str = ""
+
+
+class WhatsAppSupportSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="whatsapp_support_")
+
+    event_map: dict[str, UUID] = Field(default_factory=dict)
 
 
 class SMTPSettings(BaseSettings):
@@ -129,6 +137,7 @@ class GatewaySettings(AppSettings):
     core: GatewayCoreSettings = GatewayCoreSettings()
 
     evolution: EvolutionSettings = EvolutionSettings()
+    whatsapp_support: WhatsAppSupportSettings = WhatsAppSupportSettings()
     smtp: SMTPSettings = SMTPSettings()
     twilio: TwilioSettings = TwilioSettings()
     mailu: MailuSettings = MailuSettings()
@@ -152,24 +161,45 @@ def validate_production_settings() -> None:
         return
     import os
 
-    if os.getenv("ENVIRONMENT", "development").lower() != "production":
+    environment = os.getenv("ENVIRONMENT")
+    if not environment:
+        msg = "Missing required env: ENVIRONMENT"
+        raise RuntimeError(msg)
+    if environment.lower() != "production":
         return
     required = {
+        "CHAT_SERVICE_URL": settings.core.chat_service_url,
+        "NOTIFICATION_SERVICE_URL": settings.core.notification_service_url,
         "INTERNAL_API_KEY": settings.core.internal_api_key,
         "CHAT_SERVICE_API_KEY": settings.core.chat_service_api_key,
         "NOTIFICATION_SERVICE_API_KEY": settings.core.notification_service_api_key,
+        "EVOLUTION_BASE_URL": settings.evolution.base_url,
+        "EVOLUTION_WEBHOOK_SECRET": settings.evolution.webhook_secret,
         "EVOLUTION_API_KEY": settings.evolution.api_key,
-        "RESEND_API_KEY": settings.resend.api_key,
-        "RESEND_FROM_ADDRESS": settings.resend.from_address,
     }
-    if settings.stalwart.enabled and settings.stalwart.auth_mode == "oauthbearer":
+    if settings.email_primary == "resend" or settings.email_fallback == "resend":
         required.update(
             {
-                "STALWART_OAUTH_TOKEN_URL": settings.stalwart.oauth_token_url,
-                "STALWART_OAUTH_CLIENT_ID": settings.stalwart.oauth_client_id,
-                "STALWART_OAUTH_CLIENT_SECRET": settings.stalwart.oauth_client_secret,
+                "RESEND_API_KEY": settings.resend.api_key,
+                "RESEND_FROM_ADDRESS": settings.resend.from_address,
             },
         )
+    if settings.email_primary == "stalwart" or settings.email_fallback == "stalwart":
+        required.update(
+            {
+                "STALWART_HOST": settings.stalwart.host,
+                "STALWART_USERNAME": settings.stalwart.username,
+                "STALWART_PASSWORD": settings.stalwart.password,
+            },
+        )
+        if settings.stalwart.auth_mode == "oauthbearer":
+            required.update(
+                {
+                    "STALWART_OAUTH_TOKEN_URL": settings.stalwart.oauth_token_url,
+                    "STALWART_OAUTH_CLIENT_ID": settings.stalwart.oauth_client_id,
+                    "STALWART_OAUTH_CLIENT_SECRET": settings.stalwart.oauth_client_secret,
+                },
+            )
     missing = [name for name, value in required.items() if not value]
     if missing:
         import logging
