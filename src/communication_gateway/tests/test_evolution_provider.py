@@ -153,6 +153,10 @@ class TestEvolutionProvider:
         result = await provider.verify_webhook(headers, b"{}")
         assert result is False
 
+    async def test_verify_webhook_without_key(self, provider: EvolutionProvider) -> None:
+        result = await provider.verify_webhook({}, b"{}")
+        assert result is False
+
     async def test_verify_webhook_with_bearer_token(self, provider: EvolutionProvider) -> None:
         headers = {"Authorization": "Bearer test-secret"}
         result = await provider.verify_webhook(headers, b"{}")
@@ -190,6 +194,8 @@ class TestEvolutionProvider:
         assert isinstance(result, InboundMessage)
         assert result.from_ == "1234567890"
         assert result.body == "Hello from WhatsApp"
+        assert result.provider_instance == "test-instance"
+        assert result.sender_name == "Test User"
 
     async def test_capabilities(self, provider: EvolutionProvider) -> None:
         caps = await provider.capabilities()

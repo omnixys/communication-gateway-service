@@ -18,6 +18,8 @@ class InboundMessage:
     provider_type: CommunicationProviderType
     from_: str
     body: str
+    provider_instance: str | None = None
+    sender_name: str | None = None
     content_type: str = "TEXT"
     attachment: AttachmentReference | None = None
     conversation_id: str | None = None

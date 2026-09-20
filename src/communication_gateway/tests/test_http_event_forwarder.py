@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, cast
+from uuid import UUID
 
 import httpx
 import pytest
@@ -34,6 +35,9 @@ def create_forwarder() -> HttpEventForwarder:
         notification_api_key="notification-key",
         address_resolver=cast("Any", SimpleNamespace(reverse_lookup=lambda _address: None)),
         mapping_store=cast("Any", SimpleNamespace(get_by_provider_message_id=lambda _message_id: None)),
+        whatsapp_support_event_map={
+            "dev": UUID("2dae12d9-025f-72cd-a285-87130fd6f63e"),
+        },
     )
 
 
@@ -45,6 +49,8 @@ def inbound_event() -> InboundMessageReceived:
             provider_type=CommunicationProviderType.EVOLUTION,
             from_="491701234567@s.whatsapp.net",
             body="Hallo",
+            provider_instance="dev",
+            sender_name="Test User",
         ),
     )
 
@@ -64,7 +70,9 @@ async def test_known_whatsapp_support_thread_stops_after_notification_accepts() 
             "http://notification/internal/support/inbound-message",
             {
                 "externalId": "evolution-message-1",
+                "eventId": "2dae12d9-025f-72cd-a285-87130fd6f63e",
                 "from": "491701234567@s.whatsapp.net",
+                "senderName": "Test User",
                 "body": "Hallo",
                 "mediaUrl": None,
                 "mimeType": None,
@@ -75,7 +83,7 @@ async def test_known_whatsapp_support_thread_stops_after_notification_accepts() 
 
 
 @pytest.mark.asyncio
-async def test_unknown_support_contact_continues_through_existing_chat_path() -> None:
+async def test_unmatched_support_contact_is_not_routed_to_generic_chat() -> None:
     forwarder = create_forwarder()
     notification = RecordingClient(404)
     chat = RecordingClient(201, {"id": "message-1", "conversation_id": "chat-1"})
@@ -89,8 +97,24 @@ async def test_unknown_support_contact_continues_through_existing_chat_path() ->
 
     await forwarder._forward_inbound(inbound_event())
 
-    assert len(chat.requests) == 1
-    assert chat.requests[0][1]["conversation_id"] is None
+    assert len(notification.requests) == 1
+    assert chat.requests == []
+
+
+@pytest.mark.asyncio
+async def test_unknown_evolution_instance_fails_closed() -> None:
+    forwarder = create_forwarder()
+    notification = RecordingClient(201)
+    chat = RecordingClient(201)
+    forwarder._notification_client = cast("Any", notification)
+    forwarder._chat_client = cast("Any", chat)
+    event = inbound_event()
+    event.message.provider_instance = "unknown"
+
+    await forwarder._forward_inbound(event)
+
+    assert notification.requests == []
+    assert chat.requests == []
 
 
 @pytest.mark.asyncio

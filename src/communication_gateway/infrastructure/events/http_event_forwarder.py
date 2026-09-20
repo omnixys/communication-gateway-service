@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from communication_gateway.domain.enums import DeliveryStatus
 from communication_gateway.domain.events import InboundMessageReceived, MessageDelivered
-from communication_gateway.domain.models.message_mapping import MessageMapping
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from uuid import UUID
+
     from communication_gateway.application.ports.address_resolver import AddressResolver
     from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
     from communication_gateway.application.ports.message_mapping_store import (
@@ -18,7 +19,6 @@ if TYPE_CHECKING:
     )
 
 logger = __import__("structlog").get_logger(__name__)
-SUPPORT_THREAD_NOT_FOUND = 404
 
 
 class HttpEventForwarder:
@@ -31,12 +31,14 @@ class HttpEventForwarder:
         notification_api_key: str,
         address_resolver: AddressResolver,
         mapping_store: MessageMappingStore,
+        whatsapp_support_event_map: Mapping[str, UUID],
     ) -> None:
         self._publisher = publisher
         self._chat_service_url = chat_service_url.rstrip("/")
         self._notification_service_url = notification_service_url.rstrip("/")
         self._address_resolver = address_resolver
         self._mapping_store = mapping_store
+        self._whatsapp_support_event_map = whatsapp_support_event_map
         self._chat_client = httpx.AsyncClient(
             headers={
                 "x-api-key": chat_api_key,
@@ -101,11 +103,23 @@ class HttpEventForwarder:
 
     async def _forward_inbound(self, event: InboundMessageReceived) -> None:
         msg = event.message
+        event_id = self._whatsapp_support_event_map.get(msg.provider_instance) if msg.provider_instance else None
+        if event_id is None:
+            logger.warning(
+                "whatsapp_support_event_route_missing",
+                provider=msg.provider_type.value,
+                provider_instance=msg.provider_instance,
+                msg_id=msg.message_id,
+            )
+            return
+
         support_response = await self._notification_client.post(
             f"{self._notification_service_url}/internal/support/inbound-message",
             json={
                 "externalId": msg.message_id,
+                "eventId": str(event_id),
                 "from": msg.from_,
+                "senderName": msg.sender_name,
                 "body": msg.body,
                 "mediaUrl": msg.attachment.url if msg.attachment else None,
                 "mimeType": msg.attachment.mime_type if msg.attachment else None,
@@ -118,76 +132,11 @@ class HttpEventForwarder:
                 channel=msg.channel.type.value,
             )
             return
-        if support_response.status_code != SUPPORT_THREAD_NOT_FOUND:
-            logger.warning(
-                "forward_inbound_support_failed",
-                msg_id=msg.message_id,
-                status_code=support_response.status_code,
-            )
-            return
-
-        payload: dict[str, Any] = {
-            "message_id": msg.message_id,
-            "channel": msg.channel.type.value,
-            "from_": msg.from_,
-            "body": msg.body,
-            "content_type": msg.content_type,
-        }
-
-        user_id = await self._address_resolver.reverse_lookup(msg.from_)
-        payload["user_id"] = user_id or ""
-
-        mapping = None
-        try:
-            mapping = await self._mapping_store.get_by_provider_message_id(
-                msg.message_id,
-            )
-        except Exception:
-            logger.exception("mapping_lookup_error", provider_msg_id=msg.message_id)
-
-        if mapping is not None:
-            payload["conversation_id"] = mapping.conversation_id
-        else:
-            payload["conversation_id"] = None
-
-        logger.info(
-            "forward_inbound",
-            chat_url=self._chat_service_url,
+        logger.warning(
+            "forward_inbound_support_failed",
             msg_id=msg.message_id,
-            user_id=user_id,
-            conversation_id=payload.get("conversation_id"),
-            channel=msg.channel.type.value,
+            status_code=support_response.status_code,
         )
-
-        response = await self._chat_client.post(
-            f"{self._chat_service_url}/api/v1/internal/inbound-message",
-            json=payload,
-        )
-
-        if response.is_success:
-            logger.info("forward_inbound_success", msg_id=msg.message_id)
-            data = response.json()
-            mapping = MessageMapping(
-                internal_id=str(data["id"]),
-                provider_message_id=msg.message_id,
-                provider=msg.provider_type,
-                channel=msg.channel.type,
-                conversation_id=str(data["conversation_id"]),
-                sender=msg.from_,
-                recipient="",
-                status=DeliveryStatus.DELIVERED,
-            )
-            try:
-                await self._mapping_store.save(mapping)
-            except Exception as exc:
-                logger.warning("inbound_mapping_save_error", msg_id=msg.message_id, error=str(exc))
-        else:
-            logger.warning(
-                "forward_inbound_failed",
-                msg_id=msg.message_id,
-                status_code=response.status_code,
-                response_body=response.text[:200],
-            )
 
     async def _forward_delivery(self, event: MessageDelivered) -> None:
         receipt = event.receipt

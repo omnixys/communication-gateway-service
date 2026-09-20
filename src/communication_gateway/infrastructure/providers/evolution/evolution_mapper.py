@@ -43,6 +43,7 @@ def map_to_provider_response(
 
 def map_to_inbound_message(
     message_data: EvolutionMessageData,
+    provider_instance: str | None = None,
 ) -> InboundMessage:
     message_id = message_data.key.get("id", "")
     from_number = message_data.key.get("remoteJid", "").replace("@s.whatsapp.net", "")
@@ -55,6 +56,8 @@ def map_to_inbound_message(
         provider_type=CommunicationProviderType.EVOLUTION,
         from_=str(from_number),
         body=body,
+        provider_instance=provider_instance,
+        sender_name=message_data.push_name or None,
         content_type="TEXT" if attachment is None else attachment.type.value,
         attachment=attachment,
         received_at=datetime.now(UTC),

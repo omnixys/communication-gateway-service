@@ -180,7 +180,7 @@ class EvolutionProvider(CommunicationProvider):
                     message=msg_data.get("message"),
                     message_type=msg_data.get("messageType"),
                 )
-                return map_to_inbound_message(message_data)
+                return map_to_inbound_message(message_data, payload.instance)
 
         elif payload.event == "messages.update":
             message_data = EvolutionMessageData(

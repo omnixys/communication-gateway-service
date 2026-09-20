@@ -32,6 +32,12 @@ from communication_gateway.infrastructure.persistence.in_memory_message_mapping_
 from communication_gateway.infrastructure.persistence.in_memory_registry import (
     InMemoryChannelProviderRegistry,
 )
+from communication_gateway.infrastructure.providers.evolution.evolution_config import (
+    EvolutionApiConfig,
+)
+from communication_gateway.infrastructure.providers.evolution.evolution_provider import (
+    EvolutionProvider,
+)
 from communication_gateway.infrastructure.resolvers.default_provider_resolver import (
     DefaultProviderResolver,
 )
@@ -63,6 +69,69 @@ def _reset_globals(monkeypatch: MonkeyPatch) -> Generator[None]:
 
 
 class TestRestEndpoints:
+    @staticmethod
+    def _set_up_evolution_webhook() -> None:
+        registry = InMemoryChannelProviderRegistry()
+        provider = EvolutionProvider(
+            EvolutionApiConfig(
+                base_url="http://evolution:8080",
+                api_key="configured-api-key",
+                instance_name="dev",
+            ),
+        )
+        registry.register_channel(
+            CommunicationChannel(type=CommunicationChannelType.WHATSAPP),
+            ChannelEntry(
+                resolver=DefaultProviderResolver(providers=[provider]),
+                providers=[provider],
+            ),
+        )
+        set_webhook_service(
+            WebhookService(registry, InMemoryEventPublisher(), InMemoryMessageMappingStore()),
+        )
+
+    async def test_evolution_webhook_accepts_configured_api_key(self) -> None:
+        self._set_up_evolution_webhook()
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/webhooks/evolution",
+                headers={"apikey": "configured-api-key"},
+                json={
+                    "event": "messages.upsert",
+                    "instance": "dev",
+                    "data": {
+                        "key": {
+                            "id": "webhook-message-1",
+                            "remoteJid": "4915226049639@s.whatsapp.net",
+                        },
+                        "pushName": "WhatsApp Guest",
+                        "message": {"conversation": "Hallo"},
+                        "messageType": "conversation",
+                    },
+                },
+            )
+
+        assert response.status_code == 200
+        assert response.json()["received"] is True
+
+    @pytest.mark.parametrize("headers", [{}, {"apikey": "wrong-api-key"}])
+    async def test_evolution_webhook_rejects_missing_or_wrong_api_key(
+        self,
+        headers: dict[str, str],
+    ) -> None:
+        self._set_up_evolution_webhook()
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/webhooks/evolution",
+                headers=headers,
+                json={"event": "messages.upsert", "instance": "dev", "data": {}},
+            )
+
+        assert response.status_code == 401
+        assert response.json()["detail"]["code"] == "WEBHOOK_VERIFICATION_FAILED"
+
     async def test_health_endpoint(self) -> None:
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:

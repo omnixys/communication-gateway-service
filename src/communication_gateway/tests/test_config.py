@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import pytest
+from pydantic import ValidationError
 
 from communication_gateway.config import (
     EvolutionSettings,
     GatewaySettings,
     StalwartSettings,
+    WhatsAppSupportSettings,
 )
-
-if TYPE_CHECKING:
-    import pytest
 
 
 class TestConfig:
@@ -48,3 +47,25 @@ class TestConfig:
         assert s.oauth_token_url == "https://keycloak.example/token"
         assert s.oauth_client_id == "communication-gateway-mail"
         assert s.oauth_client_secret == "secret"
+
+    def test_whatsapp_support_event_map_is_parsed_and_validated(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv(
+            "WHATSAPP_SUPPORT_EVENT_MAP",
+            '{"dev":"2dae12d9-025f-72cd-a285-87130fd6f63e"}',
+        )
+
+        settings = WhatsAppSupportSettings()
+
+        assert str(settings.event_map["dev"]) == "2dae12d9-025f-72cd-a285-87130fd6f63e"
+
+    def test_whatsapp_support_event_map_rejects_invalid_event_id(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("WHATSAPP_SUPPORT_EVENT_MAP", '{"dev":"not-a-uuid"}')
+
+        with pytest.raises(ValidationError):
+            WhatsAppSupportSettings()

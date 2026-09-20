@@ -249,6 +249,7 @@ def _setup_forwarder() -> None:
         notification_api_key=settings.core.notification_service_api_key,
         address_resolver=address_resolver,
         mapping_store=mapping_store,
+        whatsapp_support_event_map=settings.whatsapp_support.event_map,
     )
     logger.info("setting_up_forwarder", chat_service_url=settings.core.chat_service_url)
 

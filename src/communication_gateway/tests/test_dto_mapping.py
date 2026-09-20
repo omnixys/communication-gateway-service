@@ -39,11 +39,13 @@ class TestDtoMapping:
             message={"conversation": "Hello!"},
             message_type="conversation",
         )
-        result = map_to_inbound_message(data)
+        result = map_to_inbound_message(data, "dev")
 
         assert result.message_id == "wh-1"
         assert result.from_ == "1234567890"
         assert result.body == "Hello!"
+        assert result.provider_instance == "dev"
+        assert result.sender_name == "Test User"
         assert result.content_type == "TEXT"
         assert result.attachment is None
 
