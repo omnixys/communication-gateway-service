@@ -10,8 +10,6 @@ from communication_gateway.domain.events import InboundMessageReceived, MessageD
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from uuid import UUID
-
     from communication_gateway.application.ports.address_resolver import AddressResolver
     from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
     from communication_gateway.application.ports.message_mapping_store import (
@@ -31,7 +29,7 @@ class HttpEventForwarder:
         notification_api_key: str,
         address_resolver: AddressResolver,
         mapping_store: MessageMappingStore,
-        whatsapp_support_event_map: Mapping[str, UUID],
+        whatsapp_support_event_map: Mapping[str, Any],
     ) -> None:
         self._publisher = publisher
         self._chat_service_url = chat_service_url.rstrip("/")
@@ -103,8 +101,8 @@ class HttpEventForwarder:
 
     async def _forward_inbound(self, event: InboundMessageReceived) -> None:
         msg = event.message
-        event_id = self._whatsapp_support_event_map.get(msg.provider_instance) if msg.provider_instance else None
-        if event_id is None:
+        route = self._whatsapp_support_event_map.get(msg.provider_instance) if msg.provider_instance else None
+        if route is None:
             logger.warning(
                 "whatsapp_support_event_route_missing",
                 provider=msg.provider_type.value,
@@ -117,7 +115,8 @@ class HttpEventForwarder:
             f"{self._notification_service_url}/internal/support/inbound-message",
             json={
                 "externalId": msg.message_id,
-                "eventId": str(event_id),
+                "tenantId": str(route.tenant_id),
+                "eventId": str(route.event_id),
                 "from": msg.from_,
                 "senderName": msg.sender_name,
                 "body": msg.body,

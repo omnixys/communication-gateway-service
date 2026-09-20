@@ -54,18 +54,19 @@ class TestConfig:
     ) -> None:
         monkeypatch.setenv(
             "WHATSAPP_SUPPORT_EVENT_MAP",
-            '{"dev":"2dae12d9-025f-72cd-a285-87130fd6f63e"}',
+            '{"dev":{"tenantId":"6e788f7f-c233-4cb8-bbde-c0b855e564be","eventId":"2dae12d9-025f-72cd-a285-87130fd6f63e"}}',
         )
 
         settings = WhatsAppSupportSettings()
 
-        assert str(settings.event_map["dev"]) == "2dae12d9-025f-72cd-a285-87130fd6f63e"
+        assert str(settings.event_map["dev"].tenant_id) == "6e788f7f-c233-4cb8-bbde-c0b855e564be"
+        assert str(settings.event_map["dev"].event_id) == "2dae12d9-025f-72cd-a285-87130fd6f63e"
 
     def test_whatsapp_support_event_map_rejects_invalid_event_id(
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        monkeypatch.setenv("WHATSAPP_SUPPORT_EVENT_MAP", '{"dev":"not-a-uuid"}')
+        monkeypatch.setenv("WHATSAPP_SUPPORT_EVENT_MAP", '{"dev":{"tenantId":"not-a-uuid","eventId":"not-a-uuid"}}')
 
         with pytest.raises(ValidationError):
             WhatsAppSupportSettings()

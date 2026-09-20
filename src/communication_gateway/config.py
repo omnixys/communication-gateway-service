@@ -3,7 +3,7 @@ from typing import Literal
 from uuid import UUID  # noqa: TC003 - Pydantic resolves this annotation at runtime.
 
 from config.settings import AppSettings, CoreSettings
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _GATEWAY_PKG_DIR = Path(__file__).resolve().parent.parent.parent
@@ -28,10 +28,19 @@ class EvolutionSettings(BaseSettings):
     cors_origin: str = ""
 
 
+class WhatsAppSupportRoute(BaseModel):
+    """Trusted deployment-time route for one Evolution instance."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    tenant_id: UUID = Field(alias="tenantId")
+    event_id: UUID = Field(alias="eventId")
+
+
 class WhatsAppSupportSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="whatsapp_support_")
 
-    event_map: dict[str, UUID] = Field(default_factory=dict)
+    event_map: dict[str, WhatsAppSupportRoute] = Field(default_factory=dict)
 
 
 class SMTPSettings(BaseSettings):
