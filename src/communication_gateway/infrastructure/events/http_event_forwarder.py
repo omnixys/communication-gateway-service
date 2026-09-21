@@ -10,6 +10,7 @@ from communication_gateway.domain.events import InboundMessageReceived, MessageD
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
     from communication_gateway.application.ports.address_resolver import AddressResolver
     from communication_gateway.application.ports.event_publisher import OutboundEventPublisher
     from communication_gateway.application.ports.message_mapping_store import (

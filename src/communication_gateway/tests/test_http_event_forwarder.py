@@ -1,17 +1,19 @@
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, cast
+from uuid import UUID
+
 import httpx
 import pytest
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
+from communication_gateway.config import WhatsAppSupportRoute
 from communication_gateway.domain.enums import CommunicationChannelType, CommunicationProviderType
 from communication_gateway.domain.events import InboundMessageReceived
 from communication_gateway.domain.models.communication_channel import CommunicationChannel
 from communication_gateway.domain.models.inbound_message import InboundMessage
 from communication_gateway.infrastructure.events.http_event_forwarder import HttpEventForwarder
-from communication_gateway.config import WhatsAppSupportRoute
 
 
 class RecordingClient:
@@ -36,8 +38,8 @@ def create_forwarder() -> HttpEventForwarder:
         mapping_store=cast("Any", SimpleNamespace(get_by_provider_message_id=lambda _message_id: None)),
         whatsapp_support_event_map={
             "dev": WhatsAppSupportRoute(
-                tenantId="6e788f7f-c233-4cb8-bbde-c0b855e564be",
-                eventId="2dae12d9-025f-72cd-a285-87130fd6f63e",
+                tenantId=UUID("6e788f7f-c233-4cb8-bbde-c0b855e564be"),
+                eventId=UUID("2dae12d9-025f-72cd-a285-87130fd6f63e"),
             ),
         },
     )

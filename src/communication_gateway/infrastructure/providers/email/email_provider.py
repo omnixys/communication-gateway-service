@@ -182,7 +182,7 @@ class EmailProvider(CommunicationProvider):
             expires_in = payload.get("expires_in", 300)
             try:
                 lifetime = max(0, int(expires_in))
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 lifetime = 300
             self._oauth_token = token
             self._oauth_token_expires_at = time.monotonic() + max(0, lifetime - 30)
