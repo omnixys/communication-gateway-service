@@ -3,6 +3,26 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.1](https://github.com/omnixys/communication-gateway-service/compare/v2.0.0...v2.0.1) (2026-09-21)
+
+### Communication-gateway
+
+* **Communication-gateway:** resolve lint findings ([](https://github.com/omnixys/communication-gateway-service/commit/42d61d4cf0fa2a311acb467114761c7f21e4ca5b))
+
+### Config
+
+* **Config:** require critical env vars in dev and staging ([](https://github.com/omnixys/communication-gateway-service/commit/56e46233d7ba15fd4f598ad2abfd7334076b3984))
+* **Config:** require critical env vars in production ([](https://github.com/omnixys/communication-gateway-service/commit/c820a9003f88b86c07aa6b34ee361010973c1209))
+
+### Deps
+
+* **Deps:** update omnixys infrastructure packages ([](https://github.com/omnixys/communication-gateway-service/commit/40153232978806ba3d45e1622ac7356af343411c))
+
+### Whatsapp
+
+* **Whatsapp:** forward trusted tenant event route ([](https://github.com/omnixys/communication-gateway-service/commit/1e30f3529b820658a7ebcb0c1bc8469d0f2bda97))
+* **Whatsapp:** route inbound support messages ([](https://github.com/omnixys/communication-gateway-service/commit/9f0b97f1179d7bf6aba9e05560ac08af15f5dfc5))
+
 ## [2.0.0](https://github.com/omnixys/communication-gateway-service/compare/v1.3.1...v2.0.0) (2026-09-05)
 
 ### Communication-gateway
