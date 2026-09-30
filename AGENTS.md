@@ -1,94 +1,168 @@
-<!-- repository: services/communication-gateway | kind: SERVICE | stack: python -->
+<!-- repository: services/communication-gateway | kind: SERVICE | stack: typescript -->
 
 # communication-gateway
 
 > Repository development instructions for **communication-gateway** (Service).
-> Stack: python. Generated as part of the Omnixys repository-policy rollout.
+> Stack: typescript. The service was migrated from Python/FastAPI to NestJS 11 in
+> the `3.0.0` release; the Python commands below no longer exist.
 
 ## Repository Overview
 
-Omnixys Communication Gateway – external provider integration layer (email/SMTP and other providers).
+Omnixys Communication Gateway – external provider integration layer for the
+EMAIL and WHATSAPP channels.
 
 - Repository path: `services/communication-gateway` (relative to the Omnixys root)
-- Package: `omnixys-communication-gateway` (version: 1.2.1)
-- Runtime: Python >=3.14 (uv)
+- Package: `communication-gateway-service` (version: `3.0.0`)
+- Runtime: Node >=26.8.1 <27, pnpm 11.24.0
 - Kind: Service
+- Description: Omnixys Communication Gateway – external provider integration layer (email/SMTP and other providers).
 
 ## Architecture
 
-src/communication_gateway/ with tests under src/communication_gateway/tests (testpaths in pyproject)
+Layered module per bounded context, following
+`docs/architecture/service-architecture-charter.md`:
+
+```
+src/domain         enums, models, domain errors, capabilities
+src/application    ports (interfaces) and services (dispatcher, webhook)
+src/infrastructure providers, persistence, events, analytics, registry
+src/api            controllers, DTOs, guards, filters, health, GraphQL
+src/config         environment reader, validation, config module
+src/shared         http client and cross-cutting helpers
+```
+
+Dependencies point inwards only: `api` and `infrastructure` depend on
+`application` ports, `application` depends on `domain`, and `domain` depends on
+nothing but `@omnixys/contracts-ts`.
 
 ## Database, APIs and Messaging
 
-- Database: PostgreSQL via SQLAlchemy 2 async + asyncpg
-- Migrations: Alembic (migrations/)
-- API: GraphQL (Strawberry) on FastAPI
-- Messaging: Kafka via omnixys-kafka
+- Database: PostgreSQL via Prisma (`prisma/schema.prisma`)
+- Migrations: Prisma migrate; `prisma/migrations/20260101000000_init` is the
+  baseline and replaces the Alembic chain 001-004, so existing databases need no
+  data migration. Never edit an applied migration.
+- API: REST under `/api/v1` plus a GraphQL federation v2 subgraph on `/graphql`
+  (`ApolloFederationDriver`, SDL via `{ _service { sdl } }`)
+- Messaging: Kafka via `@omnixys/kafka-ts`, topic
+  `KAFKA_TOPIC_DELIVERY_STATUS` (default `gateway.delivery.status`)
+- Providers: Evolution (WhatsApp), Resend (email), Stalwart (SMTP fallback). The
+  Twilio, Mailu, Firebase, WhatsApp Cloud API, Signal and Telegram placeholders
+  of the Python runtime are gone.
 
 ## Shared Packages
 
-omnixys-config, database, kafka, observability, security
+`@omnixys/logger-ts`, `@omnixys/contracts-ts`, `@omnixys/kafka-ts`,
+`@omnixys/context-ts`, `@omnixys/cache-ts`, `@omnixys/observability-ts`,
+`@omnixys/security-ts`. Reuse them instead of writing a second implementation.
 
 ## Commands
 
-Commands below are the authoritative validation commands for this repository. Run them
-with the appropriate tooling (observed versions: node 26.8.1, pnpm 11.24.0, uv 0.12.8, java 26.0.2).
+These are the authoritative validation commands for this repository.
 
 ### Install
 
 ```bash
-uv sync --frozen
+pnpm install --frozen-lockfile
 ```
+
+The `postinstall` hook runs `prisma generate`, which needs the GitHub Packages
+token for the `@omnixys` scope.
 
 ### Build
 
 ```bash
-uv build (hatchling)
+pnpm run build
 ```
 
 ### Formatting validation
 
 ```bash
-uv run ruff format --check src/
+pnpm run format:check
 ```
 
 ### Linting
 
+`pnpm run lint` rewrites files with `--fix`. Verify without it:
+
 ```bash
-uv run ruff check src/
+pnpm exec eslint "{src,apps,libs,test}/**/*.ts"
 ```
 
 ### Static analysis / type checking
 
 ```bash
-uv run mypy src/
+npx tsc -p tsconfig.json --noEmit
 ```
 
 ### Unit tests
 
 ```bash
-uv run pytest -m unit (when markers exist)
+node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs
 ```
 
 ### Integration tests
 
 ```bash
-uv run pytest
+node --env-file=__tests__/unit/test.env --test __tests__/integration/*.test.mjs
 ```
 
 ### Full verification
 
 ```bash
-uv run pytest
+pnpm run test
+```
+
+### Database
+
+```bash
+pnpm run prisma:validate
+pnpm run prisma:generate
+pnpm run prisma:migrate
+pnpm run prisma:deploy
 ```
 
 ## Tests
 
-pytest with pytest-asyncio; tests colocated under src/communication_gateway/tests
+`node --test` is the runner. Unit tests cover domain, configuration, provider
+adapters, webhook verification, the event bus, the outbox worker and the HTTP
+forwarder. Integration tests boot the real Nest application on an ephemeral
+port and cover REST, GraphQL, the internal API key guard, health probes,
+readiness and persistence.
+
+`__tests__/support/env.mjs` is imported first by every test file. It pins a
+closed `DATABASE_URL` and a fixed `INTERNAL_API_KEY` because Node's
+`--env-file` does not override variables that are already exported, and this
+repository has a local `.env` that Prisma would otherwise load. Keep the
+isolation; do not read `.env` in tests.
 
 ## Repository-Specific Rules
 
-External provider adapters; secrets (SMTP credentials, provider tokens) must never be logged. Ruff select=ALL, mypy strict.
+- Secret material (SMTP credentials, provider tokens, the internal API key) must
+  never be logged, and neither `.env` nor any file under `keys/` may be read or
+  copied. `docker buildx build` needs `--secret id=omnixys_token`.
+- The internal API key is fail-closed: a missing `INTERNAL_API_KEY` is a `503`,
+  a wrong key is a `401`, and production rejects keys shorter than 16 characters.
+- Health probes and webhooks are public. Everything else, including GraphQL,
+  requires `x-internal-api-key`. Never mark a new route `@Public()` without a
+  reason.
+- Webhook verification accepts a configured API key (header or body), a
+  matching bearer secret or a valid HMAC. A payload with no credential is
+  always rejected.
+- Webhook handling is idempotent per provider message id for every mapping
+  state, including `PENDING` and `FAILED`.
+- `GET /api/v1/providers` lists only providers whose credential is configured.
+- `@apollo/subgraph` is pinned to `2.14.4`. Version 2.15 refactored
+  `buildSubgraphSchema` to a modules-only signature that
+  `@nestjs/graphql@13.4.5` does not satisfy; the code-first boot fails with
+  `doc.definitions is not iterable`. Do not widen the range.
+- `graphql@17` is installed while the Apollo stack declares a `^16` peer range.
+  The code-first path works, and the warning is pre-existing; do not raise a
+  separate major bump as part of an unrelated change.
+- `KAFKA_ACKS` is accepted for compatibility but `@omnixys/kafka-ts` always
+  produces with `acks=-1`. An empty `KAFKA_BROKER` disables the event bus and
+  keeps the process up with cross-service events dropped.
+- The Docker image applies `prisma migrate deploy` on start; set
+  `RUN_MIGRATIONS=false` to skip it.
 
 ## Development Skill
 
@@ -119,7 +193,7 @@ Do not create meaningless tests. Avoid tests that: only assert that mocks were c
 
 ## Validation Before Completion
 
-Before considering a task complete, run the checks appropriate for this repository. At minimum, when available: (1) formatting validation, (2) linting, (3) static analysis/type checking, (4) unit tests, (5) integration tests, (6) build/package validation. Also run repository-specific validation such as GraphQL schema validation, migration validation, generated-code checks, Docker build validation, architecture tests, and dependency checks.
+Before considering a task complete, run the checks appropriate to this repository. At minimum, when available: (1) formatting validation, (2) linting, (3) static analysis/type checking, (4) unit tests, (5) integration tests, (6) build/package validation. Also run repository-specific validation such as GraphQL schema validation, migration validation, generated-code checks, Docker build validation, architecture tests, and dependency checks.
 
 Do not claim that a command succeeded unless it was actually executed successfully. If a validation cannot be executed, state why. Do not hide pre-existing failures. Distinguish clearly between failures introduced by the current change, pre-existing failures, and environment/infrastructure failures. Use explicit statuses: `PASS`, `FAIL`, `PRE-EXISTING FAILURE`, or `NOT RUN` with a stated reason (for example infrastructure unavailable, credentials unavailable, external dependency unavailable, unsafe with a dirty working tree, or outside the lightweight validation budget). Never report an unexecuted check as successful.
 
@@ -142,6 +216,8 @@ Avoid: god classes, circular dependencies, hidden global state, duplicated busin
 ## API and Contract Changes
 
 Treat externally observable contracts carefully: GraphQL schemas, REST APIs, Kafka events, shared DTOs, protobuf schemas, JSON schemas, and database contracts consumed externally. Before changing a contract: (1) identify consumers, (2) determine compatibility impact, (3) prefer backward-compatible evolution, (4) update corresponding tests, (5) update shared contracts/packages where applicable. Do not silently introduce breaking changes.
+
+The GraphQL surface keeps snake_case field and enum names because the gateway BFF consumes them. The REST surface is documented in `docs/contracts/api-contract.md`; update it in the same change as the code.
 
 ## Database Changes
 
@@ -167,13 +243,19 @@ Apply secure-by-default engineering. Never: commit secrets, print secrets, log c
 
 New production behavior should integrate with this repository's established observability approach where relevant: structured logging, metrics, traces, correlation IDs, tenant context, and error classification. Do not log sensitive payloads merely for debugging convenience. Avoid noisy logs in hot paths.
 
+Use `getLogger('<Class>', 'class')` from `@omnixys/logger-ts` and keep the existing log-event naming style.
+
 ## Error Handling
 
 Use the repository's established error model. Errors should: preserve meaningful context, avoid leaking sensitive implementation details, distinguish expected domain failures from unexpected system failures, map consistently to API responses/events, and remain observable. Never silently swallow errors unless explicitly required by the domain behavior.
 
+Domain errors are raised as typed errors from `src/domain/errors.ts` and mapped to HTTP status codes in `src/api/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
+
 ## Generated Code
 
 Do not manually edit generated files unless the repository explicitly treats them as maintained source. Identify generators before modifying generated artifacts. When source schemas or definitions change: (1) update the source, (2) run the generator, (3) validate generated output, (4) commit generated output only if repository convention requires it.
+
+The Prisma client in `node_modules/.prisma` is generated by the `postinstall` hook; `dist/` is build output and stays untracked.
 
 ## Documentation
 
@@ -248,7 +330,7 @@ Review these files whenever the repository's development tooling changes. Do not
 
 ### `.vscode/extensions.json`
 
-Keep recommendations aligned with the technologies actually used. Rules:
+Keep recommendations aligned with the technologies actually used by this repository. Rules:
 
 - Recommend extensions relevant to technologies actually used by this repository.
 - Prefer official or established extensions.

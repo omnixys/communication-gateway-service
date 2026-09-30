@@ -1,11 +1,16 @@
 {
   "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "Prisma.prisma",
+    "GraphQL.vscode-graphql",
+    "ms-azuretools.vscode-docker"
+  ],
+  "unwantedRecommendations": [
     "ms-python.python",
     "ms-python.vscode-pylance",
     "charliermarsh.ruff",
-    "ms-python.mypy-type-checker"
-  ],
-  "unwantedRecommendations": [
+    "ms-python.mypy-type-checker",
     "ms-python.black-formatter"
   ]
 }
