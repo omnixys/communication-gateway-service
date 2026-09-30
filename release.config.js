@@ -52,7 +52,7 @@ export default {
       {
         preset: 'conventionalcommits',
         releaseRules: [
-          { type: 'breaking', release: 'major' },
+          { breaking: true, release: 'major' },
           { type: 'feat', release: 'minor' },
           { type: 'fix', release: 'patch' },
           { type: 'perf', release: 'patch' },
