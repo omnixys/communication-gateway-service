@@ -285,7 +285,6 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       apiKey: reader.string('EVOLUTION_API_KEY'),
       instanceName: reader.string('EVOLUTION_INSTANCE_NAME', 'omnixys'),
       webhookSecret: reader.string('EVOLUTION_WEBHOOK_SECRET'),
-      corsOrigin: reader.string('EVOLUTION_CORS_ORIGIN'),
     },
     whatsappSupport: {
       eventMap: reader.json<Readonly<Record<string, WhatsappSupportRoute>>>(

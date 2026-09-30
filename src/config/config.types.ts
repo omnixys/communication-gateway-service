@@ -82,7 +82,6 @@ export interface EvolutionConfig {
   readonly apiKey: string;
   readonly instanceName: string;
   readonly webhookSecret: string;
-  readonly corsOrigin: string;
 }
 
 export interface WhatsappSupportConfig {

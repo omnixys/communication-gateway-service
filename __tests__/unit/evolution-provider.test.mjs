@@ -49,7 +49,6 @@ function provider(configOverrides = {}, timeoutMs = 1000) {
       apiKey: API_KEY,
       instanceName: 'omnixys',
       webhookSecret: '',
-      corsOrigin: '',
       ...configOverrides,
     },
     timeoutMs,

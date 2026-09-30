@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloFederationDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import {
   Module,
   ValidationPipe,
@@ -81,8 +81,11 @@ export class AppModule implements NestModule {
       PersistenceModule,
       EventsModule.forRoot({ withKafka }),
       GraphQLModule.forRoot<ApolloDriverConfig>({
-        driver: ApolloDriver,
-        autoSchemaFile: true,
+        // The gateway BFF composes this service with IntrospectAndCompose, so
+        // the driver has to build a Federation v2 subgraph that publishes its
+        // SDL at /_service/sdl instead of a plain schema.
+        driver: ApolloFederationDriver,
+        autoSchemaFile: { federation: { version: 2 } },
         sortSchema: true,
         playground: false,
         introspection: true,

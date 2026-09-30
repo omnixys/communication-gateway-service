@@ -410,6 +410,24 @@ describe('graphql api', () => {
 
     assert.equal(response.body.data.provider, null);
   });
+
+  it('serves the subgraph SDL that IntrospectAndCompose reads', async () => {
+    const response = await call('/graphql', {
+      method: 'POST',
+      headers: authorized,
+      body: { query: '{ _service { sdl } }' },
+    });
+
+    assert.equal(response.body.errors, undefined);
+    const { sdl } = response.body.data._service;
+    assert.match(sdl, /type ProviderStatus/);
+    assert.match(sdl, /gatewayHealth: GatewayHealth/);
+    assert.match(
+      sdl,
+      /@link\(url: "https:\/\/specs\.apollo\.dev\/federation\/v2\./,
+      'the SDL is linked to the federation v2 spec',
+    );
+  });
 });
 
 describe('unknown routes', () => {
