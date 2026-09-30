@@ -1,7 +1,7 @@
 {
   "name": "communication-gateway-service",
   "version": "3.0.0",
-  "description": "Omnixys Communication Gateway – External Provider Integration Layer",
+  "description": "Omnixys Communication Gateway \u2013 External Provider Integration Layer",
   "author": {
     "name": "Caleb Gyamfi",
     "email": "caleb.gyamfi@omnixys.com",
@@ -26,8 +26,8 @@
   "scripts": {
     "clean": "rm -rf dist tsconfig.build.tsbuildinfo *.tsbuildinfo",
     "build": "pnpm run clean && nest build",
-    "format": "prettier --cache --write \"src/**/*.{ts,js,json,prisma,md,yaml}\" \"__tests__/**/*.ts\"",
-    "format:check": "prettier --cache --check \"src/**/*.{ts,js,json,prisma,md,yaml,yml}\" \"__tests__/**/*.ts\"",
+    "format": "prettier --cache --write \"src/**/*.{ts,js,json,prisma,md,yaml}\" \"__tests__/**/*.ts\" --no-error-on-unmatched-pattern",
+    "format:check": "prettier --cache --check \"src/**/*.{ts,js,json,prisma,md,yaml,yml}\" \"__tests__/**/*.ts\" --no-error-on-unmatched-pattern",
     "start": "pnpm nest start",
     "dev": "pnpm run clean && nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -36,13 +36,14 @@
     "test": "pnpm run test:unit && pnpm run test:integration",
     "test:unit": "pnpm run build && node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs",
     "test:integration": "pnpm run build && node --env-file=__tests__/unit/test.env --test __tests__/integration/*.test.mjs",
-    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
-    "prisma:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
-    "prisma:reset": "prisma migrate reset --force --schema prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema prisma/schema.prisma",
-    "prisma:validate": "prisma validate --schema prisma/schema.prisma",
-    "release": "semantic-release"
+    "prisma:generate": "node scripts/prisma.mts generate --schema prisma/schema.prisma",
+    "prisma:migrate": "node scripts/prisma.mts migrate dev --schema prisma/schema.prisma",
+    "prisma:deploy": "node scripts/prisma.mts migrate deploy --schema prisma/schema.prisma",
+    "prisma:reset": "node scripts/prisma.mts migrate reset --force --schema prisma/schema.prisma",
+    "prisma:studio": "node scripts/prisma.mts studio --schema prisma/schema.prisma",
+    "prisma:validate": "node scripts/prisma.mts validate --schema prisma/schema.prisma",
+    "release": "semantic-release",
+    "postinstall": "node scripts/prisma.mts generate --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",
