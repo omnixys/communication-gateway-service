@@ -30,8 +30,12 @@ variable "APP_VERSION" {
   default = "dev"
 }
 
-variable "PYTHON_VERSION" {
-  default = "3.14.7"
+variable "NODE_VERSION" {
+  default = "26.8.1"
+}
+
+variable "PNPM_VERSION" {
+  default = "11.24.0"
 }
 
 variable "CREATED" {
@@ -55,7 +59,8 @@ target "build" {
   context = "."
 
   args = {
-    PYTHON_VERSION = "${PYTHON_VERSION}"
+    NODE_VERSION   = "${NODE_VERSION}"
+    PNPM_VERSION   = "${PNPM_VERSION}"
     APP_NAME       = "${APP_NAME}"
     APP_VERSION    = "${APP_VERSION}"
     CREATED        = "${CREATED}"
