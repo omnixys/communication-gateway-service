@@ -89,9 +89,9 @@ can serve the channel, and `401` for bad internal credentials.
 
 ## Providers
 
-- `GET /api/v1/providers` returns a bare array. A provider appears only when
-  its credential is configured, so an Evolution-only deployment returns exactly
-  one entry.
+- `GET /api/v1/providers` returns a bare array. `WHATSAPP` always registers
+  Evolution; the `EMAIL` chain is built from `EMAIL_PRIMARY` and
+  `EMAIL_FALLBACK`, and `EMAIL_PRIMARY=none` registers no email adapter at all.
 - `GET /api/v1/providers/:providerType/health` probes one adapter and answers
   `{status, provider, error?}` with `status` one of `ok`, `unavailable`,
   `unknown`, `not_implemented` or `error`. The name is case-insensitive. A name
