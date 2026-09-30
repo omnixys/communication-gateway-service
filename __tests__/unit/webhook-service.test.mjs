@@ -20,13 +20,13 @@ import './../support/env.mjs';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { WebhookService } from '../../dist/application/services/webhook.service.js';
+import { WebhookService } from '../../dist/communication-gateway/services/webhook.service.js';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/domain/enums.js';
-import { WebhookVerificationError } from '../../dist/domain/errors.js';
-import { InMemoryMessageMappingStore } from '../../dist/infrastructure/persistence/in-memory-message-mapping.store.js';
+} from '../../dist/communication-gateway/domain/enums.js';
+import { WebhookVerificationError } from '../../dist/communication-gateway/domain/errors.js';
+import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
 import {
   FakeProvider,
   FakeRegistry,

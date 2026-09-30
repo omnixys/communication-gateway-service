@@ -20,30 +20,29 @@ import '../support/env.mjs';
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 
-import { NestFactory } from '@nestjs/core';
+import { Test } from '@nestjs/testing';
+import { PrismaService } from '../../dist/prisma/prisma.service.js';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
 
 import { AppModule } from '../../dist/app.module.js';
 import { API_KEY_HEADER, INTERNAL_API_KEY } from '../support/env.mjs';
 
 let app;
-let baseUrl = '';
 
 /** Issues a request against the in-process gateway and returns status + body. */
 async function call(path, { method = 'GET', headers = {}, body } = {}) {
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await app.getHttpAdapter().getInstance().inject({
     method,
+    url: path,
     headers: {
       ...(body === undefined ? {} : { 'content-type': 'application/json' }),
       ...headers,
     },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    ...(body === undefined ? {} : { payload: body }),
   });
-  const text = await response.text();
-
   return {
-    status: response.status,
-    body: text.length === 0 ? null : JSON.parse(text),
+    status: response.statusCode,
+    body: response.body.length === 0 ? null : JSON.parse(response.body),
   };
 }
 
@@ -57,15 +56,19 @@ const MESSAGE = {
   body: 'hello',
 };
 
+async function createApp() {
+  const module = await Test.createTestingModule({ imports: [AppModule.forRoot()] })
+    .overrideProvider(PrismaService)
+    .useValue({ ping: async () => false })
+    .compile();
+  return module.createNestApplication(new FastifyAdapter(), { rawBody: true });
+}
+
 before(async () => {
   // rawBody mirrors the production bootstrap: the webhook route verifies an
   // HMAC over the exact bytes Evolution sent.
-  app = await NestFactory.create(AppModule.forRoot(), new FastifyAdapter(), {
-    logger: false,
-    rawBody: true,
-  });
-  await app.listen(0, '127.0.0.1');
-  baseUrl = await app.getUrl();
+  app = await createApp();
+  await app.init();
 });
 
 after(async () => {
@@ -88,7 +91,7 @@ describe('health probes', () => {
     assert.equal(
       response.status,
       503,
-      'the database url in the test env is closed',
+      JSON.stringify(response.body),
     );
     assert.equal(response.body.status, 'not_ready');
     assert.equal(
@@ -145,18 +148,16 @@ describe('internal api key guard', () => {
   it('answers 503 when no key is configured at all', async () => {
     const previous = process.env.INTERNAL_API_KEY;
     process.env.INTERNAL_API_KEY = '';
-    const isolated = await NestFactory.create(
-      AppModule.forRoot(),
-      new FastifyAdapter(),
-      { logger: false, rawBody: true },
-    );
-    await isolated.listen(0, '127.0.0.1');
-    const response = await fetch(`${await isolated.getUrl()}/api/v1/providers`);
-    await response.text();
+    const isolated = await createApp();
+    await isolated.init();
+    const response = await isolated.getHttpAdapter().getInstance().inject({
+      method: 'GET',
+      url: '/api/v1/providers',
+    });
     await isolated.close();
     process.env.INTERNAL_API_KEY = previous;
 
-    assert.equal(response.status, 503);
+    assert.equal(response.statusCode, 503);
   });
 });
 

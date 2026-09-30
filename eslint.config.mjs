@@ -30,6 +30,7 @@ export default tseslint.config(
     ignores: [
       'eslint.config.mjs',
       'dist/**',
+      'src/prisma/generated/**',
       'node_modules/**',
       'coverage/**',
       '*.d.ts',

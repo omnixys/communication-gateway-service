@@ -8,12 +8,12 @@
 ## Repository Facts
 
 - Kind: Service
-- Package: `communication-gateway-service` (version: `3.0.0`)
+- Package: `communication-gateway-service` (version currently set by release automation)
 - Runtime: Node >=26.8.1 <27, pnpm 11.24.0
 - Description: Omnixys Communication Gateway – external provider integration layer (email/SMTP and other providers).
-- Architecture: layered `src/{domain,application,infrastructure,api,config,shared}` with one Nest module per bounded
-  context
-- Database: PostgreSQL via Prisma; Migrations: Prisma migrate (`prisma/migrations`, baseline replaces Alembic 001-004)
+- Architecture: `src/communication-gateway` owns domain, ports, services and transports;
+  `src/{adapter,analytics,config,core,health,prisma,security}` are service infrastructure
+- Database: required PostgreSQL via Prisma 7; Migrations: Prisma migrate (`prisma/migrations`, baseline replaces Alembic 001-004)
 - API: REST under `/api/v1` plus a GraphQL federation v2 subgraph on `/graphql`
 - Messaging: Kafka via `@omnixys/kafka-ts`, topic `gateway.delivery.status`
 - Providers: Evolution (WhatsApp), Resend (email), Stalwart (SMTP fallback)
@@ -23,8 +23,8 @@
 
 ### 1. Understand the change
 
-- Identify the affected layer. Dependencies point inwards: `api` and `infrastructure` use the `application` ports,
-  `application` uses `domain`, `domain` uses nothing but `@omnixys/contracts-ts`.
+- Identify the affected gateway context and port. The domain stays framework independent;
+  services depend on ports, and adapter and Prisma modules implement them.
 - Inspect the consumers of the GraphQL operations, the REST routes and the Kafka events you may touch. The GraphQL
   field and enum names stay snake_case; the gateway BFF depends on them.
 - Decide whether the route is public. Health probes and webhooks are `@Public()`; everything else, GraphQL included,
@@ -32,22 +32,23 @@
 
 ### 2. Implement
 
-- Add a layer in the canonical order and keep the existing module layout and naming conventions.
+- Keep gateway business behavior in `src/communication-gateway`; put provider and event adapters in
+  `src/adapter`, persistence in `src/prisma`, and shared service concerns in their named directories.
 - Reuse `@omnixys/*` packages (logger-ts, contracts-ts, kafka-ts, context-ts, cache-ts, observability-ts,
   security-ts) before reimplementing shared infrastructure. Do not add a repository-local copy.
 - Keep secrets out of logs and files: SMTP credentials, provider tokens and `INTERNAL_API_KEY` are never logged, and
   `.env` is never read by code or tests.
-- Configuration changes go through `src/config/configuration.ts`. Every new key needs a default, validation where a
-  wrong value is dangerous, and a line in `.env.example`.
-- Database changes need a new migration on top of `20260101000000_init`. Never edit an applied migration, and keep
+- Configuration changes go through `src/config/configuration.ts`. New optional keys need a default; required keys
+  need validation and a line in `.env.example`.
+- `DATABASE_URL` is mandatory; startup verifies a real query. Database changes need a new migration on top of `20260101000000_init`. Never edit an applied migration, and keep
   index and constraint names aligned with the SQL baseline.
 
 ### 3. Write tests
 
 - Unit tests exercise isolated business behavior: configuration parsing, domain rules, provider adapters, webhook
   verification, the event bus, the outbox worker and the HTTP forwarder.
-- Integration tests boot the real Nest application on an ephemeral port and cover REST, GraphQL, the internal API key
-  guard, health probes, readiness and persistence.
+- API integration tests use Fastify request injection. PostgreSQL persistence is exercised against an isolated
+  Testcontainers instance when a container runtime is available.
 - Import `../support/env.mjs` first in every test file. It pins a closed `DATABASE_URL` and a fixed
   `INTERNAL_API_KEY`, because `--env-file` cannot override the ambient environment and a local `.env` exists.
 - Cover tenant-isolation and error-contract cases when the code path touches them. A regression test must fail before

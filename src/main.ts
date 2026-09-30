@@ -9,88 +9,79 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * For more information, visit <https://www.gnu.org/licenses/>.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  */
-
-import 'reflect-metadata';
-
-import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import { getLogger } from '@omnixys/logger-ts';
 
 import { AppModule } from './app.module.js';
 import {
   assertProductionReadiness,
   loadConfig,
 } from './config/configuration.js';
+import { corsOptions } from './config/cors.js';
+import compress from '@fastify/compress';
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
+import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  type NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { getLogger } from '@omnixys/logger-ts';
+import { registerFastifyTracing } from '@omnixys/observability-ts';
+import 'reflect-metadata';
 
 const logger = getLogger('Bootstrap', 'class');
 
-/** Starts the gateway HTTP server. */
+/** Starts the gateway only after configuration and database checks pass. */
 export async function bootstrap(): Promise<NestFastifyApplication> {
   const config = loadConfig(process.env);
   assertProductionReadiness(config);
 
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.forRoot(),
-    new FastifyAdapter(adapterOptions()),
-    {
-      // Provider webhooks are verified against the exact bytes that were
-      // signed, so the unparsed body has to stay reachable on the request.
-      rawBody: true,
-      bufferLogs: false,
-    },
+    new FastifyAdapter({
+      logger: false,
+      trustProxy: true,
+      bodyLimit: 1_048_576,
+    }),
+    { rawBody: true, bufferLogs: false },
   );
+  const fastify = app.getHttpAdapter().getInstance();
+  registerFastifyTracing(fastify);
+
+  await app.register(helmet, { contentSecurityPolicy: false });
+  await app.register(cors, corsOptions);
+  await app.register(compress, {
+    global: true,
+    encodings: ['br', 'gzip', 'deflate'],
+    threshold: 1024,
+  });
+  await app.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
+    allowList: (request) => request.url.startsWith('/health'),
+  });
 
   app.enableShutdownHooks();
   await app.listen({ host: config.core.host, port: config.core.port });
-
   logger.info(
     {
       service: config.core.serviceName,
       host: config.core.host,
       port: config.core.port,
-      environment: config.core.environment,
-      graphql: '/graphql',
-      internalApiKeyConfigured: config.core.internalApiKey.length > 0,
-      persistence: config.database.enabled ? 'prisma' : 'in-memory',
     },
-    'communication gateway listening',
+    'communication_gateway_listening',
   );
   return app;
 }
 
-/**
- * Fastify adapter options.
- *
- * The built in request logger is disabled because every log line goes through
- * `@omnixys/logger-ts`, and the JSON body limit matches the largest provider
- * payload the gateway accepts.
- */
-function adapterOptions(): {
-  logger: false;
-  trustProxy: boolean;
-  bodyLimit: number;
-} {
-  return {
-    logger: false,
-    trustProxy: true,
-    bodyLimit: 1_048_576,
-  };
-}
-
-const isEntrypoint = process.argv[1]?.endsWith('main.js') === true;
-if (isEntrypoint) {
+if (process.argv[1]?.endsWith('main.js')) {
   bootstrap().catch((error: unknown) => {
     logger.fatal(
       { error: error instanceof Error ? error.message : String(error) },
-      'bootstrap failed',
+      'bootstrap_failed',
     );
     process.exitCode = 1;
   });

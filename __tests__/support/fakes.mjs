@@ -22,7 +22,7 @@ import {
   CommunicationProviderType,
   DeliveryStatus,
   ProviderStatus,
-} from '../../dist/domain/enums.js';
+} from '../../dist/communication-gateway/domain/enums.js';
 
 export const WHATSAPP_CHANNEL = Object.freeze({
   type: CommunicationChannelType.WHATSAPP,
@@ -260,7 +260,7 @@ export class FakeRegistry {
 /** Minimal in-memory MessageMappingStore built on the shipped implementation. */
 export async function inMemoryStore() {
   const { InMemoryMessageMappingStore } =
-    await import('../../dist/infrastructure/persistence/in-memory-message-mapping.store.js');
+    await import('../../dist/prisma/in-memory-message-mapping.store.js');
   return new InMemoryMessageMappingStore();
 }
 

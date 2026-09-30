@@ -23,11 +23,11 @@ import { describe, it } from 'node:test';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/domain/enums.js';
-import { backoffDelay } from '../../dist/infrastructure/events/http-event.forwarder.js';
-import { InMemoryEventPublisher } from '../../dist/infrastructure/events/in-memory-event.publisher.js';
-import { KafkaDeliveryEventHandler } from '../../dist/infrastructure/events/kafka-delivery-event.handler.js';
-import { DisabledRawEventPublisher } from '../../dist/infrastructure/events/kafka-raw-event.publisher.js';
+} from '../../dist/communication-gateway/domain/enums.js';
+import { backoffDelay } from '../../dist/adapter/events/http-event.forwarder.js';
+import { InMemoryEventPublisher } from '../../dist/adapter/events/in-memory-event.publisher.js';
+import { KafkaDeliveryEventHandler } from '../../dist/adapter/events/kafka-delivery-event.handler.js';
+import { DisabledRawEventPublisher } from '../../dist/adapter/events/kafka-raw-event.publisher.js';
 import {
   RecordingRawPublisher,
   deliveryReceipt,

@@ -1,32 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Caleb Gyamfi - Omnixys Technologies
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// For more information, visit <https://www.gnu.org/licenses/>.
-
 // The datamodel mirrors the SQL in migrations/20260101000000_init, which is the
-// end state of the former Alembic chain. Two deliberate differences remain:
-//   - ids have no database default; every insert passes randomUUID()
-//   - updated_at keeps the DEFAULT CURRENT_TIMESTAMP of the baseline, but
-//     @updatedAt makes Prisma own the value, so migrate diff never prints it
-// Index and constraint names match the migration exactly, including the
-// uq_message_mappings_provider_message_id name introduced by Alembic 003.
+// end state of the former Alembic chain. Existing data does not need migration.
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/prisma/generated"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 /// Runtime configuration of a provider adapter.

@@ -24,13 +24,13 @@ import { describe, it } from 'node:test';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/domain/enums.js';
-import { EvolutionProvider } from '../../dist/infrastructure/providers/evolution/evolution.provider.js';
+} from '../../dist/communication-gateway/domain/enums.js';
+import { EvolutionProvider } from '../../dist/adapter/providers/evolution/evolution.provider.js';
 import {
   verifyApiKey,
   verifyBearerSecret,
   verifyEvolutionSignature,
-} from '../../dist/infrastructure/providers/evolution/evolution.webhook-verifier.js';
+} from '../../dist/adapter/providers/evolution/evolution.webhook-verifier.js';
 
 const API_KEY = 'evolution-api-key';
 const WEBHOOK_SECRET = 'evolution-webhook-secret';

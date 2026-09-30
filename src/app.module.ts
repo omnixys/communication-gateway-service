@@ -15,6 +15,15 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import { EventsModule } from './adapter/events/events.module.js';
+import { CommunicationGatewayModule } from './communication-gateway/communication-gateway.module.js';
+import { AppConfigModule } from './config/config.module.js';
+import { loadConfig } from './config/configuration.js';
+import { GatewayExceptionFilter } from './core/filters/gateway-exception.filter.js';
+import { RequestContextMiddleware } from './core/middleware/request-context.middleware.js';
+import { HealthModule } from './health/health.module.js';
+import { PersistenceModule } from './prisma/persistence.module.js';
+import { SecurityModule } from './security/security.module.js';
 import { ApolloFederationDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import {
   Module,
@@ -24,53 +33,14 @@ import {
   type NestModule,
   type Type,
 } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { KafkaModule } from '@omnixys/kafka-ts';
 import { getLogger } from '@omnixys/logger-ts';
 
-import { InternalApiKeyGuard } from './api/auth/internal-api-key.guard.js';
-import { GatewayExceptionFilter } from './api/filters/gateway-exception.filter.js';
-import { ProvidersResolver } from './api/graphql/providers.resolver.js';
-import { HealthController } from './api/health/health.controller.js';
-import { MessagesController } from './api/messages/messages.controller.js';
-import { MessagesService } from './api/messages/messages.service.js';
-import { RequestContextMiddleware } from './api/middleware/request-context.middleware.js';
-import { ProvidersController } from './api/providers/providers.controller.js';
-import {
-  ADDRESS_RESOLVER,
-  CHANNEL_PROVIDER_REGISTRY,
-  WEBHOOK_SERVICE,
-} from './api/shared/tokens.js';
-import { WebhooksController } from './api/webhooks/webhooks.controller.js';
-import type { MessageMappingStore } from './application/ports/message-mapping-store.port.js';
-import type { OutboundEventPublisher } from './application/ports/outbound-event-publisher.port.js';
-import { GatewayDispatcher } from './application/services/gateway-dispatcher.service.js';
-import { WebhookService } from './application/services/webhook.service.js';
-import { AppConfigModule, APP_CONFIG } from './config/config.module.js';
-import type { AppConfig } from './config/config.types.js';
-import { loadConfig } from './config/configuration.js';
-import { EVENT_PUBLISHER, EventsModule } from './infrastructure/events/events.module.js';
-import {
-  MESSAGE_MAPPING_STORE,
-  PersistenceModule,
-} from './infrastructure/persistence/persistence.module.js';
-import { ProviderLifecycle } from './infrastructure/providers/provider-lifecycle.service.js';
-import { buildChannelRegistry } from './infrastructure/providers/provider-registry.factory.js';
-import type { InMemoryChannelProviderRegistry } from './infrastructure/registry/in-memory-channel-provider.registry.js';
-import { DictAddressResolver } from './infrastructure/resolvers/dict-address.resolver.js';
-
 const logger = getLogger('AppModule', 'class');
 
-/**
- * Composition root.
- *
- * Kafka is optional in this service, so the module graph is assembled from the
- * validated configuration at bootstrap instead of being a static decorator
- * list. The configuration is read twice on purpose: once here to decide which
- * modules exist, and once inside `AppConfigModule` to expose the typed object
- * to the providers.
- */
+/** Composition root: infrastructure first, then the gateway context and transports. */
 @Module({})
 export class AppModule implements NestModule {
   static forRoot(): DynamicModule {
@@ -81,19 +51,17 @@ export class AppModule implements NestModule {
       PersistenceModule,
       EventsModule.forRoot({ withKafka }),
       GraphQLModule.forRoot<ApolloDriverConfig>({
-        // The gateway BFF composes this service with IntrospectAndCompose, so
-        // the driver has to build a Federation v2 subgraph that publishes its
-        // SDL at /_service/sdl instead of a plain schema.
         driver: ApolloFederationDriver,
         autoSchemaFile: { federation: { version: 2 } },
         sortSchema: true,
         playground: false,
         introspection: true,
       }),
+      SecurityModule,
+      CommunicationGatewayModule,
+      HealthModule,
     ];
-
     if (withKafka) {
-      logger.info({ broker: config.kafka.broker }, 'kafka_enabled');
       imports.unshift(
         KafkaModule.forRoot({
           clientId: `${config.core.serviceName}-producer`,
@@ -107,46 +75,10 @@ export class AppModule implements NestModule {
     } else {
       logger.warn('kafka_disabled: KAFKA_BROKER is empty, cross service events are dropped');
     }
-
     return {
       module: AppModule,
       imports,
-      controllers: [MessagesController, ProvidersController, HealthController, WebhooksController],
       providers: [
-        {
-          provide: CHANNEL_PROVIDER_REGISTRY,
-          inject: [APP_CONFIG],
-          useFactory: (appConfig: AppConfig): InMemoryChannelProviderRegistry =>
-            buildChannelRegistry(appConfig),
-        },
-        {
-          provide: ADDRESS_RESOLVER,
-          inject: [APP_CONFIG],
-          useFactory: (appConfig: AppConfig): DictAddressResolver =>
-            new DictAddressResolver(appConfig.core.addressMappings),
-        },
-        {
-          provide: GatewayDispatcher,
-          inject: [CHANNEL_PROVIDER_REGISTRY],
-          useFactory: (registry: InMemoryChannelProviderRegistry): GatewayDispatcher =>
-            new GatewayDispatcher(registry),
-        },
-        {
-          provide: WEBHOOK_SERVICE,
-          inject: [CHANNEL_PROVIDER_REGISTRY, EVENT_PUBLISHER, MESSAGE_MAPPING_STORE],
-          useFactory: (
-            registry: InMemoryChannelProviderRegistry,
-            publisher: OutboundEventPublisher,
-            mappingStore: MessageMappingStore,
-          ): WebhookService => new WebhookService(registry, publisher, mappingStore),
-        },
-        MessagesService,
-        ProvidersResolver,
-        ProviderLifecycle,
-        {
-          provide: APP_GUARD,
-          useClass: InternalApiKeyGuard,
-        },
         {
           provide: APP_PIPE,
           useFactory: (): ValidationPipe =>
@@ -159,7 +91,6 @@ export class AppModule implements NestModule {
         },
         { provide: APP_FILTER, useClass: GatewayExceptionFilter },
       ],
-      exports: [],
     };
   }
 

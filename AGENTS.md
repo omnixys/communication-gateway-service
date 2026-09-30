@@ -12,32 +12,36 @@ Omnixys Communication Gateway – external provider integration layer for the
 EMAIL and WHATSAPP channels.
 
 - Repository path: `services/communication-gateway` (relative to the Omnixys root)
-- Package: `communication-gateway-service` (version: `3.0.0`)
+- Package: `communication-gateway-service` (version managed by semantic-release)
 - Runtime: Node >=26.8.1 <27, pnpm 11.24.0
 - Kind: Service
 - Description: Omnixys Communication Gateway – external provider integration layer (email/SMTP and other providers).
 
 ## Architecture
 
-Layered module per bounded context, following
-`docs/architecture/service-architecture-charter.md`:
+The service follows the TypeScript service layout used by `services/user`:
 
 ```
-src/domain         enums, models, domain errors, capabilities
-src/application    ports (interfaces) and services (dispatcher, webhook)
-src/infrastructure providers, persistence, events, analytics, registry
-src/api            controllers, DTOs, guards, filters, health, GraphQL
-src/config         environment reader, validation, config module
-src/shared         http client and cross-cutting helpers
+src/communication-gateway  gateway domain, ports, services, REST and GraphQL
+src/adapter                external providers, event transport, address resolution
+src/analytics              delivery analytics outbox
+src/config                 validated runtime configuration and bootstrap helpers
+src/core                   cross-cutting HTTP, context and error helpers
+src/health                 public liveness and readiness endpoints
+src/prisma                 Prisma 7 client, message mapping repository, test fake
+src/security               internal API key guard and public-route marker
 ```
 
-Dependencies point inwards only: `api` and `infrastructure` depend on
-`application` ports, `application` depends on `domain`, and `domain` depends on
-nothing but `@omnixys/contracts-ts`.
+`CommunicationGatewayModule` owns the business surface. The composition root
+imports it alongside adapter, events, Prisma, health and security modules.
+The gateway domain is framework independent; application services depend on
+ports, and adapters and Prisma implement those ports. The in-memory mapping
+store is used only by isolated tests.
 
 ## Database, APIs and Messaging
 
-- Database: PostgreSQL via Prisma (`prisma/schema.prisma`)
+- Database: PostgreSQL via Prisma 7 (`prisma/schema.prisma`). `DATABASE_URL` is
+  required and startup verifies the connection before serving traffic.
 - Migrations: Prisma migrate; `prisma/migrations/20260101000000_init` is the
   baseline and replaces the Alembic chain 001-004, so existing databases need no
   data migration. Never edit an applied migration.
@@ -125,9 +129,7 @@ pnpm run prisma:deploy
 
 `node --test` is the runner. Unit tests cover domain, configuration, provider
 adapters, webhook verification, the event bus, the outbox worker and the HTTP
-forwarder. Integration tests boot the real Nest application on an ephemeral
-port and cover REST, GraphQL, the internal API key guard, health probes,
-readiness and persistence.
+forwarder. Integration tests use Fastify request injection for REST, GraphQL, the internal API key guard, health probes and readiness. PostgreSQL persistence uses an isolated Testcontainers database.
 
 `__tests__/support/env.mjs` is imported first by every test file. It pins a
 closed `DATABASE_URL` and a fixed `INTERNAL_API_KEY` because Node's
@@ -249,7 +251,7 @@ Use `getLogger('<Class>', 'class')` from `@omnixys/logger-ts` and keep the exist
 
 Use the repository's established error model. Errors should: preserve meaningful context, avoid leaking sensitive implementation details, distinguish expected domain failures from unexpected system failures, map consistently to API responses/events, and remain observable. Never silently swallow errors unless explicitly required by the domain behavior.
 
-Domain errors are raised as typed errors from `src/domain/errors.ts` and mapped to HTTP status codes in `src/api/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
+Domain errors are raised as typed errors from `src/communication-gateway/domain/errors.ts` and mapped to HTTP status codes in `src/core/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
 
 ## Generated Code
 

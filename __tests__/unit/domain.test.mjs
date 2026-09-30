@@ -28,7 +28,7 @@ import {
   parseCommunicationProviderType,
   parseContentType,
   parseDeliveryStatus,
-} from '../../dist/domain/enums.js';
+} from '../../dist/communication-gateway/domain/enums.js';
 import {
   ChannelNotFoundError,
   ConfigurationError,
@@ -37,16 +37,16 @@ import {
   ProviderNotAvailableError,
   ProviderNotFoundError,
   WebhookVerificationError,
-} from '../../dist/domain/errors.js';
+} from '../../dist/communication-gateway/domain/errors.js';
 import {
   EMPTY_CHANNEL_CAPABILITIES,
   mergeChannelCapabilities,
-} from '../../dist/domain/models/channel-capabilities.model.js';
-import { createMessageMapping } from '../../dist/domain/models/message-mapping.model.js';
+} from '../../dist/communication-gateway/domain/models/channel-capabilities.model.js';
+import { createMessageMapping } from '../../dist/communication-gateway/domain/models/message-mapping.model.js';
 import {
   assertValidTransition,
   isValidTransition,
-} from '../../dist/domain/services/delivery-lifecycle.service.js';
+} from '../../dist/communication-gateway/domain/services/delivery-lifecycle.service.js';
 
 describe('parseCommunicationProviderType', () => {
   it('accepts the three shipped adapters regardless of case', () => {

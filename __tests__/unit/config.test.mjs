@@ -27,7 +27,7 @@ const BASE_ENV = {
   ENVIRONMENT: 'local',
   LOG_LEVEL: 'silent',
   PORT: '8000',
-  DATABASE_URL: '',
+  DATABASE_URL: 'postgresql://u:p@127.0.0.1:1/db',
   KAFKA_BROKER: '',
   INTERNAL_API_KEY: 'unit-internal-key',
 };
@@ -75,13 +75,17 @@ describe('normalizeDatabaseUrl', () => {
 });
 
 describe('loadConfig', () => {
-  it('disables persistence and kafka when the optional settings are empty', () => {
+  it('keeps Kafka optional while requiring persistence', () => {
     const config = loadConfig(BASE_ENV);
 
-    assert.equal(config.database.enabled, false);
-    assert.equal(config.database.url, '');
+    assert.equal(config.database.enabled, true);
+    assert.equal(config.database.url, BASE_ENV.DATABASE_URL);
     assert.equal(config.kafka.broker, '');
     assert.equal(config.core.port, 8000);
+  });
+
+  it('rejects a missing database url even in local mode', () => {
+    assert.throws(() => loadConfig({ ...BASE_ENV, DATABASE_URL: '' }), /DATABASE_URL/);
   });
 
   it('enables persistence and normalizes the url', () => {

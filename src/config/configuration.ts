@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { ConfigurationError } from '../domain/errors.js';
+import { ConfigurationError } from '../communication-gateway/domain/errors.js';
 import type {
   AddressMapping,
   AppConfig,
@@ -245,6 +245,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
   const environment = reader.string('ENVIRONMENT', 'local');
   const logLevel = reader.enumeration('LOG_LEVEL', LOG_LEVELS, 'info');
   const databaseUrl = normalizeDatabaseUrl(reader.string('DATABASE_URL'));
+  if (!databaseUrl) {
+    throw new ConfigurationError('Missing required env: DATABASE_URL');
+  }
 
   const config: AppConfig = {
     core: {
@@ -416,9 +419,7 @@ export function assertProductionReadiness(config: AppConfig): void {
     }
   }
 
-  if (config.database.enabled) {
-    required['DATABASE_URL'] = config.database.url;
-  }
+  required['DATABASE_URL'] = config.database.url;
 
   const missing = Object.entries(required)
     .filter(([, value]) => value.length === 0)

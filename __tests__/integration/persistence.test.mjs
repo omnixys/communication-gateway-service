@@ -24,90 +24,26 @@ import { loadConfig } from '../../dist/config/configuration.js';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/domain/enums.js';
-import { AnalyticsOutboxWorker } from '../../dist/infrastructure/analytics/analytics-outbox.worker.js';
-import { DisabledRawEventPublisher } from '../../dist/infrastructure/events/kafka-raw-event.publisher.js';
-import { InMemoryMessageMappingStore } from '../../dist/infrastructure/persistence/in-memory-message-mapping.store.js';
-import {
-  PersistenceDisabledError,
-  PrismaService,
-} from '../../dist/infrastructure/persistence/prisma.service.js';
+} from '../../dist/communication-gateway/domain/enums.js';
+import { PrismaService } from '../../dist/prisma/prisma.service.js';
+import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
 
-describe('loadConfig without a database', () => {
-  it('disables persistence for an empty DATABASE_URL', () => {
-    const config = loadConfig({
-      ENVIRONMENT: 'local',
-      LOG_LEVEL: 'silent',
-      DATABASE_URL: '',
-      KAFKA_BROKER: '',
-    });
+const CLOSED_URL = 'postgresql://omnixys:omnixys@127.0.0.1:1/omnixys?connect_timeout=1';
 
-    assert.equal(config.database.enabled, false);
+describe('required database configuration', () => {
+  it('rejects an empty DATABASE_URL', () => {
+    assert.throws(() => loadConfig({ DATABASE_URL: '' }), /DATABASE_URL/);
+  });
+
+  it('fails startup when PostgreSQL cannot be reached', async () => {
+    const config = loadConfig({ DATABASE_URL: CLOSED_URL, LOG_LEVEL: 'silent' });
+    const prisma = new PrismaService(config);
+    await assert.rejects(prisma.onModuleInit());
+    await prisma.onModuleDestroy();
   });
 });
 
-describe('PrismaService without a database', () => {
-  const config = loadConfig({
-    ENVIRONMENT: 'local',
-    LOG_LEVEL: 'silent',
-    DATABASE_URL: '',
-    KAFKA_BROKER: '',
-  });
-  const prisma = new PrismaService(config);
-
-  it('reports persistence as disabled', () => {
-    assert.equal(prisma.isEnabled, false);
-    assert.equal(prisma.maybeClient, null);
-  });
-
-  it('fails loudly instead of pretending to persist', () => {
-    assert.throws(() => prisma.client, PersistenceDisabledError);
-  });
-
-  it('answers the readiness probe with false', async () => {
-    assert.equal(await prisma.ping(), false);
-  });
-
-  it('starts and stops without a connection', async () => {
-    await assert.doesNotReject(prisma.onModuleInit());
-    await assert.doesNotReject(prisma.onModuleDestroy());
-  });
-});
-
-describe('PrismaService with an unreachable database', () => {
-  const config = loadConfig({
-    ENVIRONMENT: 'local',
-    LOG_LEVEL: 'silent',
-    DATABASE_URL:
-      'postgresql://omnixys:omnixys@127.0.0.1:1/omnixys?connect_timeout=1',
-    KAFKA_BROKER: '',
-  });
-  const prisma = new PrismaService(config);
-
-  it('keeps the client available for the repositories', () => {
-    assert.equal(prisma.isEnabled, true);
-    assert.notEqual(prisma.maybeClient, null);
-  });
-
-  it('does not crash the bootstrap when the database is down', async () => {
-    await assert.doesNotReject(prisma.onModuleInit());
-  });
-
-  it('reports the outage through the readiness probe', async () => {
-    assert.equal(await prisma.ping(), false);
-  });
-
-  it('lets the outbox worker wait for a database instead of failing', async () => {
-    const worker = new AnalyticsOutboxWorker(
-      prisma.maybeClient,
-      new DisabledRawEventPublisher(),
-    );
-
-    assert.equal(await worker.runOnce(), 0);
-  });
-});
-
-describe('InMemoryMessageMappingStore as the persistence fallback', () => {
+describe('InMemoryMessageMappingStore for isolated tests', () => {
   it('keeps a mapping across the operations the webhook path performs', async () => {
     const store = new InMemoryMessageMappingStore();
 
