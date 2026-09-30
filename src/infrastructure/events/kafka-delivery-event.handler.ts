@@ -20,6 +20,7 @@ import { getLogger } from '@omnixys/logger-ts';
 import type { MessageMappingStore } from '../../application/ports/message-mapping-store.port.js';
 import type { OutboundEventPublisher } from '../../application/ports/outbound-event-publisher.port.js';
 import type { RawEventPublisher } from '../../application/ports/raw-event-publisher.port.js';
+import type { GatewayEvent } from '../../domain/events.js';
 import type { MessageDelivered } from '../../domain/events.js';
 
 const logger = getLogger('KafkaDeliveryEventHandler', 'class');
@@ -35,7 +36,6 @@ export const DELIVERY_STATUS_TOPIC = 'gateway.delivery.status';
  */
 export class KafkaDeliveryEventHandler {
   private task: Promise<void> | null = null;
-  private stopped = false;
 
   constructor(
     private readonly publisher: OutboundEventPublisher,
@@ -48,8 +48,9 @@ export class KafkaDeliveryEventHandler {
       logger.info({ topic: DELIVERY_STATUS_TOPIC }, 'delivery_events_disabled');
       return;
     }
-    this.stopped = false;
-    this.task = this.run();
+    // Subscribing before the loop starts guarantees that a receipt published
+    // right after start() is queued instead of dropped.
+    this.task = this.run(this.publisher.subscribe('MessageDelivered'));
     logger.info(
       { topic: DELIVERY_STATUS_TOPIC },
       'kafka_delivery_handler_started',
@@ -57,7 +58,6 @@ export class KafkaDeliveryEventHandler {
   }
 
   async stop(): Promise<void> {
-    this.stopped = true;
     await this.publisher.close();
     await this.task;
     this.task = null;
@@ -65,11 +65,10 @@ export class KafkaDeliveryEventHandler {
     logger.info('kafka_delivery_handler_stopped');
   }
 
-  private async run(): Promise<void> {
-    for await (const event of this.publisher.subscribe('MessageDelivered')) {
-      if (this.stopped) {
-        return;
-      }
+  private async run(stream: AsyncIterable<GatewayEvent>): Promise<void> {
+    for await (const event of stream) {
+      // close() ends the iteration once the queue is drained, so every
+      // accepted event is still forwarded during shutdown.
       if (event.kind !== 'MessageDelivered') {
         continue;
       }

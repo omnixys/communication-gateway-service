@@ -23,6 +23,7 @@ import type {
   ForwarderConfig,
   WhatsappSupportRoute,
 } from '../../config/config.types.js';
+import type { GatewayEvent } from '../../domain/events.js';
 import type {
   InboundMessageReceived,
   MessageDelivered,
@@ -54,7 +55,6 @@ export class HttpEventForwarder {
   >;
   private inboundTask: Promise<void> | null = null;
   private deliveryTask: Promise<void> | null = null;
-  private stopped = false;
   private ready = false;
 
   constructor(
@@ -78,9 +78,14 @@ export class HttpEventForwarder {
   }
 
   async start(): Promise<void> {
-    this.stopped = false;
-    this.inboundTask = this.consumeInbound();
-    this.deliveryTask = this.consumeDeliveries();
+    // The subscriptions are taken before the consume loops start: a
+    // subscription is only registered once the generator is first advanced, so
+    // subscribing inside the loop would drop every event published between
+    // start() and the first tick.
+    const inbound = this.publisher.subscribe('InboundMessageReceived');
+    const deliveries = this.publisher.subscribe('MessageDelivered');
+    this.inboundTask = this.consumeInbound(inbound);
+    this.deliveryTask = this.consumeDeliveries(deliveries);
     this.ready = true;
     logger.info(
       { chatServiceUrl: this.chatServiceUrl },
@@ -89,7 +94,6 @@ export class HttpEventForwarder {
   }
 
   async stop(): Promise<void> {
-    this.stopped = true;
     this.ready = false;
     await this.publisher.close();
     await Promise.all([this.inboundTask, this.deliveryTask]);
@@ -98,13 +102,12 @@ export class HttpEventForwarder {
     logger.info('http_event_forwarder_stopped');
   }
 
-  private async consumeInbound(): Promise<void> {
-    for await (const event of this.publisher.subscribe(
-      'InboundMessageReceived',
-    )) {
-      if (this.stopped) {
-        return;
-      }
+  private async consumeInbound(
+    stream: AsyncIterable<GatewayEvent>,
+  ): Promise<void> {
+    for await (const event of stream) {
+      // close() ends the iteration once the queue is drained, so every
+      // accepted event is still forwarded during shutdown.
       if (event.kind !== 'InboundMessageReceived') {
         continue;
       }
@@ -119,11 +122,12 @@ export class HttpEventForwarder {
     }
   }
 
-  private async consumeDeliveries(): Promise<void> {
-    for await (const event of this.publisher.subscribe('MessageDelivered')) {
-      if (this.stopped) {
-        return;
-      }
+  private async consumeDeliveries(
+    stream: AsyncIterable<GatewayEvent>,
+  ): Promise<void> {
+    for await (const event of stream) {
+      // close() ends the iteration once the queue is drained, so every
+      // accepted event is still forwarded during shutdown.
       if (event.kind !== 'MessageDelivered') {
         continue;
       }
