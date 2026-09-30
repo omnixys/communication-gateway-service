@@ -22,10 +22,8 @@ import type {
   ChannelProviderRegistry,
 } from '../../application/ports/channel-provider-registry.port.js';
 import type { CommunicationProvider } from '../../application/ports/communication-provider.port.js';
-import {
-  CommunicationProviderType,
-  type CommunicationChannelType,
-} from '../../domain/enums.js';
+import type { CommunicationProviderType } from '../../domain/enums.js';
+import { type CommunicationChannelType } from '../../domain/enums.js';
 import { ChannelNotFoundError } from '../../domain/errors.js';
 import { mergeChannelCapabilities } from '../../domain/models/channel-capabilities.model.js';
 import type { ChannelCapabilities } from '../../domain/models/channel-capabilities.model.js';

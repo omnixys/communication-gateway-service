@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { DeliveryStatus } from '../enums.js';
+import type { DeliveryStatus } from '../enums.js';
 import type { ProviderIdentity } from './provider-identity.model.js';
 
 /** Normalized result of a provider delivery attempt. */

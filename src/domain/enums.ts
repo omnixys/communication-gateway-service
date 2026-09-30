@@ -74,13 +74,13 @@ export function parseCommunicationChannelType(
   value: string,
 ): CommunicationChannelType {
   const normalized = value.trim().toUpperCase();
-  const channel = Object.values(CommunicationChannelType).find(
+  const channel = (Object.values(CommunicationChannelType) as string[]).find(
     (candidate) => candidate === normalized,
   );
   if (channel === undefined) {
     throw new RangeError(`Unsupported communication channel: ${value}`);
   }
-  return channel;
+  return channel as CommunicationChannelType;
 }
 
 /**
@@ -92,13 +92,13 @@ export function parseCommunicationProviderType(
   value: string,
 ): CommunicationProviderType {
   const normalized = value.trim().toUpperCase();
-  const provider = Object.values(CommunicationProviderType).find(
+  const provider = (Object.values(CommunicationProviderType) as string[]).find(
     (candidate) => candidate === normalized,
   );
   if (provider === undefined) {
     throw new RangeError(`Unknown provider type: ${value}`);
   }
-  return provider;
+  return provider as CommunicationProviderType;
 }
 
 /**
@@ -108,11 +108,25 @@ export function parseCommunicationProviderType(
  */
 export function parseDeliveryStatus(value: string): DeliveryStatus {
   const normalized = value.trim().toUpperCase();
-  const status = Object.values(DeliveryStatus).find(
+  const status = (Object.values(DeliveryStatus) as string[]).find(
     (candidate) => candidate === normalized,
   );
   if (status === undefined) {
     throw new RangeError(`Unknown delivery status: ${value}`);
   }
-  return status;
+  return status as DeliveryStatus;
+}
+
+/**
+ * Narrows an arbitrary string to a {@link ContentType}, defaulting to `TEXT`.
+ *
+ * Content type arrives from HTTP bodies and Kafka payloads, so an unknown
+ * value must degrade to plain text instead of failing the delivery.
+ */
+export function parseContentType(value: string): ContentType {
+  const normalized = value.trim().toUpperCase();
+  const content = (Object.values(ContentType) as string[]).find(
+    (candidate) => candidate === normalized,
+  );
+  return content === undefined ? ContentType.TEXT : (content as ContentType);
 }
