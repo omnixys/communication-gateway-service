@@ -23,7 +23,7 @@ import { describe, it } from 'node:test';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { backoffDelay } from '../../dist/adapter/events/http-event.forwarder.js';
 import { InMemoryEventPublisher } from '../../dist/adapter/events/in-memory-event.publisher.js';
 import { KafkaDeliveryEventHandler } from '../../dist/adapter/events/kafka-delivery-event.handler.js';
@@ -32,7 +32,7 @@ import {
   RecordingRawPublisher,
   deliveryReceipt,
   inboundMessage,
-} from './../support/fakes.mjs';
+} from '../support/fakes.mjs';
 
 const FORWARDER_CONFIG = {
   maxAttempts: 3,

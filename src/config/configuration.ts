@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { ConfigurationError } from '../communication-gateway/domain/errors.js';
+import { ConfigurationError } from '../communication-gateway/errors/gateway.errors.js';
 import type {
   AddressMapping,
   AppConfig,

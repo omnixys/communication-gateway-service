@@ -17,7 +17,7 @@
 
 import { Inject, Injectable, type OnApplicationShutdown } from '@nestjs/common';
 
-import { CHANNEL_PROVIDER_REGISTRY } from '../../communication-gateway/shared/tokens.js';
+import { CHANNEL_PROVIDER_REGISTRY } from '../../communication-gateway/utils/tokens.js';
 import type { InMemoryChannelProviderRegistry } from '../registry/in-memory-channel-provider.registry.js';
 import { closeProviders } from './provider-registry.factory.js';
 

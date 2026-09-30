@@ -22,17 +22,17 @@ import type { PrismaClient } from './generated/client.js';
 import { Prisma, type AnalyticsOutbox } from './generated/client.js';
 import { getLogger } from '@omnixys/logger-ts';
 
+import type { MessageMapping } from '../communication-gateway/models/entities/message-mapping.model.js';
 import {
   DeliveryStatus,
   parseCommunicationChannelType,
   parseCommunicationProviderType,
   parseDeliveryStatus,
-} from '../communication-gateway/domain/enums.js';
-import type { MessageMapping } from '../communication-gateway/domain/models/message-mapping.model.js';
+} from '../communication-gateway/models/enums/gateway.enums.js';
 import type {
   DeliveryFailureRecord,
   MessageMappingStore,
-} from '../communication-gateway/ports/message-mapping-store.port.js';
+} from '../communication-gateway/models/interfaces/message-mapping-store.port.js';
 import { asRecord } from '../core/coerce.js';
 import { currentCorrelationId } from '../core/request-context.js';
 import { PrismaService } from './prisma.service.js';

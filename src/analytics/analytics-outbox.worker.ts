@@ -20,7 +20,7 @@ import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '../prisma/generated/client.js';
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { RawEventPublisher } from '../communication-gateway/ports/raw-event-publisher.port.js';
+import type { RawEventPublisher } from '../communication-gateway/models/interfaces/raw-event-publisher.port.js';
 
 const logger = getLogger('AnalyticsOutboxWorker', 'class');
 

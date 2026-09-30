@@ -15,17 +15,17 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
+import type { AttachmentReference } from '../../../communication-gateway/models/entities/attachment-reference.model.js';
+import type { InboundMessage } from '../../../communication-gateway/models/entities/inbound-message.model.js';
+import type { ProviderIdentity } from '../../../communication-gateway/models/entities/provider-identity.model.js';
 import {
   AttachmentType,
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../../communication-gateway/domain/enums.js';
-import type { CommunicationChannelType } from '../../../communication-gateway/domain/enums.js';
-import type { AttachmentReference } from '../../../communication-gateway/domain/models/attachment-reference.model.js';
-import type { DeliveryReceipt } from '../../../communication-gateway/domain/models/delivery-receipt.model.js';
-import type { InboundMessage } from '../../../communication-gateway/domain/models/inbound-message.model.js';
-import type { ProviderIdentity } from '../../../communication-gateway/domain/models/provider-identity.model.js';
-import type { ProviderResponse } from '../../../communication-gateway/domain/models/provider-response.model.js';
+} from '../../../communication-gateway/models/enums/gateway.enums.js';
+import type { CommunicationChannelType } from '../../../communication-gateway/models/enums/gateway.enums.js';
+import type { DeliveryReceipt } from '../../../communication-gateway/models/payloads/delivery-receipt.model.js';
+import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
 import { asNumber, asRecord, asText } from '../../../core/coerce.js';
 
 const WHATSAPP_SUFFIX = '@s.whatsapp.net';

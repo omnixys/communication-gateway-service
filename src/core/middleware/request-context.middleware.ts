@@ -19,8 +19,8 @@ import { randomUUID } from 'node:crypto';
 
 import { Injectable, type NestMiddleware } from '@nestjs/common';
 
-import { setReplyHeader } from '../../communication-gateway/shared/compat-reply.js';
-import type { CompatReply } from '../../communication-gateway/shared/compat-reply.js';
+import { setReplyHeader } from '../compat-reply.js';
+import type { CompatReply } from '../compat-reply.js';
 import { runWithRequestContext } from '../request-context.js';
 
 /** Incoming request as seen by the Nest middleware bridge. */

@@ -17,9 +17,9 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import { CommunicationChannelType } from '../../communication-gateway/domain/enums.js';
-import type { ChannelEntry } from '../../communication-gateway/ports/channel-provider-registry.port.js';
-import type { CommunicationProvider } from '../../communication-gateway/ports/communication-provider.port.js';
+import { CommunicationChannelType } from '../../communication-gateway/models/enums/gateway.enums.js';
+import type { ChannelEntry } from '../../communication-gateway/models/interfaces/channel-provider-registry.port.js';
+import type { CommunicationProvider } from '../../communication-gateway/models/interfaces/communication-provider.port.js';
 import type {
   AppConfig,
   EmailProviderName,

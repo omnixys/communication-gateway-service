@@ -17,18 +17,18 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { CommunicationProviderType } from '../../communication-gateway/domain/enums.js';
-import { type CommunicationChannelType } from '../../communication-gateway/domain/enums.js';
-import { ChannelNotFoundError } from '../../communication-gateway/domain/errors.js';
-import { mergeChannelCapabilities } from '../../communication-gateway/domain/models/channel-capabilities.model.js';
-import type { ChannelCapabilities } from '../../communication-gateway/domain/models/channel-capabilities.model.js';
-import type { CommunicationChannel } from '../../communication-gateway/domain/models/communication-channel.model.js';
-import type { ProviderMetadata } from '../../communication-gateway/domain/models/provider-metadata.model.js';
+import { ChannelNotFoundError } from '../../communication-gateway/errors/gateway.errors.js';
+import { mergeChannelCapabilities } from '../../communication-gateway/models/entities/channel-capabilities.model.js';
+import type { ChannelCapabilities } from '../../communication-gateway/models/entities/channel-capabilities.model.js';
+import type { CommunicationChannel } from '../../communication-gateway/models/entities/communication-channel.model.js';
+import type { ProviderMetadata } from '../../communication-gateway/models/entities/provider-metadata.model.js';
+import type { CommunicationProviderType } from '../../communication-gateway/models/enums/gateway.enums.js';
+import { type CommunicationChannelType } from '../../communication-gateway/models/enums/gateway.enums.js';
 import type {
   ChannelEntry,
   ChannelProviderRegistry,
-} from '../../communication-gateway/ports/channel-provider-registry.port.js';
-import type { CommunicationProvider } from '../../communication-gateway/ports/communication-provider.port.js';
+} from '../../communication-gateway/models/interfaces/channel-provider-registry.port.js';
+import type { CommunicationProvider } from '../../communication-gateway/models/interfaces/communication-provider.port.js';
 
 const logger = getLogger('InMemoryChannelProviderRegistry', 'class');
 

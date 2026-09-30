@@ -36,9 +36,9 @@ import {
   ProviderNotAvailableError,
   ProviderNotFoundError,
   WebhookVerificationError,
-} from '../../communication-gateway/domain/errors.js';
-import { sendReply } from '../../communication-gateway/shared/compat-reply.js';
-import type { CompatReply } from '../../communication-gateway/shared/compat-reply.js';
+} from '../../communication-gateway/errors/gateway.errors.js';
+import { sendReply } from '../compat-reply.js';
+import type { CompatReply } from '../compat-reply.js';
 import { currentCorrelationId } from '../request-context.js';
 
 const logger = getLogger('GatewayExceptionFilter', 'class');

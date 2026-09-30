@@ -1,7 +1,7 @@
 import {
   ADDRESS_RESOLVER,
   CHANNEL_PROVIDER_REGISTRY,
-} from '../communication-gateway/shared/tokens.js';
+} from '../communication-gateway/utils/tokens.js';
 import { APP_CONFIG } from '../config/config.module.js';
 import type { AppConfig } from '../config/config.types.js';
 import { ProviderLifecycle } from './providers/provider-lifecycle.service.js';

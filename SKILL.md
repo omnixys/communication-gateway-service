@@ -11,7 +11,8 @@
 - Package: `communication-gateway-service` (version currently set by release automation)
 - Runtime: Node >=26.8.1 <27, pnpm 11.24.0
 - Description: Omnixys Communication Gateway – external provider integration layer (email/SMTP and other providers).
-- Architecture: `src/communication-gateway` owns domain, ports, services and transports;
+- Architecture: `src/communication-gateway` uses `controllers`, `resolvers`, `services`, `errors`, `utils`,
+  and `models/{dto,entities,enums,inputs,interfaces,mappers,payloads}`;
   `src/{adapter,analytics,config,core,health,prisma,security}` are service infrastructure
 - Database: required PostgreSQL via Prisma 7; Migrations: Prisma migrate (`prisma/migrations`, baseline replaces Alembic 001-004)
 - API: REST under `/api/v1` plus a GraphQL federation v2 subgraph on `/graphql`
@@ -23,8 +24,8 @@
 
 ### 1. Understand the change
 
-- Identify the affected gateway context and port. The domain stays framework independent;
-  services depend on ports, and adapter and Prisma modules implement them.
+- Identify the affected gateway controller, resolver, service, or model interface. Model types stay
+  framework independent where possible; adapter and Prisma modules implement service interfaces.
 - Inspect the consumers of the GraphQL operations, the REST routes and the Kafka events you may touch. The GraphQL
   field and enum names stay snake_case; the gateway BFF depends on them.
 - Decide whether the route is public. Health probes and webhooks are `@Public()`; everything else, GraphQL included,
@@ -32,8 +33,10 @@
 
 ### 2. Implement
 
-- Keep gateway business behavior in `src/communication-gateway`; put provider and event adapters in
+- Keep gateway business behavior in the existing `controllers`, `resolvers`, `services`, `errors`,
+  `models`, and `utils` folders of `src/communication-gateway`. Put provider and event adapters in
   `src/adapter`, persistence in `src/prisma`, and shared service concerns in their named directories.
+  Do not introduce technical layer folders such as `domain`, `application`, `api`, or `infrastructure` inside the context.
 - Reuse `@omnixys/*` packages (logger-ts, contracts-ts, kafka-ts, context-ts, cache-ts, observability-ts,
   security-ts) before reimplementing shared infrastructure. Do not add a repository-local copy.
 - Keep secrets out of logs and files: SMTP credentials, provider tokens and `INTERNAL_API_KEY` are never logged, and

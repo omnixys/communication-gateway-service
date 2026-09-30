@@ -17,10 +17,10 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { OutboundMessage } from '../domain/models/outbound-message.model.js';
-import type { ProviderResponse } from '../domain/models/provider-response.model.js';
-import type { ResolutionContext } from '../domain/models/resolution-context.model.js';
-import type { ChannelProviderRegistry } from '../ports/channel-provider-registry.port.js';
+import type { OutboundMessage } from '../models/entities/outbound-message.model.js';
+import type { ResolutionContext } from '../models/inputs/resolution-context.model.js';
+import type { ChannelProviderRegistry } from '../models/interfaces/channel-provider-registry.port.js';
+import type { ProviderResponse } from '../models/payloads/provider-response.model.js';
 
 const logger = getLogger('GatewayDispatcher', 'class');
 

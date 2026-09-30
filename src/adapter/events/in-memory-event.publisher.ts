@@ -17,8 +17,8 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { GatewayEvent } from '../../communication-gateway/domain/events.js';
-import type { OutboundEventPublisher } from '../../communication-gateway/ports/outbound-event-publisher.port.js';
+import type { OutboundEventPublisher } from '../../communication-gateway/models/interfaces/outbound-event-publisher.port.js';
+import type { GatewayEvent } from '../../communication-gateway/models/payloads/gateway-events.payload.js';
 
 const logger = getLogger('InMemoryEventPublisher', 'class');
 

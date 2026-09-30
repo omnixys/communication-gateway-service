@@ -24,7 +24,7 @@ import { describe, it } from 'node:test';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { EvolutionProvider } from '../../dist/adapter/providers/evolution/evolution.provider.js';
 import {
   verifyApiKey,

@@ -18,19 +18,19 @@
 import { getLogger } from '@omnixys/logger-ts';
 
 import {
-  CommunicationChannelType,
-  CommunicationProviderType,
-} from '../../../communication-gateway/domain/enums.js';
-import {
   EMPTY_CHANNEL_CAPABILITIES,
   type ChannelCapabilities,
-} from '../../../communication-gateway/domain/models/channel-capabilities.model.js';
-import type { OutboundMessage } from '../../../communication-gateway/domain/models/outbound-message.model.js';
-import type { ProviderIdentity } from '../../../communication-gateway/domain/models/provider-identity.model.js';
-import type { ProviderMetadata } from '../../../communication-gateway/domain/models/provider-metadata.model.js';
-import type { ProviderResponse } from '../../../communication-gateway/domain/models/provider-response.model.js';
-import type { WebhookResult } from '../../../communication-gateway/ports/communication-provider.port.js';
-import type { CommunicationProvider } from '../../../communication-gateway/ports/communication-provider.port.js';
+} from '../../../communication-gateway/models/entities/channel-capabilities.model.js';
+import type { OutboundMessage } from '../../../communication-gateway/models/entities/outbound-message.model.js';
+import type { ProviderIdentity } from '../../../communication-gateway/models/entities/provider-identity.model.js';
+import type { ProviderMetadata } from '../../../communication-gateway/models/entities/provider-metadata.model.js';
+import {
+  CommunicationChannelType,
+  CommunicationProviderType,
+} from '../../../communication-gateway/models/enums/gateway.enums.js';
+import type { WebhookResult } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { CommunicationProvider } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
 import type { EvolutionConfig } from '../../../config/config.types.js';
 import {
   HttpTransportError,

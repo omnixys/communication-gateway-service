@@ -23,10 +23,10 @@ import { describe, it } from 'node:test';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { AnalyticsOutboxWorker } from '../../dist/analytics/analytics-outbox.worker.js';
 import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
-import { RecordingRawPublisher, messageMapping } from './../support/fakes.mjs';
+import { RecordingRawPublisher, messageMapping } from '../support/fakes.mjs';
 
 /** Minimal in-memory stand-in for the `analyticsOutbox` Prisma delegate. */
 function fakeOutboxDb(rows = []) {

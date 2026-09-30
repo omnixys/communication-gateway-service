@@ -24,8 +24,8 @@ import { WebhookService } from '../../dist/communication-gateway/services/webhoo
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
-import { WebhookVerificationError } from '../../dist/communication-gateway/domain/errors.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
+import { WebhookVerificationError } from '../../dist/communication-gateway/errors/gateway.errors.js';
 import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
 import {
   FakeProvider,
@@ -34,7 +34,7 @@ import {
   deliveryReceipt,
   inboundMessage,
   messageMapping,
-} from './../support/fakes.mjs';
+} from '../support/fakes.mjs';
 
 const BODY = Buffer.from('{"event":"messages.upsert"}');
 const HEADERS = { apikey: 'key' };

@@ -17,15 +17,18 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { CommunicationProviderType } from '../domain/enums.js';
-import { WebhookVerificationError } from '../domain/errors.js';
-import type { InboundMessageReceived, MessageDelivered } from '../domain/events.js';
-import type { DeliveryReceipt } from '../domain/models/delivery-receipt.model.js';
-import type { InboundMessage } from '../domain/models/inbound-message.model.js';
-import { assertValidTransition } from '../domain/services/delivery-lifecycle.service.js';
-import type { ChannelProviderRegistry } from '../ports/channel-provider-registry.port.js';
-import type { MessageMappingStore } from '../ports/message-mapping-store.port.js';
-import type { OutboundEventPublisher } from '../ports/outbound-event-publisher.port.js';
+import { WebhookVerificationError } from '../errors/gateway.errors.js';
+import type { InboundMessage } from '../models/entities/inbound-message.model.js';
+import type { CommunicationProviderType } from '../models/enums/gateway.enums.js';
+import type { ChannelProviderRegistry } from '../models/interfaces/channel-provider-registry.port.js';
+import type { MessageMappingStore } from '../models/interfaces/message-mapping-store.port.js';
+import type { OutboundEventPublisher } from '../models/interfaces/outbound-event-publisher.port.js';
+import type { DeliveryReceipt } from '../models/payloads/delivery-receipt.model.js';
+import type {
+  InboundMessageReceived,
+  MessageDelivered,
+} from '../models/payloads/gateway-events.payload.js';
+import { assertValidTransition } from './delivery-lifecycle.service.js';
 const logger = getLogger('WebhookService', 'class');
 
 /** Outcome of a processed webhook, as reported back to the caller. */

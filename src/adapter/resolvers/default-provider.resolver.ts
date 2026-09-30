@@ -17,11 +17,11 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import { NoProviderAvailableError } from '../../communication-gateway/domain/errors.js';
-import type { OutboundMessage } from '../../communication-gateway/domain/models/outbound-message.model.js';
-import type { ResolutionContext } from '../../communication-gateway/domain/models/resolution-context.model.js';
-import type { CommunicationProvider } from '../../communication-gateway/ports/communication-provider.port.js';
-import type { ProviderResolver } from '../../communication-gateway/ports/provider-resolver.port.js';
+import { NoProviderAvailableError } from '../../communication-gateway/errors/gateway.errors.js';
+import type { OutboundMessage } from '../../communication-gateway/models/entities/outbound-message.model.js';
+import type { ResolutionContext } from '../../communication-gateway/models/inputs/resolution-context.model.js';
+import type { CommunicationProvider } from '../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { ProviderResolver } from '../../communication-gateway/models/interfaces/provider-resolver.port.js';
 
 const logger = getLogger('DefaultProviderResolver', 'class');
 

@@ -15,9 +15,9 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { DeliveryStatus } from '../communication-gateway/domain/enums.js';
-import type { MessageMapping } from '../communication-gateway/domain/models/message-mapping.model.js';
-import type { MessageMappingStore } from '../communication-gateway/ports/message-mapping-store.port.js';
+import type { MessageMapping } from '../communication-gateway/models/entities/message-mapping.model.js';
+import type { DeliveryStatus } from '../communication-gateway/models/enums/gateway.enums.js';
+import type { MessageMappingStore } from '../communication-gateway/models/interfaces/message-mapping-store.port.js';
 
 /**
  * Correlation store backed by an in-process map.

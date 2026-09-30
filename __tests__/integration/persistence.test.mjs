@@ -24,7 +24,7 @@ import { loadConfig } from '../../dist/config/configuration.js';
 import {
   CommunicationProviderType,
   DeliveryStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { PrismaService } from '../../dist/prisma/prisma.service.js';
 import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
 

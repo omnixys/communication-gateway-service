@@ -28,9 +28,9 @@ import { KafkaProducerService } from '@omnixys/kafka-ts';
 import { getLogger } from '@omnixys/logger-ts';
 
 import { AnalyticsOutboxWorker } from '../../analytics/analytics-outbox.worker.js';
-import type { MessageMappingStore } from '../../communication-gateway/ports/message-mapping-store.port.js';
-import type { OutboundEventPublisher } from '../../communication-gateway/ports/outbound-event-publisher.port.js';
-import type { RawEventPublisher } from '../../communication-gateway/ports/raw-event-publisher.port.js';
+import type { MessageMappingStore } from '../../communication-gateway/models/interfaces/message-mapping-store.port.js';
+import type { OutboundEventPublisher } from '../../communication-gateway/models/interfaces/outbound-event-publisher.port.js';
+import type { RawEventPublisher } from '../../communication-gateway/models/interfaces/raw-event-publisher.port.js';
 import { APP_CONFIG } from '../../config/config.module.js';
 import type { AppConfig } from '../../config/config.types.js';
 import { MESSAGE_MAPPING_STORE } from '../../prisma/persistence.module.js';

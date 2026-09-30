@@ -17,9 +17,9 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { CommunicationChannelType } from '../../communication-gateway/domain/enums.js';
-import { AddressResolutionError } from '../../communication-gateway/domain/errors.js';
-import type { AddressResolver } from '../../communication-gateway/ports/address-resolver.port.js';
+import { AddressResolutionError } from '../../communication-gateway/errors/gateway.errors.js';
+import type { CommunicationChannelType } from '../../communication-gateway/models/enums/gateway.enums.js';
+import type { AddressResolver } from '../../communication-gateway/models/interfaces/address-resolver.port.js';
 import type { AddressMapping } from '../../config/config.types.js';
 
 const logger = getLogger('DictAddressResolver', 'class');

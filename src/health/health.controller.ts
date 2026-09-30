@@ -21,10 +21,10 @@ import type { FastifyReply } from 'fastify';
 
 import { EVENT_FORWARDER } from '../adapter/events/events.module.js';
 import type { HttpEventForwarder } from '../adapter/events/http-event.forwarder.js';
-import { CommunicationProviderType } from '../communication-gateway/domain/enums.js';
-import type { ChannelProviderRegistry } from '../communication-gateway/ports/channel-provider-registry.port.js';
-import type { MessageMappingStore } from '../communication-gateway/ports/message-mapping-store.port.js';
-import { CHANNEL_PROVIDER_REGISTRY } from '../communication-gateway/shared/tokens.js';
+import { CommunicationProviderType } from '../communication-gateway/models/enums/gateway.enums.js';
+import type { ChannelProviderRegistry } from '../communication-gateway/models/interfaces/channel-provider-registry.port.js';
+import type { MessageMappingStore } from '../communication-gateway/models/interfaces/message-mapping-store.port.js';
+import { CHANNEL_PROVIDER_REGISTRY } from '../communication-gateway/utils/tokens.js';
 import { APP_CONFIG } from '../config/config.module.js';
 import type { AppConfig } from '../config/config.types.js';
 import { MESSAGE_MAPPING_STORE } from '../prisma/persistence.module.js';

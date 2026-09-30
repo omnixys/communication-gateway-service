@@ -17,11 +17,11 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { GatewayEvent } from '../../communication-gateway/domain/events.js';
-import type { MessageDelivered } from '../../communication-gateway/domain/events.js';
-import type { MessageMappingStore } from '../../communication-gateway/ports/message-mapping-store.port.js';
-import type { OutboundEventPublisher } from '../../communication-gateway/ports/outbound-event-publisher.port.js';
-import type { RawEventPublisher } from '../../communication-gateway/ports/raw-event-publisher.port.js';
+import type { MessageMappingStore } from '../../communication-gateway/models/interfaces/message-mapping-store.port.js';
+import type { OutboundEventPublisher } from '../../communication-gateway/models/interfaces/outbound-event-publisher.port.js';
+import type { RawEventPublisher } from '../../communication-gateway/models/interfaces/raw-event-publisher.port.js';
+import type { GatewayEvent } from '../../communication-gateway/models/payloads/gateway-events.payload.js';
+import type { MessageDelivered } from '../../communication-gateway/models/payloads/gateway-events.payload.js';
 
 const logger = getLogger('KafkaDeliveryEventHandler', 'class');
 

@@ -11,7 +11,7 @@ import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { AppModule } from '../../dist/app.module.js';
 import { PrismaService } from '../../dist/prisma/prisma.service.js';
 import { PrismaMessageMappingStore } from '../../dist/prisma/prisma-message-mapping.store.js';
-import { CommunicationProviderType, DeliveryStatus } from '../../dist/communication-gateway/domain/enums.js';
+import { CommunicationProviderType, DeliveryStatus } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { API_KEY_HEADER, INTERNAL_API_KEY } from '../support/env.mjs';
 
 const run = promisify(execFile);

@@ -20,23 +20,23 @@ import { randomUUID } from 'node:crypto';
 import { getLogger } from '@omnixys/logger-ts';
 
 import {
+  EMPTY_CHANNEL_CAPABILITIES,
+  type ChannelCapabilities,
+} from '../../../communication-gateway/models/entities/channel-capabilities.model.js';
+import type { OutboundMessage } from '../../../communication-gateway/models/entities/outbound-message.model.js';
+import type { ProviderIdentity } from '../../../communication-gateway/models/entities/provider-identity.model.js';
+import type { ProviderMetadata } from '../../../communication-gateway/models/entities/provider-metadata.model.js';
+import {
   CommunicationProviderType,
   ContentType,
   DeliveryStatus,
   parseContentType,
-} from '../../../communication-gateway/domain/enums.js';
-import {
-  EMPTY_CHANNEL_CAPABILITIES,
-  type ChannelCapabilities,
-} from '../../../communication-gateway/domain/models/channel-capabilities.model.js';
-import type { OutboundMessage } from '../../../communication-gateway/domain/models/outbound-message.model.js';
-import type { ProviderIdentity } from '../../../communication-gateway/domain/models/provider-identity.model.js';
-import type { ProviderMetadata } from '../../../communication-gateway/domain/models/provider-metadata.model.js';
-import type { ProviderResponse } from '../../../communication-gateway/domain/models/provider-response.model.js';
+} from '../../../communication-gateway/models/enums/gateway.enums.js';
 import type {
   CommunicationProvider,
   WebhookResult,
-} from '../../../communication-gateway/ports/communication-provider.port.js';
+} from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
 import type { StalwartConfig } from '../../../config/config.types.js';
 import { asText } from '../../../core/coerce.js';
 import { SmtpClient, SmtpError, type SmtpEnvelope } from './smtp-client.js';

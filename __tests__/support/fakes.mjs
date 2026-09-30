@@ -22,7 +22,7 @@ import {
   CommunicationProviderType,
   DeliveryStatus,
   ProviderStatus,
-} from '../../dist/communication-gateway/domain/enums.js';
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 
 export const WHATSAPP_CHANNEL = Object.freeze({
   type: CommunicationChannelType.WHATSAPP,

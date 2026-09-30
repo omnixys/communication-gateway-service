@@ -22,7 +22,7 @@ EMAIL and WHATSAPP channels.
 The service follows the TypeScript service layout used by `services/user`:
 
 ```
-src/communication-gateway  gateway domain, ports, services, REST and GraphQL
+src/communication-gateway  controllers, resolvers, services, errors, models, utils
 src/adapter                external providers, event transport, address resolution
 src/analytics              delivery analytics outbox
 src/config                 validated runtime configuration and bootstrap helpers
@@ -34,9 +34,11 @@ src/security               internal API key guard and public-route marker
 
 `CommunicationGatewayModule` owns the business surface. The composition root
 imports it alongside adapter, events, Prisma, health and security modules.
-The gateway domain is framework independent; application services depend on
-ports, and adapters and Prisma implement those ports. The in-memory mapping
-store is used only by isolated tests.
+Inside the context, `models/{dto,entities,enums,inputs,interfaces,mappers,payloads}`
+holds the actual model types; do not recreate `domain`, `application`, `api`,
+`infrastructure`, `graphql`, `ports`, or `shared` as sibling layers. Services
+depend on interfaces, and adapters and Prisma implement those interfaces. The
+in-memory mapping store is used only by isolated tests.
 
 ## Database, APIs and Messaging
 
@@ -251,7 +253,7 @@ Use `getLogger('<Class>', 'class')` from `@omnixys/logger-ts` and keep the exist
 
 Use the repository's established error model. Errors should: preserve meaningful context, avoid leaking sensitive implementation details, distinguish expected domain failures from unexpected system failures, map consistently to API responses/events, and remain observable. Never silently swallow errors unless explicitly required by the domain behavior.
 
-Domain errors are raised as typed errors from `src/communication-gateway/domain/errors.ts` and mapped to HTTP status codes in `src/core/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
+Domain errors are raised as typed errors from `src/communication-gateway/errors/gateway.errors.ts` and mapped to HTTP status codes in `src/core/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
 
 ## Generated Code
 

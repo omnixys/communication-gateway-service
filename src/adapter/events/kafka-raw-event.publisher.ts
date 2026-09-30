@@ -18,7 +18,7 @@
 import type { KafkaProducerService } from '@omnixys/kafka-ts';
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { RawEventPublisher } from '../../communication-gateway/ports/raw-event-publisher.port.js';
+import type { RawEventPublisher } from '../../communication-gateway/models/interfaces/raw-event-publisher.port.js';
 import { currentCorrelationId } from '../../core/request-context.js';
 
 const logger = getLogger('KafkaRawEventPublisher', 'class');
