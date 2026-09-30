@@ -1,7 +1,7 @@
 {
   "name": "communication-gateway-service",
   "version": "3.0.0",
-  "description": "Omnixys Communication Gateway \u2013 External Provider Integration Layer",
+  "description": "Omnixys Communication Gateway – External Provider Integration Layer",
   "author": {
     "name": "Caleb Gyamfi",
     "email": "caleb.gyamfi@omnixys.com",
@@ -73,6 +73,12 @@
     "@eslint/js": "^9.39.5",
     "@nestjs/cli": "^11.0.24",
     "@nestjs/schematics": "^11.1.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.10",
+    "@semantic-release/npm": "^13.2.0",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.16.2",
     "@tsconfig/node23": "^23.0.5",

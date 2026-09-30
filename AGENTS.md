@@ -314,6 +314,8 @@ Create multiple commits when the work contains genuinely independent logical cha
 
 Respect Semantic Versioning when changes affect versioned packages or externally consumed contracts: `PATCH` for backward-compatible fixes, `MINOR` for backward-compatible functionality, `MAJOR` for breaking changes. Do not increment versions merely because files changed. Follow the repository's existing release/versioning mechanism. Conventional Commit semantics should reflect the actual compatibility impact. If automated release tooling determines versions, do not manually modify package versions unless the repository's established workflow requires it.
 
+`release.config.js` releases from `main` only and lets `@semantic-release/npm` write the version into `package.json`; the service is not published to npm. Its first `releaseRules` entry is `{ breaking: true, release: "major" }` and it must stay that way: the `conventionalcommits` preset keeps the original commit type and attaches a note for a `!` marker or a `BREAKING CHANGE` footer, so a `{ type: "breaking" }` rule never matches and `{ type: "chore", release: false }` would otherwise swallow a breaking `chore` and publish no version at all. `__tests__/unit/release-config.test.mjs` guards this.
+
 ## Repository Cleanliness
 
 Do not commit: build outputs unless intentionally versioned, temporary files, IDE caches, local environment files, secrets, logs, coverage output, OS metadata, or arbitrary generated files. Review `.gitignore` when introducing tooling that creates new local artifacts.
