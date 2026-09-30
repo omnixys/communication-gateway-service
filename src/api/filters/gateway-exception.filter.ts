@@ -27,6 +27,16 @@ import {
 const SERVER_ERROR = 500;
 import { getLogger } from '@omnixys/logger-ts';
 
+import {
+  AddressResolutionError,
+  ChannelNotFoundError,
+  DeliveryFailedError,
+  InvalidStatusTransitionError,
+  NoProviderAvailableError,
+  ProviderNotAvailableError,
+  ProviderNotFoundError,
+  WebhookVerificationError,
+} from '../../domain/errors.js';
 import { currentCorrelationId } from '../../shared/request-context.js';
 import { sendReply } from '../shared/compat-reply.js';
 import type { CompatReply } from '../shared/compat-reply.js';
@@ -117,18 +127,89 @@ function describe(exception: unknown): {
       error: typeof record.error === 'string' ? record.error : reason(status),
     };
   }
-  if (exception instanceof Error) {
-    return {
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Internal server error',
-      error: exception.name,
-    };
+  const domain = describeDomainError(exception);
+  if (domain !== null) {
+    return domain;
   }
+  // An unexpected error is logged with its class and stack, but the client only
+  // sees a generic body: an internal class name is not part of the contract and
+  // would tell an unauthenticated caller how the service is built.
   return {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'Internal server error',
     error: 'InternalServerError',
   };
+}
+
+/**
+ * HTTP contract of the expected domain failures.
+ *
+ * The domain layer throws framework free errors. Without this mapping they
+ * reach the client as an HTTP 500, which makes a missing provider look like a
+ * gateway bug and hides the difference between a misconfiguration and an outage.
+ */
+function describeDomainError(exception: unknown): {
+  status: number;
+  message: string;
+  error: string;
+} | null {
+  if (exception instanceof NoProviderAvailableError) {
+    return {
+      status: HttpStatus.SERVICE_UNAVAILABLE,
+      message: 'NO_PROVIDER_AVAILABLE',
+      error: reason(HttpStatus.SERVICE_UNAVAILABLE),
+    };
+  }
+  if (exception instanceof ProviderNotAvailableError) {
+    return {
+      status: HttpStatus.SERVICE_UNAVAILABLE,
+      message: 'PROVIDER_NOT_AVAILABLE',
+      error: reason(HttpStatus.SERVICE_UNAVAILABLE),
+    };
+  }
+  if (exception instanceof ProviderNotFoundError) {
+    return {
+      status: HttpStatus.NOT_FOUND,
+      message: 'PROVIDER_NOT_FOUND',
+      error: reason(HttpStatus.NOT_FOUND),
+    };
+  }
+  if (exception instanceof ChannelNotFoundError) {
+    return {
+      status: HttpStatus.NOT_FOUND,
+      message: 'CHANNEL_NOT_FOUND',
+      error: reason(HttpStatus.NOT_FOUND),
+    };
+  }
+  if (exception instanceof AddressResolutionError) {
+    return {
+      status: HttpStatus.UNPROCESSABLE_ENTITY,
+      message: 'ADDRESS_RESOLUTION_FAILED',
+      error: reason(HttpStatus.UNPROCESSABLE_ENTITY),
+    };
+  }
+  if (exception instanceof WebhookVerificationError) {
+    return {
+      status: HttpStatus.UNAUTHORIZED,
+      message: 'WEBHOOK_VERIFICATION_FAILED',
+      error: reason(HttpStatus.UNAUTHORIZED),
+    };
+  }
+  if (exception instanceof DeliveryFailedError) {
+    return {
+      status: HttpStatus.BAD_GATEWAY,
+      message: 'DELIVERY_FAILED',
+      error: reason(HttpStatus.BAD_GATEWAY),
+    };
+  }
+  if (exception instanceof InvalidStatusTransitionError) {
+    return {
+      status: HttpStatus.CONFLICT,
+      message: 'INVALID_STATUS_TRANSITION',
+      error: reason(HttpStatus.CONFLICT),
+    };
+  }
+  return null;
 }
 
 function reason(status: number): string {

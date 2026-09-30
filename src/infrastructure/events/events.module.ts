@@ -169,7 +169,7 @@ export class EventsModule {
           useFactory: (
             prisma: PrismaService,
             rawPublisher: RawEventPublisher,
-          ): AnalyticsOutboxWorker => new AnalyticsOutboxWorker(prisma.client, rawPublisher),
+          ): AnalyticsOutboxWorker => new AnalyticsOutboxWorker(prisma.maybeClient, rawPublisher),
         },
         EventLifecycle,
       ],

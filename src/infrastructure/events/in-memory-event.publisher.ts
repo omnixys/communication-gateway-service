@@ -26,7 +26,8 @@ const logger = getLogger('InMemoryEventPublisher', 'class');
 interface Subscriber {
   readonly queue: GatewayEvent[];
   waiting: ((value: IteratorResult<GatewayEvent>) => void) | null;
-  closed: boolean;
+  /** No further event will be queued; the queue is still being drained. */
+  closing: boolean;
 }
 
 /**
@@ -48,7 +49,7 @@ export class InMemoryEventPublisher implements OutboundEventPublisher {
       return;
     }
     for (const subscriber of [...subscribers]) {
-      if (subscriber.closed) {
+      if (subscriber.closing) {
         continue;
       }
       const waiting = subscriber.waiting;
@@ -62,7 +63,7 @@ export class InMemoryEventPublisher implements OutboundEventPublisher {
   }
 
   subscribe(kind: GatewayEvent['kind']): AsyncGenerator<GatewayEvent> {
-    const subscriber: Subscriber = { queue: [], waiting: null, closed: false };
+    const subscriber: Subscriber = { queue: [], waiting: null, closing: false };
     const subscribers = this.subscribers.get(kind) ?? new Set<Subscriber>();
     subscribers.add(subscriber);
     this.subscribers.set(kind, subscribers);
@@ -70,14 +71,22 @@ export class InMemoryEventPublisher implements OutboundEventPublisher {
     return this.iterate(kind, subscriber);
   }
 
+  /**
+   * Closes the bus after the queued events have been handed out.
+   *
+   * A consumer that is asked to stop while an event is still queued must get
+   * that event: a gateway shutdown happens right after the last webhook, and
+   * dropping the queue would lose the forwarded message without a trace.
+   */
   async close(): Promise<void> {
     for (const subscribers of this.subscribers.values()) {
       for (const subscriber of subscribers) {
-        subscriber.closed = true;
-        subscriber.waiting?.({ done: true, value: undefined });
+        subscriber.closing = true;
+        if (subscriber.queue.length === 0) {
+          subscriber.waiting?.({ done: true, value: undefined });
+        }
       }
     }
-    this.subscribers.clear();
   }
 
   private async *iterate(
@@ -85,11 +94,14 @@ export class InMemoryEventPublisher implements OutboundEventPublisher {
     subscriber: Subscriber,
   ): AsyncGenerator<GatewayEvent> {
     try {
-      while (!subscriber.closed) {
+      for (;;) {
         const queued = subscriber.queue.shift();
         if (queued !== undefined) {
           yield queued;
           continue;
+        }
+        if (subscriber.closing) {
+          return;
         }
         const next = await new Promise<IteratorResult<GatewayEvent>>(
           (resolve) => {

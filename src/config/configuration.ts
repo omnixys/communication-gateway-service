@@ -54,6 +54,9 @@ const PRODUCTION_ENVIRONMENTS: readonly string[] = [
   'staging',
 ];
 
+/** Shortest internal api key accepted in a deployed environment. */
+const MIN_INTERNAL_API_KEY_LENGTH = 16;
+
 const UUID_V4_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -78,6 +81,24 @@ class EnvReader {
     const parsed = Number(raw);
     if (!Number.isInteger(parsed)) {
       this.issues.push(`${key} must be an integer, received "${raw}"`);
+      return fallback;
+    }
+    return parsed;
+  }
+
+  /**
+   * Integer that must be greater than zero.
+   *
+   * Retry budgets, timeouts and pool sizes below zero, or a zero retry
+   * budget, produce a component that silently never retries or never
+   * answers. Rejecting the value at startup is the only way to notice.
+   */
+  positiveInteger(key: string, fallback: number): number {
+    const parsed = this.integer(key, fallback);
+    if (parsed <= 0) {
+      this.issues.push(
+        `${key} must be greater than 0, received "${String(parsed)}"`,
+      );
       return fallback;
     }
     return parsed;
@@ -249,8 +270,8 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       url: databaseUrl,
       enabled: databaseUrl.length > 0,
       echo: reader.boolean('DATABASE_ECHO', false),
-      poolSize: reader.integer('DATABASE_POOL_SIZE', 10),
-      maxOverflow: reader.integer('DATABASE_MAX_OVERFLOW', 20),
+      poolSize: reader.positiveInteger('DATABASE_POOL_SIZE', 10),
+      maxOverflow: reader.positiveInteger('DATABASE_MAX_OVERFLOW', 20),
     },
     keycloak: {
       url: reader.string('KEYCLOAK_URL'),
@@ -277,12 +298,12 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       apiKey: reader.string('RESEND_API_KEY'),
       fromAddress: reader.string('RESEND_FROM_ADDRESS'),
       baseUrl: reader.string('RESEND_BASE_URL', 'https://api.resend.com'),
-      timeout: reader.integer('RESEND_TIMEOUT', 30),
+      timeout: reader.positiveInteger('RESEND_TIMEOUT', 30),
     },
     stalwart: {
       enabled: reader.boolean('STALWART_ENABLED', false),
       priority: reader.integer('STALWART_PRIORITY', 10),
-      timeout: reader.integer('STALWART_TIMEOUT', 30),
+      timeout: reader.positiveInteger('STALWART_TIMEOUT', 30),
       host: reader.string('STALWART_HOST'),
       port: reader.integer('STALWART_PORT', 587),
       username: reader.string('STALWART_USERNAME'),
@@ -315,10 +336,10 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       samplingProbability: reader.number('OTEL_SAMPLING_PROBABILITY', 0.1),
     },
     forwarder: {
-      maxAttempts: reader.integer('FORWARDER_MAX_ATTEMPTS', 3),
-      baseDelayMs: reader.integer('FORWARDER_BASE_DELAY_MS', 200),
-      maxDelayMs: reader.integer('FORWARDER_MAX_DELAY_MS', 2000),
-      timeoutMs: reader.integer('FORWARDER_TIMEOUT_MS', 15000),
+      maxAttempts: reader.positiveInteger('FORWARDER_MAX_ATTEMPTS', 3),
+      baseDelayMs: reader.positiveInteger('FORWARDER_BASE_DELAY_MS', 200),
+      maxDelayMs: reader.positiveInteger('FORWARDER_MAX_DELAY_MS', 2000),
+      timeoutMs: reader.positiveInteger('FORWARDER_TIMEOUT_MS', 15000),
     },
     cache: {
       url: reader.string('CACHE_URL'),
@@ -415,5 +436,14 @@ export function assertProductionReadiness(config: AppConfig): void {
     throw new ConfigurationError('PORT must be a valid TCP port', [
       `received ${String(config.core.port)}`,
     ]);
+  }
+
+  // A deployed gateway authenticates every internal call with this value, so a
+  // guessable key would leave the REST surface, GraphQL and the webhooks open.
+  if (config.core.internalApiKey.length < MIN_INTERNAL_API_KEY_LENGTH) {
+    throw new ConfigurationError(
+      `INTERNAL_API_KEY must be at least ${String(MIN_INTERNAL_API_KEY_LENGTH)} characters`,
+      [`received ${String(config.core.internalApiKey.length)} characters`],
+    );
   }
 }

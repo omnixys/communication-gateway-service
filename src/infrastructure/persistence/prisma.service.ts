@@ -58,6 +58,17 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * The client, or `null` when persistence is disabled.
+   *
+   * Optional collaborators use this instead of {@link PrismaService.client} so
+   * that a gateway without a database still boots and degrades to in-memory
+   * behaviour rather than throwing during dependency injection.
+   */
+  get maybeClient(): PrismaClient | null {
+    return this.prisma;
+  }
+
+  /**
    * The Prisma client.
    *
    * @throws {PersistenceDisabledError} when no database is configured.

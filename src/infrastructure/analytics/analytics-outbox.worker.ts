@@ -49,8 +49,13 @@ export class AnalyticsOutboxWorker {
   private timer: NodeJS.Timeout | null = null;
   private running = false;
 
+  /**
+   * @param db outbox table, or `null` when no database is configured. Without a
+   *   database there is nothing to poll, and the worker stays idle instead of
+   *   failing the bootstrap of the whole gateway.
+   */
   constructor(
-    private readonly db: Db,
+    private readonly db: Db | null,
     private readonly producer: RawEventPublisher,
   ) {}
 
@@ -62,8 +67,14 @@ export class AnalyticsOutboxWorker {
    * cannot serve, not a boot time out.
    */
   async start(): Promise<void> {
-    if (this.producer.enabled === false) {
-      logger.warn('analytics_outbox_disabled: no broker configured');
+    if (this.producer.enabled === false || this.db === null) {
+      logger.warn(
+        {
+          database: this.db !== null,
+          broker: this.producer.enabled,
+        },
+        'analytics_outbox_disabled: nothing to publish or no broker configured',
+      );
       return;
     }
     if (this.timer !== null) {
@@ -95,15 +106,19 @@ export class AnalyticsOutboxWorker {
    * @returns the number of successfully published records.
    */
   async runOnce(): Promise<number> {
+    const db = this.db;
+    if (db === null) {
+      return 0;
+    }
     if (this.running) {
       return 0;
     }
     this.running = true;
     try {
-      const claimed = await this.claim(BATCH_SIZE);
+      const claimed = await this.claim(db, BATCH_SIZE);
       let published = 0;
       for (const id of claimed) {
-        if (await this.publish(id)) {
+        if (await this.publish(db, id)) {
           published += 1;
         }
       }
@@ -119,10 +134,10 @@ export class AnalyticsOutboxWorker {
     }
   }
 
-  private async claim(limit: number): Promise<string[]> {
+  private async claim(db: Db, limit: number): Promise<string[]> {
     const now = new Date();
     const staleBefore = new Date(now.getTime() - STALE_LOCK_MS);
-    const candidates = await this.db.analyticsOutbox.findMany({
+    const candidates = await db.analyticsOutbox.findMany({
       where: {
         publishedAt: null,
         deadLetteredAt: null,
@@ -136,7 +151,7 @@ export class AnalyticsOutboxWorker {
 
     const claimed: string[] = [];
     for (const candidate of candidates) {
-      const result = await this.db.analyticsOutbox.updateMany({
+      const result = await db.analyticsOutbox.updateMany({
         where: {
           id: candidate.id,
           OR: [{ lockedAt: null }, { lockedAt: { lt: staleBefore } }],
@@ -150,8 +165,8 @@ export class AnalyticsOutboxWorker {
     return claimed;
   }
 
-  private async publish(id: string): Promise<boolean> {
-    const record = await this.db.analyticsOutbox.findUnique({ where: { id } });
+  private async publish(db: Db, id: string): Promise<boolean> {
+    const record = await db.analyticsOutbox.findUnique({ where: { id } });
     if (record?.lockedBy !== this.instanceId) {
       return false;
     }
@@ -184,11 +199,11 @@ export class AnalyticsOutboxWorker {
         headers,
       );
     } catch (error) {
-      await this.releaseWithFailure(record.attempts + 1, record.id, error);
+      await this.releaseWithFailure(db, record.attempts + 1, record.id, error);
       return false;
     }
 
-    await this.db.analyticsOutbox.update({
+    await db.analyticsOutbox.update({
       where: { id: record.id },
       data: {
         publishedAt: new Date(),
@@ -201,6 +216,7 @@ export class AnalyticsOutboxWorker {
   }
 
   private async releaseWithFailure(
+    db: Db,
     attempts: number,
     id: string,
     error: unknown,
@@ -211,7 +227,7 @@ export class AnalyticsOutboxWorker {
     const deadLettered = attempts >= MAX_RETRIES;
     const backoffSeconds = Math.min(MAX_BACKOFF_SECONDS, 2 ** attempts);
 
-    await this.db.analyticsOutbox.update({
+    await db.analyticsOutbox.update({
       where: { id },
       data: {
         attempts,
