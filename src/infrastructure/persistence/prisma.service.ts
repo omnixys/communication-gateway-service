@@ -69,13 +69,28 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.prisma;
   }
 
+  /**
+   * Warms the connection pool without making an unreachable database fatal.
+   *
+   * The previous runtime started with a down database and reported the
+   * failure through `/health/ready`. Keeping that behaviour avoids a restart
+   * loop that turns a transient database outage into a crash loop; the
+   * readiness probe is the signal that the gateway is not serving.
+   */
   async onModuleInit(): Promise<void> {
     if (this.prisma === null) {
       logger.warn('database_disabled: DATABASE_URL is empty, message mappings are kept in memory');
       return;
     }
-    await this.prisma.$connect();
-    logger.info('database_connected');
+    try {
+      await this.prisma.$connect();
+      logger.info('database_connected');
+    } catch (error) {
+      logger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        'database_unavailable_at_startup: readiness will report database=false',
+      );
+    }
   }
 
   async onModuleDestroy(): Promise<void> {

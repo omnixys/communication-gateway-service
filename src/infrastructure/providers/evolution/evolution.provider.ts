@@ -47,6 +47,7 @@ import {
 } from './evolution.mapper.js';
 import {
   verifyApiKey,
+  verifyBearerSecret,
   verifyEvolutionSignature,
 } from './evolution.webhook-verifier.js';
 
@@ -144,21 +145,53 @@ export class EvolutionProvider implements CommunicationProvider {
     return this.staticCapabilities();
   }
 
+  /**
+   * Accepts a webhook when any configured credential matches.
+   *
+   * The checks are tried in the order of the previous runtime: the Evolution
+   * API key from a header or from the body, then a bearer token equal to the
+   * webhook secret, then the HMAC signature. Failing all three is a rejection
+   * - a webhook is never accepted because it presented no credential at all.
+   */
   async verifyWebhook(
     headers: Readonly<Record<string, string>>,
     body: Buffer,
   ): Promise<boolean> {
-    const signature = readHeader(headers, 'x-evolution-signature');
-    if (this.webhookSecret.length > 0) {
-      return verifyEvolutionSignature(body, this.webhookSecret, signature);
+    const headerKey =
+      readHeader(headers, 'apikey') ??
+      readHeader(headers, 'x-api-key') ??
+      readHeader(headers, 'apiKey');
+    if (this.apiKey.length > 0) {
+      if (verifyApiKey(headerKey, this.apiKey)) {
+        return true;
+      }
+      if (verifyApiKey(extractApikey(body), this.apiKey)) {
+        return true;
+      }
     }
 
-    const headerKey =
-      readHeader(headers, 'x-api-key') ?? readHeader(headers, 'apikey');
-    if (headerKey !== null) {
-      return verifyApiKey(headerKey, this.apiKey);
+    if (this.webhookSecret.length > 0) {
+      if (verifyBearerSecret(headers, this.webhookSecret)) {
+        return true;
+      }
+      const signature =
+        readHeader(headers, 'x-signature') ??
+        readHeader(headers, 'x-evolution-signature');
+      if (verifyEvolutionSignature(body, this.webhookSecret, signature)) {
+        return true;
+      }
     }
-    return verifyApiKey(extractApikey(body), this.apiKey);
+
+    logger.warn(
+      {
+        hasHeaderKey: headerKey !== null,
+        hasSignature: readHeader(headers, 'x-signature') !== null,
+        secretConfigured: this.webhookSecret.length > 0,
+        apiKeyConfigured: this.apiKey.length > 0,
+      },
+      'evolution_webhook_verification_failed: no_matching_key_or_signature',
+    );
+    return false;
   }
 
   async handleWebhook(

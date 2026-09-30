@@ -17,7 +17,6 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import { DeliveryStatus } from '../../domain/enums.js';
 import type { CommunicationProviderType } from '../../domain/enums.js';
 import { WebhookVerificationError } from '../../domain/errors.js';
 import type { InboundMessageReceived, MessageDelivered } from '../../domain/events.js';
@@ -81,11 +80,10 @@ export class WebhookService {
       message.messageId,
     );
 
-    if (
-      existing !== null &&
-      existing.status !== DeliveryStatus.FAILED &&
-      existing.status !== DeliveryStatus.PENDING
-    ) {
+    // Idempotency is keyed on the provider message id alone. Re-processing a
+    // mapping in any state - including PENDING and FAILED - would emit a
+    // second InboundMessageReceived for a provider id that was already seen.
+    if (existing !== null) {
       logger.info(
         {
           provider: message.providerType,

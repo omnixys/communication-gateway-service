@@ -297,13 +297,19 @@ class SmtpSession {
     }
   }
 
-  /** Upgrades the plain connection with STARTTLS. */
+  /**
+   * Upgrades the plain connection with STARTTLS.
+   *
+   * The `220 Ready to start TLS` reply was already consumed by
+   * {@link SmtpSession.command}, so the handshake must not read another line
+   * before wrapping the socket. RFC 3207 requires the client to send EHLO
+   * again after the upgrade, which the caller does.
+   */
   async upgrade(host: string, rejectUnauthorized: boolean): Promise<void> {
     this.detachListeners();
     this.buffer = '';
     this.socket = await SmtpSession.wrap(this.socket, host, rejectUnauthorized);
     this.attachListeners();
-    await this.nextReply('STARTTLS');
   }
 
   async close(): Promise<void> {

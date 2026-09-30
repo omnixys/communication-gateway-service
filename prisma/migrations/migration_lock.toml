@@ -13,6 +13,6 @@
 #
 # For more information, visit <https://www.gnu.org/licenses/>.
 
--- See the migration file for the statements that create the baseline schema.
--- Downgrades are intentionally not provided: the previous Alembic chain did not
--- provide a reversible path for the shared production database either.
+# Prisma reads this file to decide which provider the migration chain belongs
+# to. Without it `prisma migrate deploy` refuses to apply the baseline.
+provider = "postgresql"

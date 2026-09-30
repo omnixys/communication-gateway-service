@@ -54,18 +54,26 @@ export class AnalyticsOutboxWorker {
     private readonly producer: RawEventPublisher,
   ) {}
 
-  /** Starts the polling loop. */
+  /**
+   * Starts the polling loop.
+   *
+   * The first batch runs detached: an unreachable database must not delay the
+   * HTTP listener, because the readiness probe is the signal that the gateway
+   * cannot serve, not a boot time out.
+   */
   async start(): Promise<void> {
     if (this.producer.enabled === false) {
       logger.warn('analytics_outbox_disabled: no broker configured');
       return;
     }
-    this.running = true;
-    await this.runOnce();
+    if (this.timer !== null) {
+      return;
+    }
     this.timer = setInterval(() => {
       void this.runOnce();
     }, POLL_INTERVAL_MS);
     this.timer.unref();
+    void this.runOnce();
     logger.info({ batchSize: BATCH_SIZE }, 'analytics_outbox_worker_started');
   }
 

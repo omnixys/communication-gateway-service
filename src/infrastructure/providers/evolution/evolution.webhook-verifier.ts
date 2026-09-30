@@ -20,23 +20,23 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 /**
  * Verifies the HMAC-SHA256 signature of an Evolution webhook.
  *
- * The signature is transmitted as `sha256=<hex>` in the `x-evolution-signature`
- * header and is computed over the raw request body.
+ * The signature is computed over the raw request body and travels either as a
+ * bare hex digest or with the `sha256=` prefix, which is how Evolution
+ * instances differ in their configuration.
+ *
+ * A missing signature is always a rejection: treating it as a match would let
+ * any caller post to the webhook endpoint.
  *
  * @param body raw request body exactly as received.
  * @param secret shared secret configured on the Evolution instance.
  * @param signature value of the signature header, if present.
- * @returns `true` when no signature was sent or the signature matches.
  */
 export function verifyEvolutionSignature(
   body: Buffer,
   secret: string,
   signature: string | null,
 ): boolean {
-  if (signature === null || signature.length === 0) {
-    return true;
-  }
-  if (secret.length === 0) {
+  if (signature === null || signature.length === 0 || secret.length === 0) {
     return false;
   }
 
@@ -70,7 +70,14 @@ export function verifyApiKey(
   candidate: string | null,
   expected: string,
 ): boolean {
-  if (candidate === null || candidate.length === 0 || expected.length === 0) {
+  if (candidate === null || candidate.length === 0) {
+    return false;
+  }
+  return constantTimeEquals(candidate, expected);
+}
+
+function constantTimeEquals(candidate: string, expected: string): boolean {
+  if (expected.length === 0) {
     return false;
   }
   const provided = Buffer.from(candidate, 'utf8');
@@ -79,4 +86,27 @@ export function verifyApiKey(
     return false;
   }
   return timingSafeEqual(provided, configured);
+}
+
+/**
+ * Checks a bearer token against the webhook secret.
+ *
+ * Some Evolution deployments are configured with an authorization header
+ * instead of a signature, which is the same secret.
+ */
+export function verifyBearerSecret(
+  headers: Readonly<Record<string, string>>,
+  secret: string,
+): boolean {
+  if (secret.length === 0) {
+    return false;
+  }
+  const entry = Object.entries(headers).find(
+    ([name]) => name.toLowerCase() === 'authorization',
+  );
+  const value = entry?.[1];
+  if (!value?.startsWith('Bearer ')) {
+    return false;
+  }
+  return constantTimeEquals(value.slice(7), secret);
 }
