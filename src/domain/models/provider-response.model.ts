@@ -15,13 +15,15 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-/** Error raised when the runtime configuration is missing or inconsistent. */
-export class ConfigurationError extends Error {
-  public readonly issues: readonly string[];
+import { DeliveryStatus } from '../enums';
+import type { ProviderIdentity } from './provider-identity.model';
 
-  constructor(message: string, issues: readonly string[] = []) {
-    super(issues.length > 0 ? `${message}: ${issues.join('; ')}` : message);
-    this.name = 'ConfigurationError';
-    this.issues = issues;
-  }
+/** Normalized result of a provider delivery attempt. */
+export interface ProviderResponse {
+  readonly success: boolean;
+  readonly providerMessageId: string | null;
+  readonly status: DeliveryStatus;
+  readonly error: string | null;
+  readonly raw: Record<string, unknown> | null;
+  readonly providerIdentity: ProviderIdentity | null;
 }

@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { ConfigurationError } from '../shared/configuration.error';
+import { ConfigurationError } from '../domain/errors';
 import type {
   AddressMapping,
   AppConfig,
