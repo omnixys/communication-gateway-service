@@ -1,0 +1,71 @@
+# @license GPL-3.0-or-later
+# Copyright (C) 2026 Caleb Gyamfi - Omnixys Technologies
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# For more information, visit <https://www.gnu.org/licenses/>.
+
+# ============================================================
+# 🧩 Prettier-Konfiguration für TypeScript + Node + NestJS
+# ------------------------------------------------------------
+# Ziel: Einheitlicher Stil, maximale Lesbarkeit, CI/CD-kompatibel
+# ============================================================
+
+# ───────────────────────────────
+# 🌍 Allgemeine Formatregeln
+# ───────────────────────────────
+singleQuote: true
+semi: true
+trailingComma: all
+tabWidth: 2
+printWidth: 80
+endOfLine: lf
+bracketSpacing: true
+arrowParens: always
+quoteProps: as-needed
+proseWrap: preserve
+
+# ───────────────────────────────
+# 📦 Import-Sortierung
+# ───────────────────────────────
+plugins:
+  - prettier-plugin-organize-imports
+  - prettier-plugin-sort-imports
+
+sortingMethod: alphabetical
+
+# ───────────────────────────────
+# ⚙️ Overrides für bestimmte Dateitypen
+# ───────────────────────────────
+overrides:
+  - files: ['*.ts', '*.tsx', '*.js']
+    options:
+      tabWidth: 2
+      trailingComma: all
+      singleQuote: true
+      semi: true
+
+  - files: ['*.json', '*.yaml', '*.yml', '*.md']
+    options:
+      tabWidth: 2
+      printWidth: 80
+      proseWrap: preserve
+
+  - files: '*.prisma'
+    options:
+      tabWidth: 2
+      printWidth: 80
+      trailingComma: es5
+
+  - files: ['*.module.ts', '*.controller.ts', '*.service.ts']
+    options:
+      tabWidth: 2
+      printWidth: 100

@@ -1,2 +1,0 @@
-[console_scripts]
-gateway = communication_gateway.main:run
