@@ -1,7 +1,7 @@
 {
   "name": "communication-gateway-service",
   "version": "3.0.0",
-  "description": "Omnixys Communication Gateway \u2013 External Provider Integration Layer",
+  "description": "Omnixys Communication Gateway – External Provider Integration Layer",
   "author": {
     "name": "Caleb Gyamfi",
     "email": "caleb.gyamfi@omnixys.com",
@@ -48,6 +48,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@apollo/subgraph": "^2.14.4",
+    "@as-integrations/fastify": "3.1.0",
     "@nestjs/apollo": "^13.4.5",
     "@nestjs/common": "^11.2.3",
     "@nestjs/core": "^11.2.3",
