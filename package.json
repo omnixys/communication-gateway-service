@@ -1,7 +1,7 @@
 {
   "name": "communication-gateway-service",
   "version": "3.0.0",
-  "description": "Omnixys Communication Gateway – External Provider Integration Layer",
+  "description": "Omnixys Communication Gateway \u2013 External Provider Integration Layer",
   "author": {
     "name": "Caleb Gyamfi",
     "email": "caleb.gyamfi@omnixys.com",
@@ -26,8 +26,8 @@
   "scripts": {
     "clean": "rm -rf dist tsconfig.build.tsbuildinfo *.tsbuildinfo",
     "build": "pnpm run clean && nest build",
-    "format": "prettier --cache --write \"src/**/*.{ts,js,json,prisma,md,yaml}\" \"__tests__/**/*.ts\" --no-error-on-unmatched-pattern",
-    "format:check": "prettier --cache --check \"src/**/*.{ts,js,json,prisma,md,yaml,yml}\" \"__tests__/**/*.ts\" --no-error-on-unmatched-pattern",
+    "format": "prettier --cache --write \"src/**/*.{ts,js,json,prisma,md,yaml}\" \"__tests__/**/*.mjs\" --no-error-on-unmatched-pattern",
+    "format:check": "prettier --cache --check \"src/**/*.{ts,js,json,prisma,md,yaml,yml}\" \"__tests__/**/*.mjs\" --no-error-on-unmatched-pattern",
     "start": "pnpm nest start",
     "dev": "pnpm run clean && nest start --watch",
     "start:debug": "nest start --debug --watch",
