@@ -15,11 +15,11 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { DeliveryStatus } from '../enums';
+import { DeliveryStatus } from '../enums.js';
 import type {
   CommunicationChannelType,
   CommunicationProviderType,
-} from '../enums';
+} from '../enums.js';
 
 /** Persisted correlation between an internal message and its provider copy. */
 export interface MessageMapping {

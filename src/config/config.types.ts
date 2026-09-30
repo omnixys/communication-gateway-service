@@ -25,14 +25,7 @@
 
 /** Log levels accepted by the runtime. `test` silences the production checks. */
 export type LogLevel =
-  | 'trace'
-  | 'debug'
-  | 'info'
-  | 'warn'
-  | 'error'
-  | 'fatal'
-  | 'silent'
-  | 'test';
+  'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'silent' | 'test';
 
 /** SMTP authentication mechanism used by the Stalwart provider. */
 export type StalwartAuthMode = 'password' | 'oauthbearer';

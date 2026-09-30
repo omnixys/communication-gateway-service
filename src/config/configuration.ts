@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { ConfigurationError } from '../domain/errors';
+import { ConfigurationError } from '../domain/errors.js';
 import type {
   AddressMapping,
   AppConfig,
@@ -23,8 +23,8 @@ import type {
   LogLevel,
   StalwartAuthMode,
   WhatsappSupportRoute,
-} from './config.types';
-import { normalizeDatabaseUrl } from './database-url';
+} from './config.types.js';
+import { normalizeDatabaseUrl } from './database-url.js';
 
 const LOG_LEVELS: readonly LogLevel[] = [
   'trace',
@@ -186,9 +186,7 @@ function validateAddressMappings(value: unknown): string | null {
   return null;
 }
 
-function validateWhatsappEventMap(
-  value: unknown,
-): string | null {
+function validateWhatsappEventMap(value: unknown): string | null {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return 'must be a JSON object of instance name to route';
   }
@@ -269,9 +267,11 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       corsOrigin: reader.string('EVOLUTION_CORS_ORIGIN'),
     },
     whatsappSupport: {
-      eventMap: reader.json<
-        Readonly<Record<string, WhatsappSupportRoute>>
-      >('WHATSAPP_SUPPORT_EVENT_MAP', {}, validateWhatsappEventMap),
+      eventMap: reader.json<Readonly<Record<string, WhatsappSupportRoute>>>(
+        'WHATSAPP_SUPPORT_EVENT_MAP',
+        {},
+        validateWhatsappEventMap,
+      ),
     },
     resend: {
       apiKey: reader.string('RESEND_API_KEY'),
@@ -352,16 +352,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
  * Local development keeps working with an empty configuration; deployed
  * environments must be complete.
  */
-export function assertProductionReadiness(
-  config: AppConfig,
-): void {
+export function assertProductionReadiness(config: AppConfig): void {
   if (config.core.logLevel === 'test') {
     return;
   }
   if (!config.core.environment) {
     throw new ConfigurationError('Missing required env: ENVIRONMENT');
   }
-  if (!PRODUCTION_ENVIRONMENTS.includes(config.core.environment.toLowerCase())) {
+  if (
+    !PRODUCTION_ENVIRONMENTS.includes(config.core.environment.toLowerCase())
+  ) {
     return;
   }
 
@@ -376,10 +376,7 @@ export function assertProductionReadiness(
     EVOLUTION_WEBHOOK_SECRET: config.evolution.webhookSecret,
   };
 
-  if (
-    config.emailPrimary === 'resend' ||
-    config.emailFallback === 'resend'
-  ) {
+  if (config.emailPrimary === 'resend' || config.emailFallback === 'resend') {
     required['RESEND_API_KEY'] = config.resend.apiKey;
     required['RESEND_FROM_ADDRESS'] = config.resend.fromAddress;
   }

@@ -15,8 +15,8 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { AttachmentReference } from './attachment-reference.model';
-import type { CommunicationChannel } from './communication-channel.model';
+import type { AttachmentReference } from './attachment-reference.model.js';
+import type { CommunicationChannel } from './communication-channel.model.js';
 
 /** Message the gateway is asked to deliver to an external provider. */
 export interface OutboundMessage {

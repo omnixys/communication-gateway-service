@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { CommunicationChannelType } from '../enums';
+import type { CommunicationChannelType } from '../enums.js';
 
 /** A communication channel a message can be routed through. */
 export interface CommunicationChannel {

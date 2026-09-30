@@ -15,9 +15,9 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { CommunicationProviderType } from '../enums';
-import type { AttachmentReference } from './attachment-reference.model';
-import type { CommunicationChannel } from './communication-channel.model';
+import type { CommunicationProviderType } from '../enums.js';
+import type { AttachmentReference } from './attachment-reference.model.js';
+import type { CommunicationChannel } from './communication-channel.model.js';
 
 /** Message received from an external provider. */
 export interface InboundMessage {

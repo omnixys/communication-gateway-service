@@ -18,7 +18,7 @@
 import type {
   CommunicationChannelType,
   CommunicationProviderType,
-} from './enums';
+} from './enums.js';
 
 /** Base class for every expected domain failure. */
 export class GatewayError extends Error {

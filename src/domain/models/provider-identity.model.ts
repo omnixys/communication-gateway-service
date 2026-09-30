@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { CommunicationProviderType } from '../enums';
+import type { CommunicationProviderType } from '../enums.js';
 
 /** Static identity of a provider adapter. */
 export interface ProviderIdentity {

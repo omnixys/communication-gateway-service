@@ -17,8 +17,8 @@
 
 import { Global, Module } from '@nestjs/common';
 
-import { loadConfig } from './configuration';
-import type { AppConfig } from './config.types';
+import type { AppConfig } from './config.types.js';
+import { loadConfig } from './configuration.js';
 
 /** Injection token for the validated runtime configuration. */
 export const APP_CONFIG = Symbol('APP_CONFIG');

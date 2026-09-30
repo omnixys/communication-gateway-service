@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { ProviderIdentity } from './provider-identity.model';
+import type { ProviderIdentity } from './provider-identity.model.js';
 
 /** Self description a provider adapter exposes to the registry and GraphQL. */
 export interface ProviderMetadata {

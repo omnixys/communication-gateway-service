@@ -15,9 +15,9 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { CommunicationProviderType, ProviderStatus } from './enums';
-import type { DeliveryReceipt } from './models/delivery-receipt.model';
-import type { InboundMessage } from './models/inbound-message.model';
+import type { CommunicationProviderType, ProviderStatus } from './enums.js';
+import type { DeliveryReceipt } from './models/delivery-receipt.model.js';
+import type { InboundMessage } from './models/inbound-message.model.js';
 
 /** Emitted when a provider delivers an inbound message to the gateway. */
 export interface InboundMessageReceived {
@@ -40,6 +40,4 @@ export interface ProviderStatusChanged {
 
 /** Every event the in-process bus can carry. */
 export type GatewayEvent =
-  | InboundMessageReceived
-  | MessageDelivered
-  | ProviderStatusChanged;
+  InboundMessageReceived | MessageDelivered | ProviderStatusChanged;

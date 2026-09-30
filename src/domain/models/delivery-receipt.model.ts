@@ -15,10 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type {
-  CommunicationProviderType,
-  DeliveryStatus,
-} from '../enums';
+import type { CommunicationProviderType, DeliveryStatus } from '../enums.js';
 
 /** Delivery status report emitted by a provider. */
 export interface DeliveryReceipt {

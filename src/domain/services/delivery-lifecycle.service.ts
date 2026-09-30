@@ -17,18 +17,13 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import { DeliveryStatus } from '../enums';
-import { InvalidStatusTransitionError } from '../errors';
+import { DeliveryStatus } from '../enums.js';
+import { InvalidStatusTransitionError } from '../errors.js';
 
 const logger = getLogger('DeliveryLifecycle', 'domain');
 
-const VALID_TRANSITIONS: Readonly<
-  Record<DeliveryStatus, ReadonlySet<DeliveryStatus>>
-> = {
-  [DeliveryStatus.UNKNOWN]: new Set([
-    DeliveryStatus.PENDING,
-    DeliveryStatus.FAILED,
-  ]),
+const VALID_TRANSITIONS: Readonly<Record<DeliveryStatus, ReadonlySet<DeliveryStatus>>> = {
+  [DeliveryStatus.UNKNOWN]: new Set([DeliveryStatus.PENDING, DeliveryStatus.FAILED]),
   [DeliveryStatus.PENDING]: new Set([
     DeliveryStatus.QUEUED,
     DeliveryStatus.SENT,
@@ -50,22 +45,13 @@ const VALID_TRANSITIONS: Readonly<
     DeliveryStatus.FAILED,
     DeliveryStatus.CANCELLED,
   ]),
-  [DeliveryStatus.READ]: new Set([
-    DeliveryStatus.FAILED,
-    DeliveryStatus.CANCELLED,
-  ]),
-  [DeliveryStatus.FAILED]: new Set([
-    DeliveryStatus.PENDING,
-    DeliveryStatus.CANCELLED,
-  ]),
+  [DeliveryStatus.READ]: new Set([DeliveryStatus.FAILED, DeliveryStatus.CANCELLED]),
+  [DeliveryStatus.FAILED]: new Set([DeliveryStatus.PENDING, DeliveryStatus.CANCELLED]),
   [DeliveryStatus.CANCELLED]: new Set<DeliveryStatus>(),
 };
 
 /** Reports whether a delivery status change is allowed. */
-export function isValidTransition(
-  current: DeliveryStatus,
-  next: DeliveryStatus,
-): boolean {
+export function isValidTransition(current: DeliveryStatus, next: DeliveryStatus): boolean {
   if (current === next) {
     return true;
   }
@@ -77,15 +63,9 @@ export function isValidTransition(
  *
  * @throws {InvalidStatusTransitionError} when the change is not allowed.
  */
-export function assertValidTransition(
-  current: DeliveryStatus,
-  next: DeliveryStatus,
-): void {
+export function assertValidTransition(current: DeliveryStatus, next: DeliveryStatus): void {
   if (!isValidTransition(current, next)) {
-    logger.warn(
-      { currentStatus: current, attemptedStatus: next },
-      'invalid status transition',
-    );
+    logger.warn({ currentStatus: current, attemptedStatus: next }, 'invalid status transition');
     throw new InvalidStatusTransitionError(current, next);
   }
 }

@@ -15,7 +15,7 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import type { AttachmentType } from '../enums';
+import type { AttachmentType } from '../enums.js';
 
 /** Reference to a media object attached to a message. */
 export interface AttachmentReference {
