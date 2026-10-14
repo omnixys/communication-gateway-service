@@ -20,26 +20,19 @@ import './../support/env.mjs';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import {
-  CommunicationProviderType,
-  DeliveryStatus,
-} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { backoffDelay } from '../../dist/adapter/events/http-event.forwarder.js';
 import { InMemoryEventPublisher } from '../../dist/adapter/events/in-memory-event.publisher.js';
 import { KafkaDeliveryEventHandler } from '../../dist/adapter/events/kafka-delivery-event.handler.js';
 import { DisabledRawEventPublisher } from '../../dist/adapter/events/kafka-raw-event.publisher.js';
 import {
+  CommunicationProviderType,
+  DeliveryStatus,
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
+import {
   RecordingRawPublisher,
   deliveryReceipt,
   inboundMessage,
 } from '../support/fakes.mjs';
-
-const FORWARDER_CONFIG = {
-  maxAttempts: 3,
-  baseDelayMs: 1,
-  maxDelayMs: 4,
-  timeoutMs: 50,
-};
 
 describe('InMemoryEventPublisher', () => {
   it('delivers an event to a subscriber of that kind', async () => {

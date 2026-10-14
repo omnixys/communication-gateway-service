@@ -260,7 +260,7 @@ export class FakeRegistry {
 /** Minimal in-memory MessageMappingStore built on the shipped implementation. */
 export async function inMemoryStore() {
   const { InMemoryMessageMappingStore } =
-    await import('../../dist/prisma/in-memory-message-mapping.store.js');
+    await import('./message-mapping-store.mjs');
   return new InMemoryMessageMappingStore();
 }
 

@@ -17,18 +17,16 @@
 
 import { getLogger } from '@omnixys/logger-ts';
 
+import type { ForwarderConfig } from '../../communication-gateway/models/interfaces/forwarder-config.interface.js';
 import type { MessageMappingStore } from '../../communication-gateway/models/interfaces/message-mapping-store.port.js';
 import type { OutboundEventPublisher } from '../../communication-gateway/models/interfaces/outbound-event-publisher.port.js';
+import type { WhatsappSupportRoute } from '../../communication-gateway/models/interfaces/whatsapp-support-route.interface.js';
 import type { GatewayEvent } from '../../communication-gateway/models/payloads/gateway-events.payload.js';
 import type {
   InboundMessageReceived,
   MessageDelivered,
 } from '../../communication-gateway/models/payloads/gateway-events.payload.js';
-import type {
-  ForwarderConfig,
-  WhatsappSupportRoute,
-} from '../../config/config.types.js';
-import { requestJson } from '../../core/http-client.js';
+import { requestJson } from '../http/json-request.js';
 
 const logger = getLogger('HttpEventForwarder', 'class');
 

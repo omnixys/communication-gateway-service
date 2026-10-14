@@ -26,8 +26,7 @@ import {
 } from '@nestjs/common';
 import { getLogger } from '@omnixys/logger-ts';
 
-import { currentRequestContext } from '../../core/request-context.js';
-import { MESSAGE_MAPPING_STORE } from '../../prisma/persistence.module.js';
+import { MESSAGE_MAPPING_STORE } from '../../prisma/tokens.js';
 import { AddressResolutionError } from '../errors/gateway.errors.js';
 import type { SendMessageDto } from '../models/dto/send-message.dto.js';
 import { createMessageMapping } from '../models/entities/message-mapping.model.js';
@@ -46,6 +45,7 @@ import { toIdentityResponse } from '../models/mappers/provider-identity.mapper.j
 import type { SendMessageResult } from '../models/payloads/send-message.payload.js';
 import { ADDRESS_RESOLVER } from '../utils/tokens.js';
 import { GatewayDispatcher } from './gateway-dispatcher.service.js';
+import { ContextAccessor } from '@omnixys/context-ts';
 
 const logger = getLogger('MessagesService', 'class');
 
@@ -264,7 +264,7 @@ function buildMetadata(dto: SendMessageDto, organizationId: string): Record<stri
  * error rather than a persistence error.
  */
 function resolveOrganizationId(): string {
-  const context = currentRequestContext();
+  const context = ContextAccessor.current();
   const organizationId = context?.tenantId ?? '';
   if (organizationId.length === 0) {
     return '';

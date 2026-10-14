@@ -40,7 +40,7 @@ const COMMIT_ANALYZER = releaseConfig.plugins.find(
 const silentLogger = { log: () => {} };
 
 async function releaseTypeFor(message) {
-  return await analyzeCommits(COMMIT_ANALYZER[1], {
+  return analyzeCommits(COMMIT_ANALYZER[1], {
     commits: [
       { hash: '0'.repeat(40), message, gitTags: '', committerDate: new Date() },
     ],

@@ -1,18 +1,24 @@
 import '../support/env.mjs';
 
+import { AppModule } from '../../dist/app.module.js';
+import {
+  CommunicationProviderType,
+  DeliveryStatus,
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
+import { MessageMappingRepository } from '../../dist/prisma/message-mapping.repository.js';
+import { PrismaService } from '../../dist/prisma/prisma.service.js';
+import { API_KEY_HEADER, INTERNAL_API_KEY } from '../support/env.mjs';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { Test } from '@nestjs/testing';
+import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { promisify } from 'node:util';
 import { it } from 'node:test';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
-import { Test } from '@nestjs/testing';
-import { FastifyAdapter } from '@nestjs/platform-fastify';
-import { AppModule } from '../../dist/app.module.js';
-import { PrismaService } from '../../dist/prisma/prisma.service.js';
-import { PrismaMessageMappingStore } from '../../dist/prisma/prisma-message-mapping.store.js';
-import { CommunicationProviderType, DeliveryStatus } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
-import { API_KEY_HEADER, INTERNAL_API_KEY } from '../support/env.mjs';
+import { promisify } from 'node:util';
+
+// @covers MessageMappingRepository.save
+// @covers MessageMappingRepository.getByInternalId
 
 const run = promisify(execFile);
 
@@ -21,7 +27,9 @@ it('boots with migrated PostgreSQL and persists message mappings', async (t) => 
   try {
     container = await new PostgreSqlContainer('postgres:17-alpine').start();
   } catch (error) {
-    t.skip(`isolated PostgreSQL unavailable: ${error instanceof Error ? error.message : String(error)}`);
+    t.skip(
+      `isolated PostgreSQL unavailable: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return;
   }
 
@@ -33,7 +41,9 @@ it('boots with migrated PostgreSQL and persists message mappings', async (t) => 
       cwd: process.cwd(),
       env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
     });
-    const module = await Test.createTestingModule({ imports: [AppModule.forRoot()] }).compile();
+    const module = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = module.createNestApplication(new FastifyAdapter(), { rawBody: true });
     await app.init();
 
@@ -44,7 +54,7 @@ it('boots with migrated PostgreSQL and persists message mappings', async (t) => 
     assert.equal(response.json().checks.database, true);
 
     const prisma = app.get(PrismaService);
-    const store = new PrismaMessageMappingStore(prisma);
+    const store = new MessageMappingRepository(prisma);
     const internalId = randomUUID();
     const providerMessageId = randomUUID();
     await store.save({
@@ -66,13 +76,19 @@ it('boots with migrated PostgreSQL and persists message mappings', async (t) => 
       createdAt: new Date(),
       updatedAt: null,
     });
-    assert.equal((await store.getByInternalId(internalId))?.providerMessageId, providerMessageId);
+    assert.equal(
+      (await store.getByInternalId(internalId))?.providerMessageId,
+      providerMessageId,
+    );
 
-    const providers = await app.getHttpAdapter().getInstance().inject({
-      method: 'GET',
-      url: '/api/v1/providers',
-      headers: { [API_KEY_HEADER]: INTERNAL_API_KEY },
-    });
+    const providers = await app
+      .getHttpAdapter()
+      .getInstance()
+      .inject({
+        method: 'GET',
+        url: '/api/v1/providers',
+        headers: { [API_KEY_HEADER]: INTERNAL_API_KEY },
+      });
     assert.equal(providers.statusCode, 200);
   } finally {
     await app?.close();

@@ -36,12 +36,13 @@
 - Keep gateway business behavior in the existing `controllers`, `resolvers`, `services`, `errors`,
   `models`, and `utils` folders of `src/communication-gateway`. Put provider and event adapters in
   `src/adapter`, persistence in `src/prisma`, and shared service concerns in their named directories.
+  Compose them in the static `src/app.module.ts` as the user and event services do.
   Do not introduce technical layer folders such as `domain`, `application`, `api`, or `infrastructure` inside the context.
 - Reuse `@omnixys/*` packages (logger-ts, contracts-ts, kafka-ts, context-ts, cache-ts, observability-ts,
   security-ts) before reimplementing shared infrastructure. Do not add a repository-local copy.
 - Keep secrets out of logs and files: SMTP credentials, provider tokens and `INTERNAL_API_KEY` are never logged, and
-  `.env` is never read by code or tests.
-- Configuration changes go through `src/config/configuration.ts`. New optional keys need a default; required keys
+  tests must never read `.env`; the application loads deployment environment through `dotenv/config`.
+- Configuration changes go through the flat `src/config/env.ts` using `SERVICE` and `NODE_ENV` as in the user service. The startup banner is registered in `AppModule`. New optional keys need a default; required keys
   need validation and a line in `.env.example`.
 - `DATABASE_URL` is mandatory; startup verifies a real query. Database changes need a new migration on top of `20260101000000_init`. Never edit an applied migration, and keep
   index and constraint names aligned with the SQL baseline.
@@ -52,6 +53,11 @@
   verification, the event bus, the outbox worker and the HTTP forwarder.
 - API integration tests use Fastify request injection. PostgreSQL persistence is exercised against an isolated
   Testcontainers instance when a container runtime is available.
+- The service-internal integration suite runs only through the local harness:
+  `OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration`
+  (from the repository root). Map every public method to a test with
+  `@covers Klassenname.methode` in `__tests__/integration/*.test.mjs`; the harness boots the real `AppModule` over an
+  isolated PostgreSQL.
 - Import `../support/env.mjs` first in every test file. It pins a closed `DATABASE_URL` and a fixed
   `INTERNAL_API_KEY`, because `--env-file` cannot override the ambient environment and a local `.env` exists.
 - Cover tenant-isolation and error-contract cases when the code path touches them. A regression test must fail before
@@ -71,7 +77,7 @@ FAILURE`, or `NOT RUN` (with a reason). Never convert `NOT RUN` into `PASS`.
   - `npx tsc -p tsconfig.json --noEmit`
   - `pnpm run build`
   - `node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs`
-  - `node --env-file=__tests__/unit/test.env --test __tests__/integration/*.test.mjs`
+  - `OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration` (integration; boots the real app over an isolated PostgreSQL)
   - `pnpm run test` (both suites, each preceded by a build)
 
 A full `docker buildx bake` needs the GitHub Packages token as a build secret. Without
@@ -85,3 +91,9 @@ it the build stops at the private registry step with `ERR_PNPM_FETCH_401`; repor
 - Update `docs/contracts/api-contract.md` in the same change whenever an externally observable contract moves, and
   keep `AGENTS.md` and `SKILL.md` current with the repository.
 - Never push, tag, publish or deploy.
+
+## Test workflow
+
+Follow `docs/TESTING.md` for the separate unit command and migration-backed container integration requirements. Record executed test evidence and concrete scenarios in `docs/testing-methods.json`; candidate references alone do not establish coverage. Verify the sealing with `node test-tools/method-inventory.mjs --write` followed by `node test-tools/method-inventory.mjs --require-integration --strict` from the `services` folder.
+
+TS unit tests run in the existing Node runner with `--experimental-test-module-mocks`; include both `.test.mjs` and `.test.ts` in the unit command. Run `test:typecheck` after the application build. The environment fixture disables dotenv files explicitly; container connection data must be set before loading the application.

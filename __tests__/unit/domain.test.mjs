@@ -21,15 +21,6 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import {
-  CommunicationChannelType,
-  CommunicationProviderType,
-  DeliveryStatus,
-  parseCommunicationChannelType,
-  parseCommunicationProviderType,
-  parseContentType,
-  parseDeliveryStatus,
-} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
-import {
   ChannelNotFoundError,
   ConfigurationError,
   GatewayError,
@@ -43,6 +34,15 @@ import {
   mergeChannelCapabilities,
 } from '../../dist/communication-gateway/models/entities/channel-capabilities.model.js';
 import { createMessageMapping } from '../../dist/communication-gateway/models/entities/message-mapping.model.js';
+import {
+  CommunicationChannelType,
+  CommunicationProviderType,
+  DeliveryStatus,
+  parseCommunicationChannelType,
+  parseCommunicationProviderType,
+  parseContentType,
+  parseDeliveryStatus,
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import {
   assertValidTransition,
   isValidTransition,

@@ -21,15 +21,15 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { after, before, describe, it } from 'node:test';
 
-import { DeliveryStatus } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { HttpEventForwarder } from '../../dist/adapter/events/http-event.forwarder.js';
 import { InMemoryEventPublisher } from '../../dist/adapter/events/in-memory-event.publisher.js';
-import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
+import { DeliveryStatus } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import {
   deliveryReceipt,
   inboundMessage,
   messageMapping,
 } from '../support/fakes.mjs';
+import { InMemoryMessageMappingStore } from '../support/message-mapping-store.mjs';
 
 /** Records what the forwarder posts and answers with a scriptable status. */
 class TargetServer {

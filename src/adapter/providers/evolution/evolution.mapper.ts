@@ -26,7 +26,7 @@ import {
 import type { CommunicationChannelType } from '../../../communication-gateway/models/enums/gateway.enums.js';
 import type { DeliveryReceipt } from '../../../communication-gateway/models/payloads/delivery-receipt.model.js';
 import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
-import { asNumber, asRecord, asText } from '../../../core/coerce.js';
+import { asNumber, asRecord, asText } from '../provider-value.mapper.js';
 
 const WHATSAPP_SUFFIX = '@s.whatsapp.net';
 

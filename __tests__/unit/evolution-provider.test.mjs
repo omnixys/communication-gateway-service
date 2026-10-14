@@ -21,16 +21,16 @@ import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import { describe, it } from 'node:test';
 
-import {
-  CommunicationProviderType,
-  DeliveryStatus,
-} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 import { EvolutionProvider } from '../../dist/adapter/providers/evolution/evolution.provider.js';
 import {
   verifyApiKey,
   verifyBearerSecret,
   verifyEvolutionSignature,
 } from '../../dist/adapter/providers/evolution/evolution.webhook-verifier.js';
+import {
+  CommunicationProviderType,
+  DeliveryStatus,
+} from '../../dist/communication-gateway/models/enums/gateway.enums.js';
 
 const API_KEY = 'evolution-api-key';
 const WEBHOOK_SECRET = 'evolution-webhook-secret';

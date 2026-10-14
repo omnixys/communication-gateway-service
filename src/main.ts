@@ -1,28 +1,6 @@
-/**
- * @license GPL-3.0-or-later
- * Copyright (C) 2026 Caleb Gyamfi - Omnixys Technologies
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
- */
-
+/** HTTP entry point for the Communication Gateway. */
 import { AppModule } from './app.module.js';
-import {
-  assertProductionReadiness,
-  loadConfig,
-} from './config/configuration.js';
-import { corsOptions } from './config/cors.js';
-import compress from '@fastify/compress';
-import cors from '@fastify/cors';
-import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
+import { env } from './config/env.js';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -34,55 +12,31 @@ import 'reflect-metadata';
 
 const logger = getLogger('Bootstrap', 'class');
 
-/** Starts the gateway only after configuration and database checks pass. */
 export async function bootstrap(): Promise<NestFastifyApplication> {
-  const config = loadConfig(process.env);
-  assertProductionReadiness(config);
-
   const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule.forRoot(),
-    new FastifyAdapter({
-      logger: false,
-      trustProxy: true,
-      bodyLimit: 1_048_576,
-    }),
-    { rawBody: true, bufferLogs: false },
+    AppModule,
+    new FastifyAdapter({ logger: false, bodyLimit: 10 * 1024 * 1024 }),
+    { rawBody: true },
   );
-  const fastify = app.getHttpAdapter().getInstance();
-  registerFastifyTracing(fastify);
-
-  await app.register(helmet, { contentSecurityPolicy: false });
-  await app.register(cors, corsOptions);
-  await app.register(compress, {
-    global: true,
-    encodings: ['br', 'gzip', 'deflate'],
-    threshold: 1024,
-  });
-  await app.register(rateLimit, {
-    max: 100,
-    timeWindow: '1 minute',
-    allowList: (request) => request.url.startsWith('/health'),
-  });
-
-  app.enableShutdownHooks();
-  await app.listen({ host: config.core.host, port: config.core.port });
-  logger.info(
-    {
-      service: config.core.serviceName,
-      host: config.core.host,
-      port: config.core.port,
-    },
-    'communication_gateway_listening',
-  );
-  return app;
+  try {
+    registerFastifyTracing(app.getHttpAdapter().getInstance());
+    app.enableShutdownHooks();
+    await app.listen(env.PORT, env.HOST);
+    logger.info({ port: env.PORT }, 'gateway_started');
+    return app;
+  } catch (error) {
+    await app.close();
+    throw error;
+  }
 }
 
-if (process.argv[1]?.endsWith('main.js')) {
-  bootstrap().catch((error: unknown) => {
-    logger.fatal(
-      { error: error instanceof Error ? error.message : String(error) },
-      'bootstrap_failed',
-    );
-    process.exitCode = 1;
-  });
-}
+void bootstrap().catch((error) => {
+  process.stderr.write(
+    'Communication Gateway startup failed; check configuration and dependencies.\n',
+  );
+  logger.error(
+    { error: error instanceof Error ? error.message : String(error) },
+    'gateway_start_failed',
+  );
+  process.exitCode = 1;
+});

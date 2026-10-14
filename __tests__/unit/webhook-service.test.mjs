@@ -20,13 +20,12 @@ import './../support/env.mjs';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { WebhookService } from '../../dist/communication-gateway/services/webhook.service.js';
+import { WebhookVerificationError } from '../../dist/communication-gateway/errors/gateway.errors.js';
 import {
   CommunicationProviderType,
   DeliveryStatus,
 } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
-import { WebhookVerificationError } from '../../dist/communication-gateway/errors/gateway.errors.js';
-import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
+import { WebhookService } from '../../dist/communication-gateway/services/webhook.service.js';
 import {
   FakeProvider,
   FakeRegistry,
@@ -35,6 +34,7 @@ import {
   inboundMessage,
   messageMapping,
 } from '../support/fakes.mjs';
+import { InMemoryMessageMappingStore } from '../support/message-mapping-store.mjs';
 
 const BODY = Buffer.from('{"event":"messages.upsert"}');
 const HEADERS = { apikey: 'key' };

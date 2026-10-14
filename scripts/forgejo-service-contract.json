@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "repository": "communication-gateway-service",
+  "manifestName": "communication-gateway-service",
+  "language": "typescript",
+  "profiles": [],
+  "versionFile": "package.json",
+  "releaseBranch": "main"
+}

@@ -37,6 +37,7 @@ export default tseslint.config(
       '.extras/**',
       'commitlint.config.mjs',
       'release.config.js',
+      'vitest.config.ts',
       'schema.gql',
     ],
   },
@@ -53,7 +54,7 @@ export default tseslint.config(
       ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
-        project: ['./tsconfig.json'],
+        project: ['./tsconfig.json', './tsconfig.test.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -131,6 +132,26 @@ export default tseslint.config(
       'prefer-template': 'warn',
       'no-new-require': 'error',
       'no-path-concat': 'error',
+    },
+  },
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: [
+      '__tests__/**/*.mjs',
+      'test/**/*.mjs',
+      '__tests__/e2e/**/*.ts',
+    ],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: { project: null, projectService: false },
+    },
+    rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
     },
   },
 );

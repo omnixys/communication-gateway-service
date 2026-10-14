@@ -1,6 +1,7 @@
 import { AdapterModule } from '../adapter/adapter.module.js';
 import { EVENT_PUBLISHER } from '../adapter/events/events.module.js';
 import type { InMemoryChannelProviderRegistry } from '../adapter/registry/in-memory-channel-provider.registry.js';
+import { PrismaModule } from '../prisma/prisma.module.js';
 import { MESSAGE_MAPPING_STORE } from '../prisma/tokens.js';
 import { MessagesController } from './controllers/messages.controller.js';
 import { ProvidersController } from './controllers/providers.controller.js';
@@ -15,7 +16,7 @@ import { CHANNEL_PROVIDER_REGISTRY, WEBHOOK_SERVICE } from './utils/tokens.js';
 import { Module } from '@nestjs/common';
 
 @Module({
-  imports: [AdapterModule],
+  imports: [AdapterModule, PrismaModule],
   controllers: [MessagesController, ProvidersController, WebhooksController],
   providers: [
     {

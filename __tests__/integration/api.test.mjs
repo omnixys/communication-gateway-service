@@ -20,26 +20,31 @@ import '../support/env.mjs';
 import assert from 'node:assert/strict';
 import { after, before, describe, it } from 'node:test';
 
-import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../dist/prisma/prisma.service.js';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../dist/app.module.js';
 import { API_KEY_HEADER, INTERNAL_API_KEY } from '../support/env.mjs';
+
+// @covers WebhooksController.challenge
 
 let app;
 
 /** Issues a request against the in-process gateway and returns status + body. */
 async function call(path, { method = 'GET', headers = {}, body } = {}) {
-  const response = await app.getHttpAdapter().getInstance().inject({
-    method,
-    url: path,
-    headers: {
-      ...(body === undefined ? {} : { 'content-type': 'application/json' }),
-      ...headers,
-    },
-    ...(body === undefined ? {} : { payload: body }),
-  });
+  const response = await app
+    .getHttpAdapter()
+    .getInstance()
+    .inject({
+      method,
+      url: path,
+      headers: {
+        ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        ...headers,
+      },
+      ...(body === undefined ? {} : { payload: body }),
+    });
   return {
     status: response.statusCode,
     body: response.body.length === 0 ? null : JSON.parse(response.body),
@@ -57,7 +62,7 @@ const MESSAGE = {
 };
 
 async function createApp() {
-  const module = await Test.createTestingModule({ imports: [AppModule.forRoot()] })
+  const module = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(PrismaService)
     .useValue({ ping: async () => false })
     .compile();
@@ -88,11 +93,7 @@ describe('health probes', () => {
   it('reports 503 while a dependency is unreachable', async () => {
     const response = await call('/health/ready');
 
-    assert.equal(
-      response.status,
-      503,
-      JSON.stringify(response.body),
-    );
+    assert.equal(response.status, 503, JSON.stringify(response.body));
     assert.equal(response.body.status, 'not_ready');
     assert.equal(
       response.body.checks.database,

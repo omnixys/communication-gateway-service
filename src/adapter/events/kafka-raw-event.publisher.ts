@@ -19,7 +19,7 @@ import type { KafkaProducerService } from '@omnixys/kafka-ts';
 import { getLogger } from '@omnixys/logger-ts';
 
 import type { RawEventPublisher } from '../../communication-gateway/models/interfaces/raw-event-publisher.port.js';
-import { currentCorrelationId } from '../../core/request-context.js';
+import { ContextAccessor } from '@omnixys/context-ts';
 
 const logger = getLogger('KafkaRawEventPublisher', 'class');
 
@@ -42,7 +42,7 @@ export class KafkaRawEventPublisher implements RawEventPublisher {
     key?: string,
     headers: Readonly<Record<string, string>> = {},
   ): Promise<void> {
-    const correlationId = currentCorrelationId();
+    const correlationId = ContextAccessor.current()?.correlationId ?? null;
     try {
       await this.producer.rawSendWithHeaders(topic, value, {
         ...headers,

@@ -34,6 +34,8 @@ const CLOSED_PORT_URL =
   'postgresql://omnixys:omnixys@127.0.0.1:1/omnixys_test?connect_timeout=1';
 
 const FORCED = {
+  NODE_ENV: 'test',
+  DOTENV_CONFIG_PATH: '/dev/null',
   ENVIRONMENT: 'local',
   LOG_LEVEL: 'silent',
   PORT: '0',

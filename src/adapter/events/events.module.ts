@@ -31,10 +31,9 @@ import { AnalyticsOutboxWorker } from '../../analytics/analytics-outbox.worker.j
 import type { MessageMappingStore } from '../../communication-gateway/models/interfaces/message-mapping-store.port.js';
 import type { OutboundEventPublisher } from '../../communication-gateway/models/interfaces/outbound-event-publisher.port.js';
 import type { RawEventPublisher } from '../../communication-gateway/models/interfaces/raw-event-publisher.port.js';
-import { APP_CONFIG } from '../../config/config.module.js';
-import type { AppConfig } from '../../config/config.types.js';
-import { MESSAGE_MAPPING_STORE } from '../../prisma/persistence.module.js';
+import { env } from '../../config/env.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { MESSAGE_MAPPING_STORE } from '../../prisma/tokens.js';
 import { HttpEventForwarder } from './http-event.forwarder.js';
 import { InMemoryEventPublisher } from './in-memory-event.publisher.js';
 import { KafkaDeliveryEventHandler } from './kafka-delivery-event.handler.js';
@@ -131,23 +130,27 @@ export class EventsModule {
             ]),
         {
           provide: EVENT_FORWARDER,
-          inject: [EVENT_PUBLISHER, APP_CONFIG, MESSAGE_MAPPING_STORE],
+          inject: [EVENT_PUBLISHER, MESSAGE_MAPPING_STORE],
           useFactory: (
             publisher: OutboundEventPublisher,
-            config: AppConfig,
             mappingStore: MessageMappingStore,
           ): HttpEventForwarder =>
             new HttpEventForwarder(
               publisher,
               {
-                chatServiceUrl: config.core.chatServiceUrl,
-                chatServiceApiKey: config.core.chatServiceApiKey,
-                notificationServiceUrl: config.core.notificationServiceUrl,
-                notificationServiceApiKey: config.core.notificationServiceApiKey,
+                chatServiceUrl: env.CHAT_SERVICE_URL,
+                chatServiceApiKey: env.CHAT_SERVICE_API_KEY,
+                notificationServiceUrl: env.NOTIFICATION_SERVICE_URL,
+                notificationServiceApiKey: env.NOTIFICATION_SERVICE_API_KEY,
               },
               mappingStore,
-              config.forwarder,
-              config.whatsappSupport.eventMap,
+              {
+                maxAttempts: env.FORWARDER_MAX_ATTEMPTS,
+                baseDelayMs: env.FORWARDER_BASE_DELAY_MS,
+                maxDelayMs: env.FORWARDER_MAX_DELAY_MS,
+                timeoutMs: env.FORWARDER_TIMEOUT_MS,
+              },
+              env.WHATSAPP_SUPPORT_EVENT_MAP,
             ),
         },
         {

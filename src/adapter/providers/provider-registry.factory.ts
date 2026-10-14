@@ -18,12 +18,10 @@
 import { getLogger } from '@omnixys/logger-ts';
 
 import { CommunicationChannelType } from '../../communication-gateway/models/enums/gateway.enums.js';
+import type { EmailProviderName } from '../../communication-gateway/models/enums/provider-config.enum.js';
 import type { ChannelEntry } from '../../communication-gateway/models/interfaces/channel-provider-registry.port.js';
 import type { CommunicationProvider } from '../../communication-gateway/models/interfaces/communication-provider.port.js';
-import type {
-  AppConfig,
-  EmailProviderName,
-} from '../../config/config.types.js';
+import type { ProviderSelectionConfig } from '../../communication-gateway/models/interfaces/provider-selection-config.interface.js';
 import { InMemoryChannelProviderRegistry } from '../registry/in-memory-channel-provider.registry.js';
 import { DefaultProviderResolver } from '../resolvers/default-provider.resolver.js';
 import { EvolutionProvider } from './evolution/evolution.provider.js';
@@ -39,7 +37,7 @@ const logger = getLogger('ProviderRegistryFactory', 'util');
  * keeps `/api/v1/providers` and GraphQL consistent with what can be delivered.
  */
 export function buildChannelRegistry(
-  config: AppConfig,
+  config: ProviderSelectionConfig,
 ): InMemoryChannelProviderRegistry {
   const registry = new InMemoryChannelProviderRegistry();
   const registered: string[] = [];
@@ -119,7 +117,7 @@ function registerChannel(
 
 function createEmailProvider(
   name: EmailProviderName,
-  config: AppConfig,
+  config: ProviderSelectionConfig,
 ): CommunicationProvider | null {
   switch (name) {
     case 'resend':

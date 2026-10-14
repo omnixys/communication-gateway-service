@@ -18,7 +18,6 @@
 import {
   type CanActivate,
   type ExecutionContext,
-  Inject,
   Injectable,
   ServiceUnavailableException,
   UnauthorizedException,
@@ -28,8 +27,6 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { getLogger } from '@omnixys/logger-ts';
 import { timingSafeEqual } from 'node:crypto';
 
-import { APP_CONFIG } from '../config/config.module.js';
-import type { AppConfig } from '../config/config.types.js';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 
 const logger = getLogger('InternalApiKeyGuard', 'class');
@@ -47,10 +44,7 @@ export const INTERNAL_API_KEY_HEADER = 'x-internal-api-key';
  */
 @Injectable()
 export class InternalApiKeyGuard implements CanActivate {
-  constructor(
-    @Inject(APP_CONFIG) private readonly config: AppConfig,
-    private readonly reflector: Reflector,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -61,7 +55,7 @@ export class InternalApiKeyGuard implements CanActivate {
       return true;
     }
 
-    const expected = this.config.core.internalApiKey;
+    const expected = process.env.INTERNAL_API_KEY?.trim() ?? '';
     if (expected.length === 0) {
       logger.error(
         'internal_api_key_missing: refusing request, INTERNAL_API_KEY is not configured',

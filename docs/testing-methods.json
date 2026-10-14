@@ -1,0 +1,2307 @@
+{
+  "service": "communication-gateway",
+  "note": "Candidate references and @covers annotations identify tests for review; they do not prove behavioral or branch coverage. Reviewed entries require manual scenario verification and a successful test run.",
+  "methods": [
+    {
+      "role": "Provider",
+      "class": "EventLifecycle",
+      "method": "onModuleInit",
+      "file": "src/adapter/events/events.module.ts",
+      "line": 66,
+      "signature": "onModuleInit()",
+      "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+      "scenarios": [
+        "Start forwarder then delivery handler then outbox",
+        "Continue after Error/non-Error forwarder/handler startup failures; propagate outbox failure"
+      ],
+      "unitTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+        "testHashes": {
+          "__tests__/unit/event-lifecycle.test.ts": "4c8acfc24f63da9e990b3f7c1ee30c18a05f4c35d469785ce0554172dcf842f4"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "EventLifecycle",
+      "method": "onApplicationShutdown",
+      "file": "src/adapter/events/events.module.ts",
+      "line": 86,
+      "signature": "onApplicationShutdown()",
+      "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+      "scenarios": [
+        "Await sequential forwarder/handler/outbox shutdown",
+        "Propagate each failure and preserve current stop-on-first-failure policy"
+      ],
+      "unitTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+        "testHashes": {
+          "__tests__/unit/event-lifecycle.test.ts": "4c8acfc24f63da9e990b3f7c1ee30c18a05f4c35d469785ce0554172dcf842f4"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "417bb1fa5ebacd8432dabc54129d76927772c4dc8f03f67e4d651a43230915db",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "ProviderLifecycle",
+      "method": "onApplicationShutdown",
+      "file": "src/adapter/providers/provider-lifecycle.service.ts",
+      "line": 37,
+      "signature": "onApplicationShutdown()",
+      "sourceHash": "bda92eee1c4c3faea7d7e0aa7b27b11a81c5f4fa10cb0ca70ac0f2a428ae0d12",
+      "scenarios": [
+        "Close every closable provider; skip adapter without close; tolerate failed close",
+        "Preserve empty registry without resource work"
+      ],
+      "unitTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "bda92eee1c4c3faea7d7e0aa7b27b11a81c5f4fa10cb0ca70ac0f2a428ae0d12",
+        "testHashes": {
+          "__tests__/unit/event-lifecycle.test.ts": "4c8acfc24f63da9e990b3f7c1ee30c18a05f4c35d469785ce0554172dcf842f4"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "bda92eee1c4c3faea7d7e0aa7b27b11a81c5f4fa10cb0ca70ac0f2a428ae0d12",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/event-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "DefaultProviderResolver",
+      "method": "resolve",
+      "file": "src/adapter/resolvers/default-provider.resolver.ts",
+      "line": 38,
+      "signature": "resolve(message, _context)",
+      "sourceHash": "9e92cf0096c2a6d162cd4e9eda21cbe21d5ab1009c898805bc4fcba022fceb74",
+      "scenarios": [
+        "Return the first healthy primary provider without probing the rest",
+        "Skip unhealthy primaries and return the next healthy one",
+        "Use the first healthy fallback provider when every primary is unhealthy",
+        "Treat a throwing health probe as an unhealthy provider",
+        "Throw NoProviderAvailableError when no primary or fallback is healthy",
+        "Throw NoProviderAvailableError when no provider is registered"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "unitVerification": {
+        "result": "passed",
+        "date": "2026-10-07",
+        "commands": [
+          "pnpm run build",
+          "node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs",
+          "npx tsc -p tsconfig.json --noEmit"
+        ],
+        "sourceHash": "9e92cf0096c2a6d162cd4e9eda21cbe21d5ab1009c898805bc4fcba022fceb74",
+        "testHashes": {
+          "__tests__/unit/provider-resolvers.test.mjs": "71bf80d29803df0ec7184eddcbaf6c903baa6df5151e88bb5e3a8f291ed4edc4"
+        },
+        "supportHashes": {}
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "9e92cf0096c2a6d162cd4e9eda21cbe21d5ab1009c898805bc4fcba022fceb74",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "DictAddressResolver",
+      "method": "resolve",
+      "file": "src/adapter/resolvers/dict-address.resolver.ts",
+      "line": 47,
+      "signature": "resolve(userId, channel)",
+      "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+      "scenarios": [
+        "Resolve the configured address for a known user and channel",
+        "Normalize case-insensitive channel keys supplied in the mapping",
+        "Reject an unknown user with AddressResolutionError",
+        "Reject a user without an address for the requested channel with AddressResolutionError"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "unitVerification": {
+        "result": "passed",
+        "date": "2026-10-07",
+        "commands": [
+          "pnpm run build",
+          "node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs",
+          "npx tsc -p tsconfig.json --noEmit"
+        ],
+        "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+        "testHashes": {
+          "__tests__/unit/provider-resolvers.test.mjs": "71bf80d29803df0ec7184eddcbaf6c903baa6df5151e88bb5e3a8f291ed4edc4"
+        },
+        "supportHashes": {}
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "DictAddressResolver",
+      "method": "reverseLookup",
+      "file": "src/adapter/resolvers/dict-address.resolver.ts",
+      "line": 78,
+      "signature": "reverseLookup(address)",
+      "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+      "scenarios": [
+        "Reverse the lookup of a known address to its owning user",
+        "Return null for an unknown address",
+        "Disambiguate addresses that belong to different users"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "unitVerification": {
+        "result": "passed",
+        "date": "2026-10-07",
+        "commands": [
+          "pnpm run build",
+          "node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs",
+          "npx tsc -p tsconfig.json --noEmit"
+        ],
+        "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+        "testHashes": {
+          "__tests__/unit/provider-resolvers.test.mjs": "71bf80d29803df0ec7184eddcbaf6c903baa6df5151e88bb5e3a8f291ed4edc4"
+        },
+        "supportHashes": {}
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7e93da2adb6f48bc9f7033b10f8e094e4d3a9a9d6a5fe4ebf75d69c030be3e5e",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/local-service.test.mjs",
+        "__tests__/unit/provider-resolvers.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "MessagesController",
+      "method": "send",
+      "file": "src/communication-gateway/controllers/messages.controller.ts",
+      "line": 41,
+      "signature": "send(body, tenantId)",
+      "sourceHash": "04d15e81cb6a8622892963b67fa64cf707f12cf76f28a044882fd99d9c39884a",
+      "scenarios": [
+        "Forward exact DTO and preserve service result/error for valid, omitted and empty tenant header",
+        "Reject malformed/whitespace-padded tenant before invoking service"
+      ],
+      "unitTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "04d15e81cb6a8622892963b67fa64cf707f12cf76f28a044882fd99d9c39884a",
+        "testHashes": {
+          "__tests__/unit/controllers-and-guard.test.ts": "7c9e3fe1fa2685c4875331da164bf14a376f8740b9625d7ebe8a51deb1be7757"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "04d15e81cb6a8622892963b67fa64cf707f12cf76f28a044882fd99d9c39884a",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "ProvidersController",
+      "method": "list",
+      "file": "src/communication-gateway/controllers/providers.controller.ts",
+      "line": 63,
+      "signature": "list()",
+      "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+      "scenarios": [
+        "Preserve metadata/enablement and empty registry; tolerate unavailable metadata"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "ProvidersController",
+      "method": "health",
+      "file": "src/communication-gateway/controllers/providers.controller.ts",
+      "line": 95,
+      "signature": "health(raw)",
+      "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+      "scenarios": [
+        "Normalize provider spelling, distinguish invalid/absent provider, return probe result or classified probe error"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "5bd44a36816bd14e6b946f61dbb3c7044aa3cdec265f1964616b2501a1783f94",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/local-service.test.mjs",
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "WebhooksController",
+      "method": "receive",
+      "file": "src/communication-gateway/controllers/webhooks.controller.ts",
+      "line": 71,
+      "signature": "receive(raw, headers, request)",
+      "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+      "scenarios": [
+        "Normalize provider/header names and forward original raw bytes for all outcomes",
+        "Reject unknown provider and absent raw body before processing",
+        "Map WebhookVerificationError to 401; preserve other failures"
+      ],
+      "unitTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+        "testHashes": {
+          "__tests__/unit/controllers-and-guard.test.ts": "7c9e3fe1fa2685c4875331da164bf14a376f8740b9625d7ebe8a51deb1be7757"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "WebhooksController",
+      "method": "challenge",
+      "file": "src/communication-gateway/controllers/webhooks.controller.ts",
+      "line": 110,
+      "signature": "challenge()",
+      "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+      "scenarios": [
+        "Always reject unsupported challenge with 405 without processing payload"
+      ],
+      "unitTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+        "testHashes": {
+          "__tests__/unit/controllers-and-guard.test.ts": "7c9e3fe1fa2685c4875331da164bf14a376f8740b9625d7ebe8a51deb1be7757"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/api.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "a46751e65606780711d2e082c4086eab8a3a1bcd5f95bb22192c7ba495200d32",
+        "testHashes": {
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "ProvidersResolver",
+      "method": "providers",
+      "file": "src/communication-gateway/resolvers/providers.resolver.ts",
+      "line": 82,
+      "signature": "providers()",
+      "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+      "scenarios": [
+        "Map exact GraphQL payload/capabilities with provider spelling normalization",
+        "Preserve empty/unregistered providers; tolerate independent health/capability failures"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "ProvidersResolver",
+      "method": "provider",
+      "file": "src/communication-gateway/resolvers/providers.resolver.ts",
+      "line": 89,
+      "signature": "provider(providerType)",
+      "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+      "scenarios": [
+        "Map exact GraphQL payload/capabilities with provider spelling normalization",
+        "Preserve empty/unregistered providers; tolerate independent health/capability failures"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Resolver",
+      "class": "ProvidersResolver",
+      "method": "gatewayHealth",
+      "file": "src/communication-gateway/resolvers/providers.resolver.ts",
+      "line": 101,
+      "signature": "gatewayHealth()",
+      "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+      "scenarios": [
+        "Aggregate healthy/degraded counts, including zero providers and thrown probes"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "2f4964ab452fae417971fe285428fbb0f123d1557613b3d282bdb3e5aba9a61c",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "GatewayDispatcher",
+      "method": "dispatch",
+      "file": "src/communication-gateway/services/gateway-dispatcher.service.ts",
+      "line": 35,
+      "signature": "dispatch(message, context)",
+      "sourceHash": "61edbc9064ba1c3fe0bd6169cdd789ee632f91819f2d68b79617e21ea8382a5e",
+      "scenarios": [
+        "Forward exact message, channel and optional resolution context; return complete success/failure response",
+        "Propagate registry/resolver/provider error and stop later boundaries"
+      ],
+      "unitTests": [
+        "__tests__/unit/dispatch-and-webhook.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "61edbc9064ba1c3fe0bd6169cdd789ee632f91819f2d68b79617e21ea8382a5e",
+        "testHashes": {
+          "__tests__/unit/dispatch-and-webhook.test.ts": "6519338463991fa9bb05c5db6affe2478b09e54a0deea6e1c65a4a26386d4933"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "61edbc9064ba1c3fe0bd6169cdd789ee632f91819f2d68b79617e21ea8382a5e",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/dispatch-and-webhook.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "MessagesService",
+      "method": "send",
+      "file": "src/communication-gateway/services/messages.service.ts",
+      "line": 67,
+      "signature": "send(dto)",
+      "sourceHash": "acccb9f8581933c3fd765f4a54885d9d0f3b902f3227fc164cb6c1630a2e5f97",
+      "scenarios": [
+        "Resolve recipient or preserve explicit address; map EMAIL HTML/subject/sender and WHATSAPP TEXT defaults",
+        "Replace spoofed metadata tenant with canonical context; preserve input immutability and exact mapping fields",
+        "Reject missing recipients, invalid channel fields and malformed tenant before dispatch",
+        "Map address errors to 422; record provider failure before 502/504; tolerate failed failure audit",
+        "Propagate dispatcher errors; map success persistence failure to 503; skip empty/null provider message IDs"
+      ],
+      "unitTests": [
+        "__tests__/unit/messages-service.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "acccb9f8581933c3fd765f4a54885d9d0f3b902f3227fc164cb6c1630a2e5f97",
+        "testHashes": {
+          "__tests__/unit/messages-service.test.ts": "ca7e24fa89e9dbe2255fb0eab6f7613b39e3f7190fb79190f60402b31b0f9f19"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "acccb9f8581933c3fd765f4a54885d9d0f3b902f3227fc164cb6c1630a2e5f97",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/controllers-and-guard.test.ts",
+        "__tests__/unit/messages-service.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "WebhookService",
+      "method": "processWebhook",
+      "file": "src/communication-gateway/services/webhook.service.ts",
+      "line": 50,
+      "signature": "processWebhook(providerType, headers, body)",
+      "sourceHash": "ad874f02a5d56b001d4c10e55cb988863fec5cf81cf301af4411b201c27194de",
+      "scenarios": [
+        "Verify exact provider headers/raw bytes before interpreting payload",
+        "Existing tests cover unavailable/unverified provider, ignored event, duplicate inbound mapping in all relevant states, scoped provider IDs, repeated receipts and invalid transitions",
+        "Emit complete inbound event or update receipt status before emitting exact receipt event",
+        "Propagate registry/verification/parsing/scoped lookup/status persistence/publisher errors"
+      ],
+      "unitTests": [
+        "__tests__/unit/dispatch-and-webhook.test.ts",
+        "__tests__/unit/webhook-service.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "ad874f02a5d56b001d4c10e55cb988863fec5cf81cf301af4411b201c27194de",
+        "testHashes": {
+          "__tests__/unit/dispatch-and-webhook.test.ts": "6519338463991fa9bb05c5db6affe2478b09e54a0deea6e1c65a4a26386d4933",
+          "__tests__/unit/webhook-service.test.mjs": "21b576d0deb4ffeec00aeb07386d3404160768a24a72130710ac2e4c733e3dd1"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981",
+          "__tests__/support/fakes.mjs": "5ec45a801c1a203037c0611ef13d73167216c7d7c486858574b6e98727dc9aa1",
+          "__tests__/support/message-mapping-store.mjs": "6f0e3829c666d0b1b971889d0fedc15cb01a2fc68d2d691a01bb2f98932103d8"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "ad874f02a5d56b001d4c10e55cb988863fec5cf81cf301af4411b201c27194de",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/dispatch-and-webhook.test.ts",
+        "__tests__/unit/webhook-service.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "BannerService",
+      "method": "onApplicationBootstrap",
+      "file": "src/config/banner.service.ts",
+      "line": 20,
+      "signature": "onApplicationBootstrap()",
+      "sourceHash": "5a46e31210241e9671d5f31682608d5cf45bb7189d7196ee9458e32100978ad3",
+      "scenarios": [
+        "Report actual application/platform configuration through isolated fonts/logger/OS doubles",
+        "Mask API keys in every environment; propagate rendering error before application logs"
+      ],
+      "unitTests": [
+        "__tests__/unit/banner-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "5a46e31210241e9671d5f31682608d5cf45bb7189d7196ee9458e32100978ad3",
+        "testHashes": {
+          "__tests__/unit/banner-lifecycle.test.ts": "e129448ac193090cedf26e791edd87d800fbe3026957de4c75151faa89d91781"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "5a46e31210241e9671d5f31682608d5cf45bb7189d7196ee9458e32100978ad3",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/banner-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "HealthController",
+      "method": "live",
+      "file": "src/health/health.controller.ts",
+      "line": 16,
+      "signature": "live()",
+      "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+      "scenarios": [
+        "All liveness aliases return status ok without database query"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "HealthController",
+      "method": "liveAlias",
+      "file": "src/health/health.controller.ts",
+      "line": 21,
+      "signature": "liveAlias()",
+      "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+      "scenarios": [
+        "All liveness aliases return status ok without database query"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "HealthController",
+      "method": "liveness",
+      "file": "src/health/health.controller.ts",
+      "line": 26,
+      "signature": "liveness()",
+      "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+      "scenarios": [
+        "All liveness aliases return status ok without database query"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "HealthController",
+      "method": "readiness",
+      "file": "src/health/health.controller.ts",
+      "line": 31,
+      "signature": "readiness(reply)",
+      "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+      "scenarios": [
+        "Probe SELECT 1, configured API key and forwarder state; preserve alias result",
+        "Map independent failures/missing key to not_ready and HTTP 503; ready path preserves status"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Controller",
+      "class": "HealthController",
+      "method": "ready",
+      "file": "src/health/health.controller.ts",
+      "line": 38,
+      "signature": "ready(reply)",
+      "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+      "scenarios": [
+        "Probe SELECT 1, configured API key and forwarder state; preserve alias result",
+        "Map independent failures/missing key to not_ready and HTTP 503; ready path preserves status"
+      ],
+      "unitTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/unit/provider-transports.test.mjs": "017ad5fefa9c752f08ddc485399faa6aee380be8a27cb8afc5f9ec026c37fd70"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "7bebda3860fc6abed34d2be6b30f3d10369b8cbb563cbb7cfe836414dee6ea90",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/provider-transports.test.mjs"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "save",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 23,
+      "signature": "save(mapping)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Map all persistence fields and same-transaction outbox policy across all eight delivery statuses",
+        "Use tenant fallback and Prisma JSON null; preserve input immutability",
+        "Current UUIDv4 rule rejects missing/invalid/UUIDv7 organization; compatibility remains implementation-owned",
+        "Propagate transaction/write/outbox failure; avoid subsequent writes"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/postgres.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/postgres.test.mjs",
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "getByProviderMessageId",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 56,
+      "signature": "getByProviderMessageId(providerMessageId)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Forward exact lookup key, with provider scope where implemented; map every domain field",
+        "Return null for absent row; propagate database errors",
+        "Normalize lowercase enums and non-object/null metadata; reject unknown stored enum values"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "getByInternalId",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 64,
+      "signature": "getByInternalId(internalId)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Forward exact lookup key, with provider scope where implemented; map every domain field",
+        "Return null for absent row; propagate database errors",
+        "Normalize lowercase enums and non-object/null metadata; reject unknown stored enum values"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/postgres.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/postgres.test.mjs",
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "findByProviderAndProviderMessageId",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 70,
+      "signature": "findByProviderAndProviderMessageId(provider, providerMessageId)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Forward exact lookup key, with provider scope where implemented; map every domain field",
+        "Return null for absent row; propagate database errors",
+        "Normalize lowercase enums and non-object/null metadata; reject unknown stored enum values"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "updateStatus",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 79,
+      "signature": "updateStatus(providerMessageId, status, error)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Read row and update status/error/fixed change time with same-transaction terminal fact",
+        "Default omitted error to null; missing row performs no writes",
+        "Propagate transaction/read/write/outbox failure"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "incrementRetry",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 98,
+      "signature": "incrementRetry(internalId)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Perform scoped atomic increment including zero matched rows; return void",
+        "Propagate database error"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/local-service.test.mjs",
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "recordFailure",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 104,
+      "signature": "recordFailure(record)",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Normalize error code, fallback empty normalized value and truncate to 100 characters",
+        "Write delivery log and deduplicated failure fact in same transaction with correlation metadata",
+        "Reject invalid organization before transaction; propagate transaction/log/outbox errors"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/local-service.test.mjs",
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "MessageMappingRepository",
+      "method": "health",
+      "file": "src/prisma/message-mapping.repository.ts",
+      "line": 146,
+      "signature": "health()",
+      "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+      "scenarios": [
+        "Run actual SELECT 1 contract; return true on success and false on query failure"
+      ],
+      "unitTests": [
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/unit/mapping-repository.test.ts": "128e9e2b4dfb66b74fc120855300b20df9832b8755c4c4809e2379e8d42696f7"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "d45f6724e3ba0039bd87b73c7f43de9543b931a9465861958c96d6b50ed45a15",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/local-service.test.mjs",
+        "__tests__/unit/mapping-repository.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "PrismaService",
+      "method": "onModuleInit",
+      "file": "src/prisma/prisma.service.ts",
+      "line": 17,
+      "signature": "onModuleInit()",
+      "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+      "scenarios": [
+        "Instrument spans, await connection, verify actual SELECT 1 and clear deadline timer",
+        "Connection failure prevents query; query failure propagates and clears timer",
+        "Controlled clock reproduces five-second startup query deadline without arbitrary waiting"
+      ],
+      "unitTests": [
+        "__tests__/unit/prisma-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+        "testHashes": {
+          "__tests__/unit/prisma-lifecycle.test.ts": "e8fb975e6559d076ccd1ecfce4ca8450d211d2afb11c2e6edd770109efa9995f"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/persistence.test.mjs",
+        "__tests__/unit/prisma-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Service",
+      "class": "PrismaService",
+      "method": "onModuleDestroy",
+      "file": "src/prisma/prisma.service.ts",
+      "line": 39,
+      "signature": "onModuleDestroy()",
+      "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+      "scenarios": [
+        "Await disconnect; preserve disconnect error"
+      ],
+      "unitTests": [
+        "__tests__/unit/prisma-lifecycle.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+        "testHashes": {
+          "__tests__/unit/prisma-lifecycle.test.ts": "e8fb975e6559d076ccd1ecfce4ca8450d211d2afb11c2e6edd770109efa9995f"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "974ca761461358b2d20acba07dfdad41b162dba209726dbf6767a3fc16f5493d",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/integration/persistence.test.mjs",
+        "__tests__/unit/prisma-lifecycle.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    },
+    {
+      "role": "Provider",
+      "class": "InternalApiKeyGuard",
+      "method": "canActivate",
+      "file": "src/security/internal-api-key.guard.ts",
+      "line": 49,
+      "signature": "canActivate(context)",
+      "sourceHash": "c348c8446277504cff363dd11e4b78ad7b39f42b3427ad5a015cfcb4d172a33b",
+      "scenarios": [
+        "Public metadata bypass precedes configuration; inspect handler/class metadata",
+        "Private route fails closed for absent/empty/whitespace configuration",
+        "Accept exact key from HTTP and both GraphQL carrier shapes; trim configured key only",
+        "Reject missing request/header/key and wrong length/content/whitespace keys",
+        "Use only first repeated header value; exercise GraphQL and HTTP target logging paths"
+      ],
+      "unitTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "unitVerification": {
+        "date": "2026-10-03",
+        "command": "node --experimental-test-module-mocks --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs __tests__/unit/*.test.ts",
+        "result": "passed",
+        "sourceHash": "c348c8446277504cff363dd11e4b78ad7b39f42b3427ad5a015cfcb4d172a33b",
+        "testHashes": {
+          "__tests__/unit/controllers-and-guard.test.ts": "7c9e3fe1fa2685c4875331da164bf14a376f8740b9625d7ebe8a51deb1be7757"
+        },
+        "supportHashes": {
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/unit/gateway-fixtures.ts": "85fb47c6c0d1875d40fc7d7cae21789d6036249cca99f4258f4e0ef4402fd981"
+        }
+      },
+      "integrationTests": [
+        "__tests__/integration/local-service.test.mjs"
+      ],
+      "integrationVerification": {
+        "result": "passed",
+        "date": "2026-10-11",
+        "commands": [
+          "OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration"
+        ],
+        "sourceHash": "c348c8446277504cff363dd11e4b78ad7b39f42b3427ad5a015cfcb4d172a33b",
+        "testHashes": {
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9"
+        },
+        "supportHashes": {
+          "package.json": "ab80bda64f4e4e47a9be47882b63f20ac4c1bda0743d7894278eea2c02d47c82",
+          "tsconfig.json": "568f72a30c2825e53490d2b738ea8c69e29f598be21cd54497c332a2914e8629",
+          "__tests__/unit/test.env": "bd30ac01517d3cc08b3c39af0440ea60395904eb755a138e74564b9a1622da5e",
+          "__tests__/support/env.mjs": "663d0beb1565c88e5eb5fbd1223a343a096c866002ad4bdae29e6bd2295d2593",
+          "__tests__/integration/api.test.mjs": "f074749a7a9beca4291dcd893345db497f4c4df156acc2e11603e55862999514",
+          "__tests__/integration/local-service.test.mjs": "015a23fdaa5103382d6a99eabfe6758ef072f8c27c47d7444bb21e1e8ec519a9",
+          "__tests__/integration/persistence.test.mjs": "8dde6a2b020876a22ba29893ecb88fb2837e04594d480d6b2dd8d3de6ebf7cb8",
+          "__tests__/integration/postgres.test.mjs": "2e32906784b250a51678865f5bc479891ca47648aba482004855fb37193a4e63",
+          "../test-tools/run-local-integration.mjs": "394c1b6407186b159035bc7bb13af71db832d211ea37755add95c79e73de78d0",
+          "../test-tools/local-nest-app.mjs": "3c00ea23b244f47825dc1015ed53b4125ca95566d308b9000c3bd5119aec7a27",
+          "../test-tools/local-nest-infrastructure.mjs": "379c167d653058d7628c6e4c2c4bb361db24b5803a494a988189b768ef2a92a3",
+          "../test-tools/local-kafka-observer.mjs": "b46d3f87f2bed679a285dedeae8a79975da75b4ebf8b9f62ce2009757f9ecb7d",
+          "../test-tools/local-postgres.mjs": "89447554c8eeb5ebab62edf5f1a57bf1579efda8ff2a697ed63b984553ea6a01",
+          "../test-tools/local-nest-hooks.mjs": "3aa84168a47c2fa351f708236b3ff1285c20b76b308d2e779abc4b915b3d32eb"
+        }
+      },
+      "candidateTests": [
+        "__tests__/unit/controllers-and-guard.test.ts"
+      ],
+      "reviewed": true,
+      "excludedReason": null,
+      "integrationExcludedReason": null,
+      "status": "reviewed",
+      "integrationStatus": "verified"
+    }
+  ]
+}

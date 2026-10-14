@@ -36,9 +36,9 @@ import type {
   CommunicationProvider,
   WebhookResult,
 } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { StalwartConfig } from '../../../communication-gateway/models/interfaces/stalwart-config.interface.js';
 import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
-import type { StalwartConfig } from '../../../config/config.types.js';
-import { asText } from '../../../core/coerce.js';
+import { asText } from '../provider-value.mapper.js';
 import { SmtpClient, SmtpError, type SmtpEnvelope } from './smtp-client.js';
 
 const logger = getLogger('StalwartProvider', 'class');

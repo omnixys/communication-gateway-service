@@ -34,10 +34,10 @@ import type {
   CommunicationProvider,
   WebhookResult,
 } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { ResendConfig } from '../../../communication-gateway/models/interfaces/resend-config.interface.js';
 import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
-import type { ResendConfig } from '../../../config/config.types.js';
-import { asText } from '../../../core/coerce.js';
-import { HttpTransportError, requestJson } from '../../../core/http-client.js';
+import { HttpTransportError, requestJson } from '../../http/json-request.js';
+import { asText } from '../provider-value.mapper.js';
 
 const logger = getLogger('ResendProvider', 'class');
 

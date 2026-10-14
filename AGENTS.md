@@ -19,26 +19,27 @@ EMAIL and WHATSAPP channels.
 
 ## Architecture
 
-The service follows the TypeScript service layout used by `services/user`:
+The service follows the static composition-root and bounded-context layout used by `services/user` and `services/event`:
 
 ```
 src/communication-gateway  controllers, resolvers, services, errors, models, utils
 src/adapter                external providers, event transport, address resolution
-src/analytics              delivery analytics outbox
-src/config                 validated runtime configuration and bootstrap helpers
-src/core                   cross-cutting HTTP, context and error helpers
+src/analytics              delivery analytics outbox worker
+src/config                 flat env.ts and startup BannerService
+src/communication-gateway/filters  gateway error mapping
 src/health                 public liveness and readiness endpoints
-src/prisma                 Prisma 7 client, message mapping repository, test fake
+src/prisma                 Prisma 7 client and message mapping repository
 src/security               internal API key guard and public-route marker
 ```
 
-`CommunicationGatewayModule` owns the business surface. The composition root
-imports it alongside adapter, events, Prisma, health and security modules.
+`CommunicationGatewayModule` owns the business surface. The static `AppModule`
+imports it alongside shared context and GraphQL modules, optional Kafka,
+and gateway events, Prisma, health and API-key security modules.
 Inside the context, `models/{dto,entities,enums,inputs,interfaces,mappers,payloads}`
 holds the actual model types; do not recreate `domain`, `application`, `api`,
 `infrastructure`, `graphql`, `ports`, or `shared` as sibling layers. Services
 depend on interfaces, and adapters and Prisma implement those interfaces. The
-in-memory mapping store is used only by isolated tests.
+in-memory mapping store lives under `__tests__/support` and is used only by isolated tests.
 
 ## Database, APIs and Messaging
 
@@ -109,8 +110,28 @@ node --env-file=__tests__/unit/test.env --test __tests__/unit/*.test.mjs
 ### Integration tests
 
 ```bash
-node --env-file=__tests__/unit/test.env --test __tests__/integration/*.test.mjs
+# Vom Ordner communication-gateway aus (isoliertes PostgreSQL, Kafka, Valkey, Keycloak):
+OMNIXYS_TEST_DB_PASSWORD='postgres' node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration
 ```
+
+`test:integration` baut zuerst (`pnpm run build`) und führt dann
+`__tests__/integration/*.test.mjs` aus. Der Harness instanziiert die Nest-App mit
+einer isolierten PostgreSQL-Datenbank (Produktionsmigrationen) und schreibt
+Container-Verbindungsdaten vor dem Laden der Anwendung. Methode →
+Integrationsnachweis: `@covers Klassenname.methode` in
+`__tests__/integration/*.test.mjs`.
+
+### End-to-end / smoke
+
+```bash
+pnpm run test:e2e
+```
+
+`test:e2e` läuft über **vitest** mit **Testcontainers** (isoliertes PostgreSQL) und
+bootet `dist/app.module.js` über HTTP/GraphQL (`__tests__/e2e/e2e.config.ts`,
+geteilte Infrastruktur in `test-tools/e2e/infrastructure.mjs`). Kafka ist
+deaktiviert (`KAFKA_BROKER=''`); kein Valkey, kein Keycloak. Health, Internal-API-Key-Gate,
+Providerlesen, Webhook-Verifikation und der fail-closed Sendepfad sind abgedeckt.
 
 ### Full verification
 
@@ -132,6 +153,20 @@ pnpm run prisma:deploy
 `node --test` is the runner. Unit tests cover domain, configuration, provider
 adapters, webhook verification, the event bus, the outbox worker and the HTTP
 forwarder. Integration tests use Fastify request injection for REST, GraphQL, the internal API key guard, health probes and readiness. PostgreSQL persistence uses an isolated Testcontainers database.
+
+The service-internal integration suite runs only through
+`node ../test-tools/run-local-integration.mjs communication-gateway -- pnpm run test:integration`
+(the harness boots the real `AppModule` against an isolated PostgreSQL). Every
+enumerated method is mapped to an integration test via
+`@covers Klassenname.methode`; `docs/testing-methods.json` records
+`integrationVerification` with source, test and support hashes. The integration
+tests use `__tests__/unit/test.env` (not `__tests__/integration/test.env`), so
+that file is part of the recorded `supportHashes`.
+
+`pnpm run test:e2e` is a separate smoke layer: it boots `dist/app.module.js`
+against an isolated PostgreSQL (Testcontainers) with Kafka disabled and covers
+health, the internal API key gate, provider reading, webhook verification and
+the fail-closed send path. It uses no `@covers` and is not integration evidence.
 
 `__tests__/support/env.mjs` is imported first by every test file. It pins a
 closed `DATABASE_URL` and a fixed `INTERNAL_API_KEY` because Node's
@@ -253,7 +288,7 @@ Use `getLogger('<Class>', 'class')` from `@omnixys/logger-ts` and keep the exist
 
 Use the repository's established error model. Errors should: preserve meaningful context, avoid leaking sensitive implementation details, distinguish expected domain failures from unexpected system failures, map consistently to API responses/events, and remain observable. Never silently swallow errors unless explicitly required by the domain behavior.
 
-Domain errors are raised as typed errors from `src/communication-gateway/errors/gateway.errors.ts` and mapped to HTTP status codes in `src/core/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
+Domain errors are raised as typed errors from `src/communication-gateway/errors/gateway.errors.ts` and mapped to HTTP status codes in `src/communication-gateway/filters/gateway-exception.filter.ts`. A response never carries an internal class name; it carries `{statusCode, message, error, correlationId}`.
 
 ## Generated Code
 
@@ -395,3 +430,9 @@ If a validation step cannot be executed, explicitly report it rather than silent
 Keep `AGENTS.md` synchronized with durable repository conventions. If work introduces a permanent repository rule — a new mandatory validation command, a new test category, a new architecture convention, a new shared-package requirement, a new code-generation workflow, a new package boundary, or a new migration convention — update `AGENTS.md`. Do not add temporary task notes to `AGENTS.md`.
 
 Keep `SKILL.md` current as well. If the repository changes in a way that invalidates the workflow described there — build system changes, test framework changes, new test suites, migration tooling changes, source structure changes, new API technology, Kafka introduced or removed, package publishing workflow changes, or validation command changes — update `SKILL.md` in the same logical change. Do not knowingly leave stale instructions behind.
+
+## Test execution and coverage evidence
+
+Use the separate unit command documented in `docs/TESTING.md`. Container integration must use an isolated database initialized by the production migration mechanism. Unit results and skipped/unexecuted container tests are not integration evidence. Keep `docs/testing-methods.json` synchronized with public methods, manually reviewed scenarios, and executed commands. Checkpoint contracts remain a separate suite.
+
+TS unit tests run in the existing Node runner with `--experimental-test-module-mocks`; include both `.test.mjs` and `.test.ts` in the unit command. Run `test:typecheck` after the application build. The environment fixture disables dotenv files explicitly; container connection data must be set before loading the application.

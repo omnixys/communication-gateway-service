@@ -15,7 +15,15 @@
  * For more information, visit <https://www.gnu.org/licenses/>.
  */
 
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 
 import { SendMessageDto } from '../models/dto/send-message.dto.js';
 import type { SendMessageResult } from '../models/payloads/send-message.payload.js';
@@ -32,7 +40,16 @@ export class MessagesController {
    */
   @Post('send')
   @HttpCode(HttpStatus.OK)
-  async send(@Body() body: SendMessageDto): Promise<SendMessageResult> {
+  async send(
+    @Body() body: SendMessageDto,
+    @Headers('x-tenant-id') tenantId?: string,
+  ): Promise<SendMessageResult> {
+    if (
+      tenantId &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(tenantId)
+    ) {
+      throw new BadRequestException('x-tenant-id must be a valid UUID');
+    }
     return this.messages.send(body);
   }
 }

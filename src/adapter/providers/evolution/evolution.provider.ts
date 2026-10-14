@@ -30,13 +30,13 @@ import {
 } from '../../../communication-gateway/models/enums/gateway.enums.js';
 import type { WebhookResult } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
 import type { CommunicationProvider } from '../../../communication-gateway/models/interfaces/communication-provider.port.js';
+import type { EvolutionConfig } from '../../../communication-gateway/models/interfaces/evolution-config.interface.js';
 import type { ProviderResponse } from '../../../communication-gateway/models/payloads/provider-response.model.js';
-import type { EvolutionConfig } from '../../../config/config.types.js';
 import {
   HttpTransportError,
   probeHttp,
   requestJson,
-} from '../../../core/http-client.js';
+} from '../../http/json-request.js';
 import {
   type EvolutionMessageData,
   type EvolutionWebhookPayload,

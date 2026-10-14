@@ -20,8 +20,7 @@ import './../support/env.mjs';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { loadConfig } from '../../dist/config/configuration.js';
-import { normalizeDatabaseUrl } from '../../dist/config/database-url.js';
+import { readEnv } from '../../dist/config/env.js';
 
 const BASE_ENV = {
   ENVIRONMENT: 'local',
@@ -46,124 +45,113 @@ const DEPLOYED_ENV = {
   EMAIL_PRIMARY: 'none',
 };
 
-describe('normalizeDatabaseUrl', () => {
-  it('rewrites the SQLAlchemy and psycopg schemes Prisma cannot parse', () => {
-    assert.equal(
-      normalizeDatabaseUrl('postgresql+asyncpg://u:p@h:5432/db'),
-      'postgresql://u:p@h:5432/db',
-    );
-    assert.equal(
-      normalizeDatabaseUrl('postgresql+psycopg://u:p@h:5432/db'),
-      'postgresql://u:p@h:5432/db',
-    );
-    assert.equal(
-      normalizeDatabaseUrl('postgres://u:p@h:5432/db'),
-      'postgresql://u:p@h:5432/db',
-    );
-  });
-
-  it('leaves a plain Prisma url untouched', () => {
-    assert.equal(
-      normalizeDatabaseUrl('postgresql://u:p@h:5432/db?schema=public'),
-      'postgresql://u:p@h:5432/db?schema=public',
-    );
-  });
-
-  it('keeps an empty value empty instead of inventing a host', () => {
-    assert.equal(normalizeDatabaseUrl(''), '');
-  });
-});
-
-describe('loadConfig', () => {
+describe('readEnv', () => {
   it('keeps Kafka optional while requiring persistence', () => {
-    const config = loadConfig(BASE_ENV);
+    const config = readEnv(BASE_ENV);
 
-    assert.equal(config.database.enabled, true);
-    assert.equal(config.database.url, BASE_ENV.DATABASE_URL);
-    assert.equal(config.kafka.broker, '');
-    assert.equal(config.core.port, 8000);
+    assert.equal(Boolean(config.DATABASE_URL), true);
+    assert.equal(config.DATABASE_URL, BASE_ENV.DATABASE_URL);
+    assert.equal(config.KAFKA_BROKER, '');
+    assert.equal(config.PORT, 8000);
+  });
+
+  it('uses the user-service SERVICE and NODE_ENV names with legacy fallbacks', () => {
+    const legacy = readEnv(BASE_ENV);
+    assert.equal(legacy.SERVICE, 'communication-gateway');
+    assert.equal(legacy.NODE_ENV, 'local');
+
+    const current = readEnv({
+      ...BASE_ENV,
+      SERVICE: 'gateway',
+      NODE_ENV: 'test',
+    });
+    assert.equal(current.SERVICE, 'gateway');
+    assert.equal(current.NODE_ENV, 'test');
   });
 
   it('rejects a missing database url even in local mode', () => {
-    assert.throws(() => loadConfig({ ...BASE_ENV, DATABASE_URL: '' }), /DATABASE_URL/);
+    assert.throws(
+      () => readEnv({ ...BASE_ENV, DATABASE_URL: '' }),
+      /DATABASE_URL/,
+    );
   });
 
   it('enables persistence and normalizes the url', () => {
-    const config = loadConfig({
+    const config = readEnv({
       ...BASE_ENV,
       DATABASE_URL: 'postgresql+asyncpg://u:p@h:5432/db',
     });
 
-    assert.equal(config.database.enabled, true);
-    assert.equal(config.database.url, 'postgresql://u:p@h:5432/db');
+    assert.equal(Boolean(config.DATABASE_URL), true);
+    assert.equal(config.DATABASE_URL, 'postgresql://u:p@h:5432/db');
   });
 
   it('keeps the documented kafka topic and budgets', () => {
-    const config = loadConfig({ ...BASE_ENV, KAFKA_BROKER: 'kafka:9092' });
+    const config = readEnv({ ...BASE_ENV, KAFKA_BROKER: 'kafka:9092' });
 
-    assert.equal(config.kafka.broker, 'kafka:9092');
-    assert.equal(config.kafka.topicDeliveryStatus, 'gateway.delivery.status');
-    assert.equal(config.kafka.retries, 3);
+    assert.equal(config.KAFKA_BROKER, 'kafka:9092');
+    assert.equal(config.KAFKA_TOPIC_DELIVERY_STATUS, 'gateway.delivery.status');
+    assert.equal(config.KAFKA_RETRIES, 3);
   });
 
   it('defaults the forwarder budget to the values of the previous runtime', () => {
-    const config = loadConfig(BASE_ENV);
+    const config = readEnv(BASE_ENV);
 
-    assert.equal(config.forwarder.maxAttempts, 3);
-    assert.equal(config.forwarder.baseDelayMs, 200);
-    assert.equal(config.forwarder.maxDelayMs, 2000);
-    assert.equal(config.forwarder.timeoutMs, 15000);
+    assert.equal(config.FORWARDER_MAX_ATTEMPTS, 3);
+    assert.equal(config.FORWARDER_BASE_DELAY_MS, 200);
+    assert.equal(config.FORWARDER_MAX_DELAY_MS, 2000);
+    assert.equal(config.FORWARDER_TIMEOUT_MS, 15000);
   });
 
   it('accepts a forwarder budget override', () => {
-    const config = loadConfig({
+    const config = readEnv({
       ...BASE_ENV,
       FORWARDER_MAX_ATTEMPTS: '5',
       FORWARDER_BASE_DELAY_MS: '250',
     });
 
-    assert.equal(config.forwarder.maxAttempts, 5);
-    assert.equal(config.forwarder.baseDelayMs, 250);
+    assert.equal(config.FORWARDER_MAX_ATTEMPTS, 5);
+    assert.equal(config.FORWARDER_BASE_DELAY_MS, 250);
   });
 
   it('rejects a retry budget that would never retry again', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, FORWARDER_MAX_ATTEMPTS: '0' }),
+      () => readEnv({ ...BASE_ENV, FORWARDER_MAX_ATTEMPTS: '0' }),
       /FORWARDER_MAX_ATTEMPTS must be greater than 0/u,
     );
   });
 
   it('rejects a negative retry budget', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, FORWARDER_MAX_ATTEMPTS: '-1' }),
+      () => readEnv({ ...BASE_ENV, FORWARDER_MAX_ATTEMPTS: '-1' }),
       /FORWARDER_MAX_ATTEMPTS must be greater than 0/u,
     );
   });
 
   it('rejects a zero backoff that would hammer the chat service', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, FORWARDER_BASE_DELAY_MS: '0' }),
+      () => readEnv({ ...BASE_ENV, FORWARDER_BASE_DELAY_MS: '0' }),
       /FORWARDER_BASE_DELAY_MS must be greater than 0/u,
     );
   });
 
   it('rejects a non numeric setting instead of silently defaulting it', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, STALWART_PORT: 'not-a-port' }),
+      () => readEnv({ ...BASE_ENV, STALWART_PORT: 'not-a-port' }),
       /STALWART_PORT must be an integer/u,
     );
   });
 
   it('rejects an unknown boolean instead of guessing', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, DATABASE_ECHO: 'perhaps' }),
-      /DATABASE_ECHO must be a boolean/u,
+      () => readEnv({ ...BASE_ENV, STALWART_ENABLED: 'perhaps' }),
+      /STALWART_ENABLED must be a boolean/u,
     );
   });
 
   it('rejects an unknown email provider', () => {
     assert.throws(
-      () => loadConfig({ ...BASE_ENV, EMAIL_PRIMARY: 'sendgrid' }),
+      () => readEnv({ ...BASE_ENV, EMAIL_PRIMARY: 'sendgrid' }),
       /EMAIL_PRIMARY/u,
     );
   });
@@ -171,7 +159,7 @@ describe('loadConfig', () => {
   it('rejects an address mapping that is not a uuid', () => {
     assert.throws(
       () =>
-        loadConfig({
+        readEnv({
           ...BASE_ENV,
           ADDRESS_MAPPINGS: JSON.stringify([
             { channel: 'WHATSAPP', address: '1' },
@@ -182,29 +170,29 @@ describe('loadConfig', () => {
   });
 
   it('accepts a complete deployed configuration', () => {
-    const config = loadConfig(DEPLOYED_ENV);
+    const config = readEnv(DEPLOYED_ENV);
 
-    assert.equal(config.core.isProduction, true);
-    assert.equal(config.emailPrimary, 'none');
+    assert.equal(config.NODE_ENV, 'production');
+    assert.equal(config.EMAIL_PRIMARY, 'none');
   });
 
   it('rejects a deployed run without an internal api key', () => {
     assert.throws(
-      () => loadConfig({ ...DEPLOYED_ENV, INTERNAL_API_KEY: '' }),
+      () => readEnv({ ...DEPLOYED_ENV, INTERNAL_API_KEY: '' }),
       /Missing required production settings/u,
     );
   });
 
   it('rejects a deployed run with a guessable internal api key', () => {
     assert.throws(
-      () => loadConfig({ ...DEPLOYED_ENV, INTERNAL_API_KEY: 'short' }),
+      () => readEnv({ ...DEPLOYED_ENV, INTERNAL_API_KEY: 'short' }),
       /INTERNAL_API_KEY must be at least 16 characters/u,
     );
   });
 
   it('rejects a deployed run without the chat service', () => {
     assert.throws(
-      () => loadConfig({ ...DEPLOYED_ENV, CHAT_SERVICE_URL: '' }),
+      () => readEnv({ ...DEPLOYED_ENV, CHAT_SERVICE_URL: '' }),
       /Missing required production settings/u,
     );
   });
@@ -212,7 +200,7 @@ describe('loadConfig', () => {
   it('rejects a deployed run that selects resend without credentials', () => {
     assert.throws(
       () =>
-        loadConfig({
+        readEnv({
           ...DEPLOYED_ENV,
           EMAIL_PRIMARY: 'resend',
           RESEND_API_KEY: '',
@@ -224,7 +212,7 @@ describe('loadConfig', () => {
   it('rejects a deployed run that selects stalwart without credentials', () => {
     assert.throws(
       () =>
-        loadConfig({
+        readEnv({
           ...DEPLOYED_ENV,
           EMAIL_PRIMARY: 'stalwart',
           STALWART_HOST: '',
@@ -235,20 +223,20 @@ describe('loadConfig', () => {
 
   it('rejects an out of range port in a deployed run', () => {
     assert.throws(
-      () => loadConfig({ ...DEPLOYED_ENV, PORT: '70000' }),
+      () => readEnv({ ...DEPLOYED_ENV, PORT: '70000' }),
       /PORT must be a valid TCP port/u,
     );
   });
 
   it('keeps local development permissive about optional integrations', () => {
-    const config = loadConfig({
+    const config = readEnv({
       ...BASE_ENV,
       CHAT_SERVICE_URL: '',
       NOTIFICATION_SERVICE_URL: '',
       INTERNAL_API_KEY: '',
     });
 
-    assert.equal(config.core.chatServiceUrl, '');
-    assert.equal(config.core.internalApiKey, '');
+    assert.equal(config.CHAT_SERVICE_URL, '');
+    assert.equal(config.INTERNAL_API_KEY, '');
   });
 });

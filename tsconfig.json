@@ -1,6 +1,6 @@
 /**
  * @license GPL-3.0-or-later
- * Copyright (C) 2026 Caleb Gyamfi - Omnixys Technologies
+ * Copyright (C) 2025 Caleb Gyamfi - Omnixys Technologies
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,12 @@
     "removeComments": true,
     "forceConsistentCasingInFileNames": true,
 
-    /* ──────────────── 🧪 Tests ──────────────── */
-    "resolveJsonModule": true,
+    // "paths": {
+    //   "@/*": ["./src/*"]
+    // },
 
+    /* ──────────────── 🧪 Tests ──────────────── */
+    // "isolatedModules": true,
     /* ──────────────── ⚙️ ESM & Decorators ──────────────── */
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
@@ -61,5 +64,6 @@
 
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "coverage", "__tests__/"],
-  "types": ["node", "fastify"]
+  "types": ["node", "fastify", "@types/node"],
+  "typeRoots": ["./src/types", "./node_modules/@types"],
 }

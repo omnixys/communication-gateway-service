@@ -22,6 +22,7 @@ allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
   '@swc/core': true
+  argon2: true
   cpu-features: true
   esbuild: true
   prisma: true
@@ -34,4 +35,7 @@ minimumReleaseAgeExclude:
   - '@omnixys/logger-ts@4.0.0 || 4.1.0 || 4.1.1 || 4.2.0'
   - '@omnixys/observability-ts@4.0.0 || 4.1.0 || 4.1.1'
 overrides:
+  '@nestjs/apollo@13.4.5>@apollo/server-plugin-landing-page-graphql-playground': '-'
   fastify: 5.8.5
+patchedDependencies:
+  '@nestjs/apollo@13.4.5': patches/nest-apollo-13.4.5.patch

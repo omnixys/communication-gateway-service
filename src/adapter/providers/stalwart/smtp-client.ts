@@ -20,7 +20,7 @@ import { connect as tlsConnect, TLSSocket } from 'node:tls';
 
 import { getLogger } from '@omnixys/logger-ts';
 
-import type { StalwartAuthMode } from '../../../config/config.types.js';
+import type { StalwartAuthMode } from '../../../communication-gateway/models/enums/provider-config.enum.js';
 
 const logger = getLogger('SmtpClient', 'class');
 

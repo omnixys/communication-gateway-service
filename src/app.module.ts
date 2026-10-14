@@ -1,100 +1,65 @@
-/**
- * @license GPL-3.0-or-later
- * Copyright (C) 2026 Caleb Gyamfi - Omnixys Technologies
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * For more information, visit <https://www.gnu.org/licenses/>.
- */
-
+/** Composition root, following the static module layout of the TypeScript services. */
 import { EventsModule } from './adapter/events/events.module.js';
 import { CommunicationGatewayModule } from './communication-gateway/communication-gateway.module.js';
-import { AppConfigModule } from './config/config.module.js';
-import { loadConfig } from './config/configuration.js';
-import { GatewayExceptionFilter } from './core/filters/gateway-exception.filter.js';
-import { RequestContextMiddleware } from './core/middleware/request-context.middleware.js';
+import { GatewayExceptionFilter } from './communication-gateway/filters/gateway-exception.filter.js';
+import { BannerService } from './config/banner.service.js';
+import { env } from './config/env.js';
 import { HealthModule } from './health/health.module.js';
-import { PersistenceModule } from './prisma/persistence.module.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 import { SecurityModule } from './security/security.module.js';
-import { ApolloFederationDriver, type ApolloDriverConfig } from '@nestjs/apollo';
-import {
-  Module,
-  ValidationPipe,
-  type DynamicModule,
-  type MiddlewareConsumer,
-  type NestModule,
-  type Type,
-} from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { GraphQLModule } from '@nestjs/graphql';
+import { ContextModule } from '@omnixys/context-ts';
+import { OmnixysGraphQLModule } from '@omnixys/graphql-ts';
 import { KafkaModule } from '@omnixys/kafka-ts';
 import { getLogger } from '@omnixys/logger-ts';
 
+const withKafka = env.KAFKA_BROKER.length > 0;
 const logger = getLogger('AppModule', 'class');
-
-/** Composition root: infrastructure first, then the gateway context and transports. */
-@Module({})
-export class AppModule implements NestModule {
-  static forRoot(): DynamicModule {
-    const config = loadConfig(process.env);
-    const withKafka = config.kafka.broker.length > 0;
-    const imports: Array<Type<unknown> | DynamicModule> = [
-      AppConfigModule,
-      PersistenceModule,
-      EventsModule.forRoot({ withKafka }),
-      GraphQLModule.forRoot<ApolloDriverConfig>({
-        driver: ApolloFederationDriver,
-        autoSchemaFile: { federation: { version: 2 } },
-        sortSchema: true,
-        playground: false,
-        introspection: true,
-      }),
-      SecurityModule,
-      CommunicationGatewayModule,
-      HealthModule,
-    ];
-    if (withKafka) {
-      imports.unshift(
-        KafkaModule.forRoot({
-          clientId: `${config.core.serviceName}-producer`,
-          groupId: `${config.core.serviceName}-delivery`,
-          serviceName: config.core.serviceName,
-          brokers: [config.kafka.broker],
-          fromBeginning: false,
-          retry: { maxRetries: config.kafka.retries },
-        }),
-      );
-    } else {
-      logger.warn('kafka_disabled: KAFKA_BROKER is empty, cross service events are dropped');
-    }
-    return {
-      module: AppModule,
-      imports,
-      providers: [
-        {
-          provide: APP_PIPE,
-          useFactory: (): ValidationPipe =>
-            new ValidationPipe({
-              transform: true,
-              whitelist: true,
-              forbidNonWhitelisted: true,
-              validationError: { target: false, value: false },
-            }),
-        },
-        { provide: APP_FILTER, useClass: GatewayExceptionFilter },
-      ],
-    };
-  }
-
-  configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestContextMiddleware).forRoutes('*');
-  }
+if (!withKafka) {
+  logger.warn('kafka_disabled: KAFKA_BROKER is empty, cross service events are dropped');
 }
+
+@Module({
+  imports: [
+    ContextModule.forRoot({ global: true, tenantHeader: 'x-tenant-id' }),
+    PrismaModule,
+    ...(withKafka
+      ? [
+          KafkaModule.forRoot({
+            clientId: `${env.SERVICE}-producer`,
+            groupId: `${env.SERVICE}-delivery`,
+            serviceName: env.SERVICE,
+            brokers: [env.KAFKA_BROKER],
+            fromBeginning: false,
+            retry: { maxRetries: env.KAFKA_RETRIES },
+          }),
+        ]
+      : []),
+    EventsModule.forRoot({ withKafka }),
+    OmnixysGraphQLModule.forRoot({
+      autoSchemaFile: { federation: { version: 2 } },
+      sortSchema: true,
+      playground: false,
+      introspection: true,
+    }),
+    SecurityModule,
+    CommunicationGatewayModule,
+    HealthModule,
+  ],
+  providers: [
+    BannerService,
+    {
+      provide: APP_PIPE,
+      useFactory: (): ValidationPipe =>
+        new ValidationPipe({
+          transform: true,
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          validationError: { target: false, value: false },
+        }),
+    },
+    { provide: APP_FILTER, useClass: GatewayExceptionFilter },
+  ],
+})
+export class AppModule {}

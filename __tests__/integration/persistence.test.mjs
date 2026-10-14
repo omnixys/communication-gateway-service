@@ -18,26 +18,27 @@
 import '../support/env.mjs';
 
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
 
-import { loadConfig } from '../../dist/config/configuration.js';
 import {
   CommunicationProviderType,
   DeliveryStatus,
 } from '../../dist/communication-gateway/models/enums/gateway.enums.js';
+import { readEnv } from '../../dist/config/env.js';
 import { PrismaService } from '../../dist/prisma/prisma.service.js';
-import { InMemoryMessageMappingStore } from '../../dist/prisma/in-memory-message-mapping.store.js';
+import { InMemoryMessageMappingStore } from '../support/message-mapping-store.mjs';
 
-const CLOSED_URL = 'postgresql://omnixys:omnixys@127.0.0.1:1/omnixys?connect_timeout=1';
+const CLOSED_URL =
+  'postgresql://omnixys:omnixys@127.0.0.1:1/omnixys?connect_timeout=1';
 
 describe('required database configuration', () => {
   it('rejects an empty DATABASE_URL', () => {
-    assert.throws(() => loadConfig({ DATABASE_URL: '' }), /DATABASE_URL/);
+    assert.throws(() => readEnv({ DATABASE_URL: '' }), /DATABASE_URL/);
   });
 
   it('fails startup when PostgreSQL cannot be reached', async () => {
-    const config = loadConfig({ DATABASE_URL: CLOSED_URL, LOG_LEVEL: 'silent' });
-    const prisma = new PrismaService(config);
+    const prisma = new PrismaService();
     await assert.rejects(prisma.onModuleInit());
     await prisma.onModuleDestroy();
   });
@@ -75,4 +76,42 @@ describe('InMemoryMessageMappingStore for isolated tests', () => {
     assert.equal(found.internalId, 'internal-1');
     assert.equal(await store.health(), true);
   });
+});
+
+it('starts the entry point when loaded by a launcher with a different argv', () => {
+  const child = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', "await import('./dist/main.js')"],
+    {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        DATABASE_URL: '',
+        LOG_LEVEL: 'info',
+        KAFKA_BROKER: '',
+      },
+      encoding: 'utf8',
+      timeout: 10_000,
+    },
+  );
+  assert.equal(child.status, 1, child.stderr);
+  assert.match(child.stdout + child.stderr, /DATABASE_URL/u);
+});
+
+it('resolves the real gateway modules before checking the database connection', () => {
+  const child = spawnSync(process.execPath, ['dist/main.js'], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      DATABASE_URL: CLOSED_URL,
+      KAFKA_BROKER: '',
+      LOG_LEVEL: 'info',
+    },
+    encoding: 'utf8',
+    timeout: 10_000,
+  });
+  const output = child.stdout + child.stderr;
+  assert.equal(child.status, 1, output);
+  assert.match(output, /prisma\.\$queryRaw|connect (?:EPERM|ECONNREFUSED)/u);
+  assert.doesNotMatch(output, /UnknownDependenciesException/u);
 });
