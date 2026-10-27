@@ -9,8 +9,9 @@ node --test scripts/forgejo-service-release.test.mjs
 pnpm peers check
 pnpm rebuild argon2 esbuild @prisma/engines prisma
 pnpm exec prisma generate
+pnpm build
 pnpm format:check
-pnpm run lint
+pnpm exec eslint '{src,apps,libs,test,__tests__}/**/*.{ts,mjs}'
 pnpm exec tsc -p tsconfig.json --noEmit
 pnpm test:unit
 pnpm test:typecheck
