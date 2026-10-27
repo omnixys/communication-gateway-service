@@ -68,7 +68,7 @@ COPY --chown=node:node tsconfig.json tsconfig.build.json nest-cli.json eslint.co
 COPY --chown=node:node .prettierrc.yaml .prettierignore ./
 COPY --chown=node:node src ./src
 ENV CI=true
-RUN pnpm run build
+RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true pnpm run build
 
 # ---------------------------------------------------------------------------------------
 # Stage 3: Final runtime image
