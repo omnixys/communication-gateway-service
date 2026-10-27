@@ -27,6 +27,7 @@ ARG PNPM_VERSION=11.24.0
 # - pnpm is installed as the package manager.
 # ---------------------------------------------------------------------------------------
 FROM node:${NODE_VERSION}-bookworm-slim AS base
+ARG PNPM_VERSION
 WORKDIR /home/node
 RUN npm install -g pnpm@${PNPM_VERSION}
 
@@ -41,8 +42,8 @@ COPY --chown=node:node prisma ./prisma
 
 RUN --mount=type=secret,id=omnixys_token \
     TOKEN=$(cat /run/secrets/omnixys_token) && \
-    echo "@omnixys:registry=https://npm.pkg.github.com" > .npmrc && \
-    echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> .npmrc && \
+    echo "@omnixys:registry=https://git.omnixys.com/api/packages/omnixys/npm/" > .npmrc && \
+    echo "//git.omnixys.com/api/packages/omnixys/npm/:_authToken=${TOKEN}" >> .npmrc && \
     pnpm install --frozen-lockfile --ignore-scripts && \
     pnpm run prisma:generate && \
     rm -f .npmrc
@@ -58,8 +59,8 @@ COPY --chown=node:node prisma ./prisma
 
 RUN --mount=type=secret,id=omnixys_token \
     TOKEN=$(cat /run/secrets/omnixys_token) && \
-    echo "@omnixys:registry=https://npm.pkg.github.com" > .npmrc && \
-    echo "//npm.pkg.github.com/:_authToken=${TOKEN}" >> .npmrc && \
+    echo "@omnixys:registry=https://git.omnixys.com/api/packages/omnixys/npm/" > .npmrc && \
+    echo "//git.omnixys.com/api/packages/omnixys/npm/:_authToken=${TOKEN}" >> .npmrc && \
     pnpm install --frozen-lockfile --ignore-scripts && \
     rm -f .npmrc
 
@@ -91,11 +92,11 @@ LABEL org.opencontainers.image.title="${APP_NAME}-service" \
       org.opencontainers.image.vendor="Omnixys Technologies" \
       org.opencontainers.image.authors="caleb.gyamfi@omnixys.com" \
       org.opencontainers.image.base.name="node:${NODE_VERSION}-bookworm-slim" \
-      org.opencontainers.image.url="https://github.com/omnixys/${APP_NAME}-service" \
-      org.opencontainers.image.source="https://github.com/omnixys/${APP_NAME}-service" \
+      org.opencontainers.image.url="https://git.omnixys.com/omnixys/${APP_NAME}-service" \
+      org.opencontainers.image.source="https://git.omnixys.com/omnixys/${APP_NAME}-service" \
       org.opencontainers.image.created="${CREATED}" \
       org.opencontainers.image.revision="${REVISION}" \
-      org.opencontainers.image.documentation="https://github.com/omnixys/${APP_NAME}-service/blob/main/README.md"
+      org.opencontainers.image.documentation="https://git.omnixys.com/omnixys/${APP_NAME}-service/blob/main/README.md"
 
 # ----- Set working directory -----
 WORKDIR /opt/app

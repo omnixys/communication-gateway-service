@@ -436,3 +436,11 @@ Keep `SKILL.md` current as well. If the repository changes in a way that invalid
 Use the separate unit command documented in `docs/TESTING.md`. Container integration must use an isolated database initialized by the production migration mechanism. Unit results and skipped/unexecuted container tests are not integration evidence. Keep `docs/testing-methods.json` synchronized with public methods, manually reviewed scenarios, and executed commands. Checkpoint contracts remain a separate suite.
 
 TS unit tests run in the existing Node runner with `--experimental-test-module-mocks`; include both `.test.mjs` and `.test.ts` in the unit command. Run `test:typecheck` after the application build. The environment fixture disables dotenv files explicitly; container connection data must be set before loading the application.
+
+## Automatic service image release
+
+See `docs/forgejo-dockerhub.md`. `service-ci.yml` is the automatic main/PR
+validation entry. Trusted release-control owns automatic SemVer and Docker Hub
+publication; never give publisher secrets or a host Docker socket to source CI.
+Existing manual workflows remain compatibility-only. Do not infer successful
+image publication from successful YAML validation.
