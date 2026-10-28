@@ -47,3 +47,7 @@ __tests__
 # Documentation
 docs
 CHANGELOG.md
+keys
+.ssh
+*.pat
+.secrets

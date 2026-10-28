@@ -26,56 +26,30 @@ ARG PNPM_VERSION=11.24.0
 # - Common setup for all later build stages.
 # - pnpm is installed as the package manager.
 # ---------------------------------------------------------------------------------------
-FROM node:${NODE_VERSION}-bookworm-slim AS base
-ARG PNPM_VERSION
+FROM docker.io/library/node:${NODE_VERSION}-bookworm-slim AS base
 WORKDIR /home/node
-RUN npm install -g pnpm@${PNPM_VERSION}
+RUN npm install -g pnpm@11.24.0
 
-# ---------------------------------------------------------------------------------------
-# Stage 1: Production dependencies
-# - Installs the dependency tree and generates the Prisma client.
-# - The schema is copied first because the postinstall hook needs it.
-# ---------------------------------------------------------------------------------------
-FROM base AS dependencies
-COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY --chown=node:node prisma ./prisma
-
-RUN --mount=type=secret,id=omnixys_token \
-    TOKEN=$(cat /run/secrets/omnixys_token) && \
-    echo "@omnixys:registry=https://git.omnixys.com/api/packages/omnixys/npm/" > .npmrc && \
-    echo "//git.omnixys.com/api/packages/omnixys/npm/:_authToken=${TOKEN}" >> .npmrc && \
-    pnpm install --frozen-lockfile --ignore-scripts && \
-    pnpm run prisma:generate && \
-    rm -f .npmrc
-
-# ---------------------------------------------------------------------------------------
-# Stage 2: Build (dist)
-# - Installs all dependencies (including dev) and compiles the TypeScript project.
-# - Result: ./dist folder containing the compiled ESM output.
-# ---------------------------------------------------------------------------------------
 FROM base AS dist
-COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY --chown=node:node prisma ./prisma
-
-RUN --mount=type=secret,id=omnixys_token \
-    TOKEN=$(cat /run/secrets/omnixys_token) && \
-    echo "@omnixys:registry=https://git.omnixys.com/api/packages/omnixys/npm/" > .npmrc && \
-    echo "//git.omnixys.com/api/packages/omnixys/npm/:_authToken=${TOKEN}" >> .npmrc && \
-    pnpm install --frozen-lockfile --ignore-scripts && \
-    rm -f .npmrc
-
-COPY --chown=node:node tsconfig.json tsconfig.build.json nest-cli.json eslint.config.mjs ./
-COPY --chown=node:node .prettierrc.yaml .prettierignore ./
-COPY --chown=node:node src ./src
-ENV CI=true
+# Patches, Prisma configuration and build tsconfig must exist at frozen install.
+# The trusted builder supplies a filtered Git archive, never a developer .env.
+COPY --chown=node:node . .
+ENV CI=true HUSKY=0 DOTENV_CONFIG_PATH=/dev/null NODE_ENV=test ACTIVE_PROFILE=test SCHEMA_TARGET=false
+ENV DATABASE_URL=postgresql://isolated:isolated@127.0.0.1:1/isolated SHADOW_DATABASE_URL=postgresql://isolated:isolated@127.0.0.1:1/isolated
+RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true \
+    pnpm install --frozen-lockfile --ignore-scripts
+RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true \
+    pnpm rebuild argon2 esbuild @prisma/engines prisma sharp
+RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true \
+    pnpm exec prisma generate
 RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true pnpm run build
 
-# ---------------------------------------------------------------------------------------
-# Stage 3: Final runtime image
-# - Copies only compiled code and the dependency tree.
-# - Runs the app as a non-root user for security.
-# ---------------------------------------------------------------------------------------
-FROM node:${NODE_VERSION}-bookworm-slim AS final
+FROM dist AS dependencies
+# Preserve the generated client/native modules, remove only development packages.
+RUN --mount=type=secret,id=npm_auth,target=/root/.npmrc,required=true \
+    pnpm prune --prod --ignore-scripts
+
+FROM docker.io/library/node:${NODE_VERSION}-bookworm-slim AS final
 
 # ----- Build-time arguments -----
 ARG NODE_VERSION
@@ -118,7 +92,7 @@ RUN apt-get update && \
     mkdir -p /opt/app/log && chown -R node:node /opt/app
 
 # ----- Enable pnpm (runtime) -----
-RUN npm install -g pnpm@${PNPM_VERSION}
+RUN npm install -g pnpm@11.24.0
 
 # ----- Switch to non-root user -----
 USER node
