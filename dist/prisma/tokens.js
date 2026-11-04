@@ -1,0 +1,1 @@
+export const MESSAGE_MAPPING_STORE = Symbol('MESSAGE_MAPPING_STORE');
