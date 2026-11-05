@@ -100,3 +100,6 @@ node_profiles
 !.vscode/settings.json
 
 /src/prisma/generated/
+
+docker-bake.local.hcl
+.npmrc.local
